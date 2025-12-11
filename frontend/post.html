@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" id="meta-description" content="">
+    <meta name="keywords" id="meta-keywords" content="">
+    <meta property="og:title" id="og-title" content="">
+    <meta property="og:description" id="og-description" content="">
+    <meta property="og:type" content="article">
+    <title id="page-title">Loading... - Smart Money Guide</title>
+    <link rel="stylesheet" href="css/style.6205c462.css">
+
+
+    <!-- Resource hints for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Font optimization: swap ensures text visible during load -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Inline tiny favicon to avoid /favicon.ico 404 requests -->
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/style.6205c462.css" as="style">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json" id="article-schema"></script>
+    
+    <style>
+        .post-body {
+            line-height: 1.8;
+            color: #333;
+        }
+        .post-body h2 {
+            color: #2c3e50;
+            margin: 30px 0 15px;
+            font-size: 28px;
+        }
+        .post-body h3 {
+            color: #34495e;
+            margin: 25px 0 12px;
+            font-size: 22px;
+        }
+        .post-body p {
+            margin: 15px 0;
+            font-size: 17px;
+        }
+        .post-body ul, .post-body ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        .post-body li {
+            margin: 8px 0;
+            font-size: 17px;
+        }
+        .post-body strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        .error {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fee;
+            border-radius: 10px;
+            margin: 40px 0;
+        }
+        .error h2 {
+            color: #c33;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-wrapper">
+                    <a href="index.html" class="logo">💰 Smart Money Guide</a>
+                    <ul class="nav-menu">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#categories">Categories</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <article class="post-detail">
+            <div class="container">
+                <div id="post-container" class="post-content">
+                    <div class="loading" style="text-align: center; padding: 60px 20px; font-size: 18px; color: #3498db;">
+                        Loading article...
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <section class="related-posts">
+            <div class="container">
+                <h2>Related Articles</h2>
+                <div id="related-posts-container" class="posts-grid"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Smart Money Guide</h3>
+                    <p>Empowering you with financial knowledge and practical money management strategies.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#categories">Categories</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms of Service</a></li>
+                        <li><a href="disclaimer.html">Disclaimer</a></li>
+                        <li><a href="cookie-policy.html">Cookie Policy</a></li>
+                        <li><a href="affiliate-disclosure.html">Affiliate Disclosure</a></li>
+                        <li><a href="dmca.html">DMCA Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Smart Money Guide. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000/api' 
+            : '/api';
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function loadPost() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const slug = urlParams.get('slug');
+
+            if (!slug) {
+                document.getElementById('post-container').innerHTML = `
+                    <div class="error">
+                        <h2>Post Not Found</h2>
+                        <p>The article you're looking for doesn't exist.</p>
+                        <a href="index.html" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #3498db; color: white; text-decoration: none; border-radius: 5px;">← Back to Home</a>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/posts/${encodeURIComponent(slug)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Post not found');
+                }
+
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to load post');
+                }
+
+                displayPost(data.post);
+                loadRelatedPosts(data.post.category, data.post.id);
+            } catch (error) {
+                console.error('Error loading post:', error);
+                document.getElementById('post-container').innerHTML = `
+                    <div class="error">
+                        <h2>Unable to Load Article</h2>
+                        <p>${error.message}</p>
+                        <a href="index.html" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #3498db; color: white; text-decoration: none; border-radius: 5px;">← Back to Home</a>
+                    </div>
+                `;
+                document.querySelector('.related-posts').style.display = 'none';
+            }
+        }
+
+        function displayPost(post) {
+            // Update page metadata
+            document.getElementById('page-title').textContent = `${post.title} - Smart Money Guide`;
+            document.getElementById('meta-description').setAttribute('content', post.excerpt || post.title);
+            document.getElementById('og-title').setAttribute('content', post.title);
+            document.getElementById('og-description').setAttribute('content', post.excerpt || post.title);
+
+            // Format date
+            const postDate = new Date(post.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Display post - content is already in HTML format
+            document.getElementById('post-container').innerHTML = `
+                <div class="post-header">
+                    <span class="post-category">${escapeHtml(post.category)}</span>
+                    <h1>${escapeHtml(post.title)}</h1>
+                    <div class="post-meta">
+                        <span>By ${escapeHtml(post.author_name || 'Admin')}</span>
+                        <span>•</span>
+                        <span>${postDate}</span>
+                        <span>•</span>
+                        <span>${post.views} views</span>
+                    </div>
+                </div>
+                <div class="post-body">
+                    ${post.content}
+                </div>
+                <div class="post-footer">
+                    <p style="font-style: italic; color: #666; border-top: 2px solid #f0f0f0; padding-top: 20px; margin-top: 40px;">
+                        <strong>Disclaimer:</strong> This article is for informational purposes only and should not be considered financial advice. 
+                        Please consult with a qualified financial advisor before making any investment decisions.
+                    </p>
+                    <a href="index.html" style="display: inline-block; margin-top: 30px; padding: 12px 24px; background: #3498db; color: white; text-decoration: none; border-radius: 5px;">← Back to All Articles</a>
+                </div>
+            `;
+
+            // Add lazy-loading and async decoding to images in post content
+            setTimeout(() => {
+              const postBody = document.querySelector('.post-body');
+              if (postBody) {
+                const images = postBody.querySelectorAll('img');
+                images.forEach((img, idx) => {
+                  // First image loads eagerly; rest are lazy-loaded
+                  if (idx === 0) {
+                    img.setAttribute('loading', 'eager');
+                  } else {
+                    img.setAttribute('loading', 'lazy');
+                  }
+                  img.setAttribute('decoding', 'async');
+                });
+              }
+            }, 0);
+
+            // Add structured data for SEO
+            const schema = {
+                "@context": "https://schema.org",
+                "@type": "Article",
+                "headline": post.title,
+                "description": post.excerpt || post.title,
+                "author": {
+                    "@type": "Person",
+                    "name": post.author_name || "Smart Money Guide"
+                },
+                "datePublished": post.created_at,
+                "dateModified": post.updated_at || post.created_at,
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "Smart Money Guide",
+                    "logo": {
+                        "@type": "ImageObject",
+                        "url": "https://smartmoneyguide.com/logo.png"
+                    }
+                }
+            };
+            
+            document.getElementById('article-schema').textContent = JSON.stringify(schema);
+        }
+
+        async function loadRelatedPosts(category, currentPostId) {
+            try {
+                const response = await fetch(`${API_URL}/posts?category=${encodeURIComponent(category)}&limit=4`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load related posts');
+                }
+
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.message);
+                }
+
+                // Filter out current post and limit to 3
+                const relatedPosts = data.posts.filter(p => p.id !== currentPostId).slice(0, 3);
+
+                if (relatedPosts.length === 0) {
+                    document.querySelector('.related-posts').style.display = 'none';
+                    return;
+                }
+
+                const html = relatedPosts.map(post => {
+                    const date = new Date(post.created_at);
+                    const formattedDate = date.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                    });
+
+                    let excerpt = post.excerpt || '';
+                    if (excerpt.length > 150) {
+                        excerpt = excerpt.substring(0, 150) + '...';
+                    }
+
+                    return `
+                        <article class="post-card">
+                            <div class="post-card-category">${escapeHtml(post.category)}</div>
+                            <h3><a href="post.html?slug=${encodeURIComponent(post.slug)}">${escapeHtml(post.title)}</a></h3>
+                            <p class="post-excerpt">${escapeHtml(excerpt)}</p>
+                            <div class="post-meta" style="padding: 0 20px 15px;">
+                                <span>📅 ${formattedDate}</span>
+                                <span>👁️ ${post.views || 0} views</span>
+                            </div>
+                            <a href="post.html?slug=${encodeURIComponent(post.slug)}" class="read-more">Read Full Article →</a>
+                        </article>
+                    `;
+                }).join('');
+
+                document.getElementById('related-posts-container').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading related posts:', error);
+                document.querySelector('.related-posts').style.display = 'none';
+            }
+        }
+
+        // Load post when page loads
+        loadPost();
+    </script>
+</body>
+</html>

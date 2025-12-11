@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Money Guide - Your trusted resource for personal finance tips, investing strategies, budgeting advice, and money management guidance.">
+    <meta name="keywords" content="personal finance, money management, investing, budgeting, saving tips, financial planning">
+    <title>Smart Money Guide - Personal Finance & Money Management Tips</title>
+    
+    <!-- Resource hints for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Critical CSS inlined for above-the-fold (LCP optimization) -->
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Lato', sans-serif; background: #f8f9fa; color: #333; }
+        header { background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%); box-shadow: 0 4px 12px rgba(0,0,0,0.15); position: sticky; top: 0; z-index: 1000; border-bottom: 3px solid #3498db; }
+        .navbar { padding: 15px 0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .nav-wrapper { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: bold; text-decoration: none; color: #3498db; transition: color 0.3s ease; }
+        .logo:hover { color: #2980b9; }
+        .nav-menu { display: flex; list-style: none; gap: 30px; }
+        .nav-menu a { text-decoration: none; color: #ecf0f1; font-weight: 500; transition: color 0.3s ease; }
+        .nav-menu a:hover { color: #3498db; }
+        .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 80px 20px; text-align: center; }
+        .hero h1 { font-size: 48px; margin-bottom: 20px; font-weight: 700; }
+        .hero p { font-size: 20px; max-width: 600px; margin: 0 auto; line-height: 1.6; opacity: 0.95; }
+        .blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; padding: 40px 0; }
+        .blog-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); transition: transform 0.3s, box-shadow 0.3s; }
+        .blog-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+        .blog-card-content { padding: 25px; }
+        .category-badge { display: inline-block; background: #e8f4f8; color: #3498db; padding: 5px 12px; border-radius: 20px; font-size: 12px; margin-bottom: 10px; font-weight: 600; }
+        .blog-card h3 { font-size: 20px; margin: 15px 0; }
+        .blog-card a { color: #2c3e50; text-decoration: none; }
+        .blog-card a:hover { color: #3498db; }
+        .excerpt { color: #666; font-size: 14px; margin: 12px 0; line-height: 1.6; }
+        .blog-card-meta { display: flex; gap: 15px; font-size: 13px; color: #999; margin-top: 15px; }
+        .read-more { display: inline-block; color: #3498db; text-decoration: none; font-weight: 600; margin-top: 10px; transition: color 0.3s; }
+        .read-more:hover { color: #2980b9; }
+        .loading { text-align: center; padding: 60px 20px; color: #3498db; font-size: 18px; }
+        .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+    
+    <link rel="stylesheet" href="css/style.min.f5f26ea4.css">
+    <link rel="stylesheet" href="css/responsive.min.c014bbda.css">
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
+    
+    <!-- Font optimization: swap ensures text visible during load -->
+    <link rel="preload" href="css/style.min.f5f26ea4.css" as="style">
+    <link rel="preload" href="js/main.min.eb2549f5.js" as="script">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-wrapper">
+                    <a href="index.html" class="logo">💰 Smart Money Guide</a>
+                    <ul class="nav-menu">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="#categories">Categories</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Master Your Money, Build Your Future</h1>
+                <p>Expert advice on personal finance, investing, saving, and building wealth. Learn practical strategies to achieve your financial goals.</p>
+            </div>
+        </section>
+
+        <section class="categories" id="categories">
+            <div class="container">
+                <h2>Browse by Category</h2>
+                <div class="category-grid">
+                    <button class="category-btn active" data-category="all">All Posts</button>
+                    <button class="category-btn" data-category="Saving Tips">💰 Saving Tips</button>
+                    <button class="category-btn" data-category="Investing">📈 Investing</button>
+                    <button class="category-btn" data-category="Budgeting">📊 Budgeting</button>
+                    <button class="category-btn" data-category="Retirement">🏖️ Retirement</button>
+                    <button class="category-btn" data-category="Credit Cards">💳 Credit Cards</button>
+                    <button class="category-btn" data-category="Money Management">💵 Money Management</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="blog-section">
+            <div class="container">
+                <div class="blog-grid">
+                    <!-- Posts loaded via JavaScript -->
+                </div>
+                <div class="pagination">
+                    <!-- Pagination loaded via JavaScript -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Smart Money Guide</h3>
+                    <p>Your trusted resource for financial education and money management tips.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Smart Money Guide. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/config.min.f841bc00.js" defer></script>
+    <script src="js/main.min.eb2549f5.js" defer></script>
+</body>
+</html>
