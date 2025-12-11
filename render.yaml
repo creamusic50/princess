@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: smart-money-guide
+    autoDeploy: true
+    branch: main
+    runtime: node
+    runtimeVersion: 18
+    # Install backend deps, run migrations, then copy frontend into backend so server can serve static files
+    buildCommand: cd backend && npm install && npm run migrate && cp -R ../frontend ./frontend
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: CONTACT_EMAIL
+        sync: false
+    staticPublishPath: frontend
