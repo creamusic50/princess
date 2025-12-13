@@ -1,0 +1,342 @@
+/* Responsive Design Enhancements */
+
+/* Ultra Small Devices (phones under 360px) */
+@media (max-width: 360px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .hero h1 {
+        font-size: 24px;
+        line-height: 1.2;
+    }
+    
+    .hero p {
+        font-size: 14px;
+    }
+    
+    .logo {
+        font-size: 18px;
+    }
+    
+    .nav-menu {
+        gap: 8px;
+        font-size: 12px;
+    }
+    
+    .category-btn {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+    
+    .post-card {
+        margin: 0 -10px;
+        border-radius: 0;
+        box-shadow: none;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .post-card:last-child {
+        border-bottom: none;
+    }
+}
+
+/* Foldable Devices */
+@media (max-width: 280px) {
+    .hero h1 {
+        font-size: 20px;
+    }
+    
+    .hero p {
+        font-size: 13px;
+    }
+    
+    .category-grid {
+        gap: 5px;
+    }
+    
+    .category-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+}
+
+/* iPad Portrait (768px) */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+    .posts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+    
+    .post-content {
+        padding: 40px;
+    }
+    
+    .contact-wrapper {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* iPad Landscape (1024px) */
+@media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
+    .posts-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .container {
+        max-width: 1100px;
+    }
+}
+
+/* 4K Screens */
+@media (min-width: 2560px) {
+    .container {
+        max-width: 1800px;
+    }
+    
+    .hero h1 {
+        font-size: 60px;
+    }
+    
+    .hero p {
+        font-size: 24px;
+        max-width: 1000px;
+    }
+    
+    .post-content {
+        max-width: 1200px;
+        padding: 80px;
+    }
+    
+    .post-content h1 {
+        font-size: 52px;
+    }
+    
+    .post-body {
+        font-size: 20px;
+        line-height: 1.9;
+    }
+}
+
+/* Print Optimization */
+@media print {
+    * {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+    
+    .navbar,
+    .hero,
+    .category-grid,
+    footer,
+    .related-posts,
+    .share-buttons,
+    .comments-section {
+        display: none !important;
+    }
+    
+    body {
+        font: 12pt Georgia, "Times New Roman", Times, serif;
+        line-height: 1.4;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .container {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .post-content {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    h1, h2, h3 {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+    }
+    
+    p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+    }
+    
+    a {
+        text-decoration: underline;
+        color: #000;
+    }
+    
+    a[href]:after {
+        content: " (" attr(href) ")";
+        font-size: 10pt;
+    }
+    
+    .print-url {
+        display: block;
+        margin-top: 20px;
+        font-style: italic;
+        color: #666;
+    }
+    
+    .page-break {
+        page-break-before: always;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .post-card,
+    .btn,
+    .category-btn {
+        transition: none !important;
+        transform: none !important;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    a {
+        color: #0000EE !important;
+        text-decoration: underline !important;
+    }
+    
+    .post-card,
+    .legal-page,
+    .form-container {
+        border: 3px solid black !important;
+        background: white !important;
+        color: black !important;
+    }
+    
+    button,
+    .btn,
+    input,
+    textarea,
+    select {
+        border: 3px solid black !important;
+    }
+}
+
+/* Touch Device Specific */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger tap targets */
+    .nav-menu a,
+    .category-btn,
+    .btn,
+    .post-card h3 a,
+    .read-more {
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Prevent zoom on inputs */
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+    
+    /* Remove hover effects */
+    .post-card:hover {
+        transform: none;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    }
+    
+    /* Better touch feedback */
+    .btn:active,
+    .category-btn:active {
+        transform: scale(0.98);
+    }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+    }
+    
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+    
+    .post-card,
+    .legal-page,
+    .form-container,
+    .posts-list,
+    .actions-panel,
+    .stat-card,
+    .search-results {
+        background: #1e1e1e;
+        border-color: #333;
+    }
+    
+    input,
+    select,
+    textarea {
+        background: #2d2d2d;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    
+    input::placeholder,
+    textarea::placeholder {
+        color: #888;
+    }
+    
+    .category-btn {
+        background: #2d2d2d;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    
+    .category-btn.active,
+    .category-btn:hover {
+        background: #667eea;
+        color: white;
+    }
+}
+
+/* Performance Optimizations */
+@media (prefers-reduced-data: reduce) {
+    * {
+        background-image: none !important;
+    }
+    
+    .hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+    
+    /* Lazy load everything */
+    img {
+        content-visibility: auto;
+    }
+    
+    .post-card {
+        content-visibility: auto;
+        contain-intrinsic-size: 0 300px;
+    }
+}
