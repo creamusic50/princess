@@ -4,15 +4,14 @@ services:
     autoDeploy: true
     branch: main
     runtime: node
-    runtimeVersion: 18
-    # Install backend deps, run migrations, then copy frontend into backend so server can serve static files
-    buildCommand: cd backend && npm install && npm run migrate && cp -R ../frontend ./frontend
-    startCommand: cd backend && npm start
+    runtimeVersion: 22
+    # Use the repo build script and a deterministic Node start command
+    buildCommand: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts\build-deploy.ps1
+    startCommand: node backend/server.js
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 3000
+      # Render sets PORT automatically; do not hardcode it here.
       - key: DATABASE_URL
         sync: false
       - key: JWT_SECRET
