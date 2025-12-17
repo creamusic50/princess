@@ -6,6 +6,13 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "compression": "^1.7.4",
+    "express": "^4.18.2",
+    "express-static-gzip": "^2.1.1",
+    "helmet": "^6.0.1"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "precompress": "node ../scripts/precompress.js backend/frontend"
   }
 }
