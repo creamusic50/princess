@@ -9,7 +9,18 @@ const app = express();
 
 // Security and performance middleware
 app.use(helmet({
-  contentSecurityPolicy: false, // Allow inline scripts for now
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://pagead2.googlesyndication.com", "https://cdn.jsdelivr.net"],
+      scriptSrcElem: ["'self'", "'unsafe-inline'", "https://pagead2.googlesyndication.com", "https://cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://pagead2.googlesyndication.com"],
+      frameSrc: ["https://pagead2.googlesyndication.com"]
+    }
+  },
   crossOriginEmbedderPolicy: false
 }));
 app.use(compression());
