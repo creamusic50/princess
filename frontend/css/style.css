@@ -4,6 +4,17 @@
     box-sizing: border-box;
 }
 
+/* Focus visible for better keyboard navigation accessibility */
+:focus-visible {
+    outline: 3px solid #3498db;
+    outline-offset: 2px;
+}
+
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 3px solid #3498db;
+    outline-offset: 2px;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     line-height: 1.6;
@@ -61,10 +72,17 @@ header {
     transition: color 0.3s ease;
     font-weight: 500;
     position: relative;
+    text-decoration-skip-ink: auto;
 }
 
 .nav-menu a:hover {
     color: #3498db;
+    text-decoration: underline;
+}
+
+.nav-menu a:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
 }
 
 /* Auth Buttons */

@@ -4,11 +4,21 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695"
      crossorigin="anonymous"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="google-site-verification" content="p7ObZPC6DOBVi-AUb8yGPQMlDFuLkMFZvLPv0vvfS8w" />
     <meta name="description" content="Smart Money Guide - Your trusted resource for personal finance tips, investing strategies, budgeting advice, and money management guidance.">
     <meta name="keywords" content="personal finance, money management, investing, budgeting, saving tips, financial planning">
+    <meta name="author" content="Smart Money Guide">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="google-adsense-account" content="ca-pub-4861288278202695">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#3498db">
+    <meta property="og:site_name" content="Smart Money Guide">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://smartmoneyguide.com">
+    <meta property="og:image" content="https://smartmoneyguide.com/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
     <title>Smart Money Guide - Personal Finance & Money Management Tips</title>
     
     <!-- Resource hints for performance -->
@@ -58,11 +68,11 @@
     <link rel="preload" href="js/main.min.eb2549f5.js" as="script">
 </head>
 <body>
-    <header>
-        <nav class="navbar">
+    <header role="banner">
+        <nav class="navbar" aria-label="Main navigation">
             <div class="container">
                 <div class="nav-wrapper">
-                    <a href="index.html" class="logo">💰 Smart Money Guide</a>
+                    <a href="index.html" class="logo" aria-label="Smart Money Guide home">💰 Smart Money Guide</a>
                     <ul class="nav-menu">
                         <li><a href="index.html">Home</a></li>
                         <li><a href="#categories">Categories</a></li>
@@ -85,14 +95,14 @@
         <section class="categories" id="categories">
             <div class="container">
                 <h2>Browse by Category</h2>
-                <div class="category-grid">
-                    <button class="category-btn active" data-category="all">All Posts</button>
-                    <button class="category-btn" data-category="Saving Tips">💰 Saving Tips</button>
-                    <button class="category-btn" data-category="Investing">📈 Investing</button>
-                    <button class="category-btn" data-category="Budgeting">📊 Budgeting</button>
-                    <button class="category-btn" data-category="Retirement">🏖️ Retirement</button>
-                    <button class="category-btn" data-category="Credit Cards">💳 Credit Cards</button>
-                    <button class="category-btn" data-category="Money Management">💵 Money Management</button>
+                <div class="category-grid" role="tablist" aria-label="Blog categories">
+                    <button class="category-btn active" data-category="all" role="tab" aria-selected="true" aria-label="View all posts">All Posts</button>
+                    <button class="category-btn" data-category="Saving Tips" role="tab" aria-selected="false" aria-label="View saving tips">💰 Saving Tips</button>
+                    <button class="category-btn" data-category="Investing" role="tab" aria-selected="false" aria-label="View investing posts">📈 Investing</button>
+                    <button class="category-btn" data-category="Budgeting" role="tab" aria-selected="false" aria-label="View budgeting posts">📊 Budgeting</button>
+                    <button class="category-btn" data-category="Retirement" role="tab" aria-selected="false" aria-label="View retirement posts">🏖️ Retirement</button>
+                    <button class="category-btn" data-category="Credit Cards" role="tab" aria-selected="false" aria-label="View credit card posts">💳 Credit Cards</button>
+                    <button class="category-btn" data-category="Money Management" role="tab" aria-selected="false" aria-label="View money management posts">💵 Money Management</button>
                 </div>
             </div>
         </section>
@@ -109,7 +119,7 @@
         </section>
     </main>
 
-    <footer class="site-footer">
+    <footer class="site-footer" role="contentinfo">
         <div class="container">
             <div class="footer-top">
                 <div class="footer-grid">
@@ -117,9 +127,9 @@
                         <h3 class="footer-title">💰 Smart Money Guide</h3>
                         <p class="footer-desc">Your trusted resource for financial education, investing strategies, and money management tips.</p>
                         <div class="social-links">
-                            <a href="#" class="social-link" aria-label="Facebook">Facebook</a>
-                            <a href="#" class="social-link" aria-label="Twitter">Twitter</a>
-                            <a href="#" class="social-link" aria-label="LinkedIn">LinkedIn</a>
+                            <a href="#" class="social-link" aria-label="Smart Money Guide on Facebook">Facebook</a>
+                            <a href="#" class="social-link" aria-label="Smart Money Guide on Twitter">Twitter</a>
+                            <a href="#" class="social-link" aria-label="Smart Money Guide on LinkedIn">LinkedIn</a>
                         </div>
                     </div>
                     <div class="footer-column">
@@ -152,7 +162,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Smart Money Guide. All rights reserved.</p>
+                <p>&copy; 2025 Smart Money Guide. All rights reserved.</p>
             </div>
         </div>
     </footer>

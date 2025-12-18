@@ -3,6 +3,11 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const Post = require('../models/Post');
 const { protect, admin } = require('../middleware/auth');
+const Cache = require('../utils/cache');
+
+// Initialize cache with 5 minute TTL for list queries, 10 minutes for detail
+const postCache = new Cache(300);
+const detailCache = new Cache(600);
 
 // @route   GET /api/posts
 // @desc    Get all published posts
@@ -14,13 +19,27 @@ router.get('/', async (req, res) => {
     const category = req.query.category || null;
     const search = req.query.search || null;
     
-    const result = await Post.getAll({
-      page,
-      limit,
-      category,
-      published: true,
-      search
-    });
+    // Build cache key
+    const cacheKey = `posts:${page}:${limit}:${category || 'all'}:${search || 'none'}`;
+    
+    // Check cache first
+    let result = postCache.get(cacheKey);
+    
+    if (!result) {
+      result = await Post.getAll({
+        page,
+        limit,
+        category,
+        published: true,
+        search
+      });
+      
+      // Cache the result
+      postCache.set(cacheKey, result);
+    }
+    
+    // Add cache headers for client-side caching
+    res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
     
     res.json({
       success: true,
@@ -44,7 +63,20 @@ router.get('/', async (req, res) => {
 // @access  Public
 router.get('/:slug', async (req, res) => {
   try {
-    const post = await Post.findBySlug(req.params.slug);
+    const cacheKey = `post:${req.params.slug}`;
+    
+    // Check cache first
+    let post = detailCache.get(cacheKey);
+    
+    if (!post) {
+      post = await Post.findBySlug(req.params.slug);
+      // Cache the result
+      detailCache.set(cacheKey, post);
+    }
+    
+    // Add cache headers for client-side caching
+    res.set('Cache-Control', 'public, max-age=600, s-maxage=1200');
+    
     res.json({
       success: true,
       post
@@ -134,6 +166,9 @@ router.post('/', [
       keywords: req.body.keywords || null
     });
     
+    // Invalidate cache on new post
+    postCache.flush();
+    
     res.status(201).json({
       success: true,
       post
@@ -192,6 +227,10 @@ router.put('/:id', [
     
     const updatedPost = await Post.update(req.params.id, req.body);
     
+    // Invalidate cache on update
+    postCache.flush();
+    detailCache.flush();
+    
     res.json({
       success: true,
       post: updatedPost
@@ -220,6 +259,10 @@ router.delete('/:id', protect, admin, async (req, res) => {
     }
     
     await Post.delete(req.params.id);
+    
+    // Invalidate cache on delete
+    postCache.flush();
+    detailCache.flush();
     
     res.json({
       success: true,

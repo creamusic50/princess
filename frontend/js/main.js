@@ -144,15 +144,15 @@ function displayPosts(posts) {
     container.innerHTML = posts.map(post => `
         <article class="blog-card">
             <div class="blog-card-content">
-                <span class="category-badge">${escapeHtml(post.category)}</span>
+                <span class="category-badge" role="note" aria-label="Category">${escapeHtml(post.category)}</span>
                 <h3><a href="post.html?slug=${post.slug}">${escapeHtml(post.title)}</a></h3>
                 <p class="excerpt">${escapeHtml(post.excerpt || '')}</p>
-                <div class="blog-card-meta">
-                    <span class="date">${formatDate(post.created_at)}</span>
-                    <span class="views">👁️ ${post.views || 0} views</span>
-                    ${post.author_name ? `<span class="author">By ${escapeHtml(post.author_name)}</span>` : ''}
+                <div class="blog-card-meta" aria-label="Post metadata">
+                    <span class="date" aria-label="Published date">${formatDate(post.created_at)}</span>
+                    <span class="views" aria-label="Views">👁️ ${post.views || 0} views</span>
+                    ${post.author_name ? `<span class="author" aria-label="Author">By ${escapeHtml(post.author_name)}</span>` : ''}
                 </div>
-                <a href="post.html?slug=${post.slug}" class="read-more">Read More →</a>
+                <a href="post.html?slug=${post.slug}" class="read-more" aria-label="Read more about ${escapeHtml(post.title)}">Read More →</a>
             </div>
         </article>
     `).join('');
@@ -194,8 +194,12 @@ function setupCategoryFilter() {
     categoryButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             // Update visual active state
-            categoryButtons.forEach(b => b.classList.remove('active'));
+            categoryButtons.forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
             btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
             
             // Load posts for selected category
             const category = btn.dataset.category;

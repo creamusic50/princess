@@ -8,6 +8,10 @@ services:
     # Use the repo build script and a deterministic Node start command
     buildCommand: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts\build-deploy.ps1
     startCommand: node backend/server.js
+    # Keep the site alive by pinging health endpoint
+    healthCheckPath: /_health
+    # Use paid tier for always-on (if upgrading from free tier)
+    plan: starter
     envVars:
       - key: NODE_ENV
         value: production
@@ -28,4 +32,10 @@ services:
         sync: false
       - key: CONTACT_EMAIL
         sync: false
+      - key: WEBSITE_URL
+        # Update this to your actual Render URL
+        value: "https://www.tilana.online"
+      - key: PING_INTERVAL
+        # Ping every 4 minutes to keep awake (free tier sleeps after 15 min inactivity)
+        value: "240000"
     staticPublishPath: frontend

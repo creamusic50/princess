@@ -15,9 +15,15 @@ exports.getPosts = async (req, res) => {
       search
     });
     
+    // Truncate content for list view to reduce payload
+    const optimizedPosts = result.posts.map(post => ({
+      ...post,
+      content: post.content ? post.content.substring(0, 500) : '' // Limit content preview
+    }));
+    
     res.json({
       success: true,
-      posts: result.posts,
+      posts: optimizedPosts,
       total: result.total,
       totalPages: result.totalPages,
       currentPage: result.currentPage,

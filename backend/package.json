@@ -3,16 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "keep-alive": "node ../scripts/keep-alive.js",
+    "test-health": "node ../scripts/test-health.js",
+    "precompress": "node ../scripts/precompress.js backend/frontend"
   },
   "dependencies": {
     "compression": "^1.7.4",
     "express": "^4.18.2",
     "express-static-gzip": "^2.1.1",
     "helmet": "^6.0.1"
-  },
-  "scripts": {
-    "start": "node server.js",
-    "precompress": "node ../scripts/precompress.js backend/frontend"
   }
 }

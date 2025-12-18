@@ -4,14 +4,24 @@
    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695"
      crossorigin="anonymous"></script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="google-site-verification" content="p7ObZPC6DOBVi-AUb8yGPQMlDFuLkMFZvLPv0vvfS8w" />
     <meta name="description" id="meta-description" content="">
     <meta name="keywords" id="meta-keywords" content="">
+    <meta name="author" content="Smart Money Guide">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta property="og:title" id="og-title" content="">
     <meta property="og:description" id="og-description" content="">
     <meta property="og:type" content="article">
+    <meta property="og:image" id="og-image" content="">
+    <meta property="og:site_name" content="Smart Money Guide">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" id="twitter-title" content="">
+    <meta name="twitter:description" id="twitter-description" content="">
     <meta name="google-adsense-account" content="ca-pub-4861288278202695">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#3498db">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title id="page-title">Loading... - Smart Money Guide</title>
     <link rel="stylesheet" href="css/style.6205c462.css">
 
@@ -174,7 +184,15 @@
             }
 
             try {
-                const response = await fetch(`${API_URL}/posts/${encodeURIComponent(slug)}`);
+                // Add abort signal for timeout (3 seconds max)
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 3000);
+                
+                const response = await fetch(`${API_URL}/posts/${encodeURIComponent(slug)}`, {
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeout);
                 
                 if (!response.ok) {
                     throw new Error('Post not found');
@@ -190,10 +208,11 @@
                 loadRelatedPosts(data.post.category, data.post.id);
             } catch (error) {
                 console.error('Error loading post:', error);
+                const errorMsg = error.name === 'AbortError' ? 'Loading took too long. Please try again.' : error.message;
                 document.getElementById('post-container').innerHTML = `
                     <div class="error">
                         <h2>Unable to Load Article</h2>
-                        <p>${error.message}</p>
+                        <p>${escapeHtml(errorMsg)}</p>
                         <a href="index.html" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #3498db; color: white; text-decoration: none; border-radius: 5px;">← Back to Home</a>
                     </div>
                 `;
@@ -207,6 +226,9 @@
             document.getElementById('meta-description').setAttribute('content', post.excerpt || post.title);
             document.getElementById('og-title').setAttribute('content', post.title);
             document.getElementById('og-description').setAttribute('content', post.excerpt || post.title);
+            document.getElementById('og-image').setAttribute('content', 'https://smartmoneyguide.com/og-image.png');
+            document.getElementById('twitter-title').setAttribute('content', post.title);
+            document.getElementById('twitter-description').setAttribute('content', post.excerpt || post.title);
 
             // Format date
             const postDate = new Date(post.created_at).toLocaleDateString('en-US', {
@@ -218,44 +240,47 @@
             // Display post - content is already in HTML format
             document.getElementById('post-container').innerHTML = `
                 <div class="post-header">
-                    <span class="post-category">${escapeHtml(post.category)}</span>
+                    <span class="post-category" role="note" aria-label="Category">${escapeHtml(post.category)}</span>
                     <h1>${escapeHtml(post.title)}</h1>
-                    <div class="post-meta">
-                        <span>By ${escapeHtml(post.author_name || 'Admin')}</span>
+                    <div class="post-meta" role="doc-info" aria-label="Post information">
+                        <span>By <span itemprop="author">${escapeHtml(post.author_name || 'Admin')}</span></span>
                         <span>•</span>
-                        <span>${postDate}</span>
+                        <time datetime="${post.created_at}">${postDate}</time>
                         <span>•</span>
                         <span>${post.views} views</span>
                     </div>
                 </div>
-                <div class="post-body">
+                <article class="post-body" role="main">
                     ${post.content}
-                </div>
+                </article>
                 <div class="post-footer">
                     <p style="font-style: italic; color: #666; border-top: 2px solid #f0f0f0; padding-top: 20px; margin-top: 40px;">
                         <strong>Disclaimer:</strong> This article is for informational purposes only and should not be considered financial advice. 
                         Please consult with a qualified financial advisor before making any investment decisions.
                     </p>
-                    <a href="index.html" style="display: inline-block; margin-top: 30px; padding: 12px 24px; background: #3498db; color: white; text-decoration: none; border-radius: 5px;">← Back to All Articles</a>
+                    <a href="index.html" style="display: inline-block; margin-top: 30px; padding: 12px 24px; background: #3498db; color: white; text-decoration: none; border-radius: 5px;" aria-label="Back to all articles">← Back to All Articles</a>
                 </div>
             `;
 
-            // Add lazy-loading and async decoding to images in post content
-            setTimeout(() => {
-              const postBody = document.querySelector('.post-body');
-              if (postBody) {
+            // Add lazy-loading and async decoding to images in post content with better performance
+            const postBody = document.querySelector('.post-body');
+            if (postBody) {
                 const images = postBody.querySelectorAll('img');
                 images.forEach((img, idx) => {
                   // First image loads eagerly; rest are lazy-loaded
                   if (idx === 0) {
                     img.setAttribute('loading', 'eager');
+                    img.setAttribute('importance', 'high');
                   } else {
                     img.setAttribute('loading', 'lazy');
                   }
                   img.setAttribute('decoding', 'async');
+                  // Add alt text if missing (accessibility)
+                  if (!img.getAttribute('alt')) {
+                    img.setAttribute('alt', 'Article image');
+                  }
                 });
               }
-            }, 0);
 
             // Add structured data for SEO
             const schema = {
@@ -283,6 +308,29 @@
         }
 
         async function loadRelatedPosts(category, currentPostId) {
+            // Lazy load related posts after main content
+            if (!('IntersectionObserver' in window)) {
+                // Fallback for older browsers
+                loadRelatedPostsNow(category, currentPostId);
+                return;
+            }
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        loadRelatedPostsNow(category, currentPostId);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            });
+
+            const relatedSection = document.querySelector('.related-posts');
+            if (relatedSection) {
+                observer.observe(relatedSection);
+            }
+        }
+
+        async function loadRelatedPostsNow(category, currentPostId) {
             try {
                 const response = await fetch(`${API_URL}/posts?category=${encodeURIComponent(category)}&limit=4`);
                 
