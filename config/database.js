@@ -2,11 +2,18 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 // Create PostgreSQL connection pool
+// Determine SSL setting: allow disabling for local development (localhost)
+let sslOption = { rejectUnauthorized: false };
+if (process.env.DATABASE_SSL === 'false') {
+  sslOption = false;
+} else if (process.env.DATABASE_URL && (process.env.DATABASE_URL.includes('localhost') || process.env.DATABASE_URL.includes('127.0.0.1'))) {
+  // Local Postgres often does not support SSL
+  sslOption = false;
+}
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false // Required for Neon
-  }
+  ssl: sslOption
 });
 
 // Test connection

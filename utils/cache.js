@@ -70,7 +70,8 @@ class Cache {
   }
 }
 
-// Create cache instance
-const cache = new Cache(1800); // 30 minutes default TTL
+// Export the Cache class so callers can create instances with different TTLs
+module.exports = Cache;
 
-module.exports = cache;
+// Also export a default shared cache instance for scripts that prefer a singleton
+module.exports.defaultCache = new Cache(1800); // 30 minutes default TTL
