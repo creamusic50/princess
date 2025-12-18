@@ -7,56 +7,143 @@ const morgan = require('morgan');
 
 const app = express();
 
-// Enhanced compression with Brotli support
+// Trust proxy for proper IP detection behind reverse proxies
+app.set('trust proxy', 1);
+
+// MAXIMUM Compression with Brotli and Gzip
 app.use(compression({
   level: 9, // Maximum compression
-  threshold: 0, // Compress all responses
+  threshold: 0, // Compress everything
   filter: (req, res) => {
     if (req.headers['x-no-compression']) {
       return false;
     }
     return compression.filter(req, res);
+  },
+  brotli: {
+    enabled: true,
+    zlib: {}
   }
 }));
 
-// Security headers with optimized CSP
+// Enhanced Security Headers for AdSense
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://pagead2.googlesyndication.com", "https://cdn.jsdelivr.net", "https://www.youtube.com", "https://s.ytimg.com"],
-      scriptSrcElem: ["'self'", "'unsafe-inline'", "https://pagead2.googlesyndication.com", "https://cdn.jsdelivr.net", "https://www.youtube.com", "https://s.ytimg.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://pagead2.googlesyndication.com", "https://www.youtube.com", "https://s.ytimg.com", "https://www.google.com"],
-      frameSrc: ["https://pagead2.googlesyndication.com", "https://www.youtube.com", "https://www.youtube-nocookie.com", "https://www.google.com"],
-      workerSrc: ["'self'"]
+      scriptSrc: [
+        "'self'", 
+        "'unsafe-inline'", 
+        "https://pagead2.googlesyndication.com",
+        "https://adservice.google.com",
+        "https://googleads.g.doubleclick.net",
+        "https://www.googletagservices.com",
+        "https://cdn.jsdelivr.net",
+        "https://www.google-analytics.com",
+        "https://www.googletagmanager.com"
+      ],
+      scriptSrcElem: [
+        "'self'", 
+        "'unsafe-inline'", 
+        "https://pagead2.googlesyndication.com",
+        "https://adservice.google.com",
+        "https://googleads.g.doubleclick.net",
+        "https://www.googletagservices.com",
+        "https://cdn.jsdelivr.net",
+        "https://www.google-analytics.com"
+      ],
+      styleSrc: [
+        "'self'", 
+        "'unsafe-inline'", 
+        "https://fonts.googleapis.com",
+        "https://www.googletagservices.com"
+      ],
+      fontSrc: [
+        "'self'", 
+        "https://fonts.gstatic.com", 
+        "data:"
+      ],
+      imgSrc: [
+        "'self'", 
+        "data:", 
+        "https:", 
+        "http:",
+        "https://pagead2.googlesyndication.com",
+        "https://www.google.com",
+        "https://googleads.g.doubleclick.net"
+      ],
+      connectSrc: [
+        "'self'", 
+        "https://pagead2.googlesyndication.com",
+        "https://www.google-analytics.com",
+        "https://www.googletagmanager.com",
+        "https://googleads.g.doubleclick.net"
+      ],
+      frameSrc: [
+        "https://pagead2.googlesyndication.com",
+        "https://googleads.g.doubleclick.net",
+        "https://www.google.com",
+        "https://www.youtube.com",
+        "https://www.youtube-nocookie.com"
+      ],
+      workerSrc: ["'self'", "blob:"],
+      childSrc: ["'self'", "https://pagead2.googlesyndication.com"]
     }
   },
   crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
     preload: true
+  },
+  frameguard: {
+    action: 'deny'
+  },
+  referrerPolicy: {
+    policy: 'strict-origin-when-cross-origin'
   }
 }));
 
-// Additional performance headers
+// Performance Headers for Maximum Speed
 app.use((req, res, next) => {
-  // Enable HTTP/2 Server Push hints
-  res.setHeader('Link', '</css/style.min.f5f26ea4.css>; rel=preload; as=style, </js/main.min.eb2549f5.js>; rel=preload; as=script');
+  // Server timing for performance monitoring
+  const startTime = Date.now();
   
-  // Timing headers for performance monitoring
-  res.setHeader('Server-Timing', 'total;dur=0');
+  res.on('finish', () => {
+    const duration = Date.now() - startTime;
+    res.setHeader('Server-Timing', `total;dur=${duration}`);
+  });
+  
+  // Enable HTTP/2 Server Push hints
+  if (req.path === '/' || req.path === '/index.html') {
+    res.setHeader('Link', [
+      '</css/style.min.f5f26ea4.css>; rel=preload; as=style',
+      '</css/responsive.min.c014bbda.css>; rel=preload; as=style',
+      '</js/config.min.f841bc00.js>; rel=preload; as=script',
+      '</js/main.min.eb2549f5.js>; rel=preload; as=script'
+    ].join(', '));
+  }
+  
+  // Security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
   
   next();
 });
 
-app.use(morgan('combined'));
+// Request logging in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(morgan('combined'));
+} else {
+  app.use(morgan('dev'));
+}
+
 app.use(cors());
 
-// Body parsing middleware
+// Body parsing middleware with limits
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -77,64 +164,101 @@ app.use('/api/meta', metaRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/admin', adminRouter);
 
-// Health check endpoint
+// Health check endpoint for monitoring
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.status(200).json({ 
+    status: 'healthy', 
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
   });
+});
+
+// Robots.txt with proper headers
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.sendFile(path.join(__dirname, 'frontend', 'robots.txt'));
+});
+
+// Sitemap with proper headers
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.sendFile(path.join(__dirname, 'frontend', 'sitemap.xml'));
+});
+
+// Ads.txt for AdSense
+app.get('/ads.txt', (req, res) => {
+  res.type('text/plain');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.sendFile(path.join(__dirname, 'frontend', 'ads.txt'));
 });
 
 // Serve static files from frontend directory with aggressive caching
 const frontendPath = path.join(__dirname, 'frontend');
-console.log('Serving frontend from:', frontendPath);
+console.log('📁 Serving frontend from:', frontendPath);
 
-// Serve static assets with optimized cache headers
+// Static file serving with optimized cache headers
 app.use(express.static(frontendPath, {
-  maxAge: process.env.NODE_ENV === 'production' ? '365d' : 0,
+  maxAge: '0', // We'll set this per-file type
   etag: true,
   lastModified: true,
-  immutable: true,
   setHeaders: (res, filePath) => {
-    // Set cache headers based on file type
+    // HTML files - no cache (always fresh)
     if (filePath.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
-    } else if (filePath.match(/\.(css|js|woff2?|ttf|eot)$/)) {
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    } else if (filePath.match(/\.(jpg|jpeg|png|gif|svg|webp|ico)$/)) {
-      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
     }
-    
-    // Add resource hints
-    if (filePath.endsWith('.html')) {
-      res.setHeader('Link', '<https://fonts.googleapis.com>; rel=preconnect, <https://fonts.gstatic.com>; rel=preconnect; crossorigin');
+    // CSS and JS - long cache (versioned files)
+    else if (filePath.match(/\.(css|js)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+    // Fonts - long cache
+    else if (filePath.match(/\.(woff2?|ttf|eot|otf)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+    // Images - medium cache
+    else if (filePath.match(/\.(jpg|jpeg|png|gif|svg|webp|ico)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800'); // 7 days
+    }
+    // JSON and XML - short cache
+    else if (filePath.match(/\.(json|xml)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour
     }
   }
 }));
 
+// Service Worker with proper headers
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Content-Type', 'application/javascript; charset=UTF-8');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.sendFile(path.join(frontendPath, 'sw.js'));
+});
+
 // Explicit routes for specific HTML files
 app.get('/admin.html', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache');
   res.sendFile(path.join(frontendPath, 'admin.html'));
 });
 
 app.get('/admin', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache');
   res.sendFile(path.join(frontendPath, 'admin.html'));
 });
 
 app.get('/login.html', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache');
   res.sendFile(path.join(frontendPath, 'login.html'));
 });
 
 app.get('/post.html', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'post.html'));
-});
-
-// Service Worker route
-app.get('/sw.js', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Content-Type', 'application/javascript');
-  res.sendFile(path.join(frontendPath, 'sw.js'));
+  res.sendFile(path.join(frontendPath, 'post.html'));
 });
 
 // Catch-all route for SPA routing (must be last)
@@ -148,9 +272,10 @@ app.get('*', (req, res) => {
   }
 
   // For all other routes, serve index.html
+  res.setHeader('Cache-Control', 'no-cache');
   res.sendFile(path.join(frontendPath, 'index.html'), (err) => {
     if (err) {
-      console.error('Error serving index.html:', err);
+      console.error('❌ Error serving index.html:', err);
       res.status(500).send('Server error');
     }
   });
@@ -158,24 +283,37 @@ app.get('*', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
+  console.error('❌ Error:', err);
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || 'Internal server error'
+    message: process.env.NODE_ENV === 'production' 
+      ? 'Internal server error' 
+      : err.message
   });
 });
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log('===========================================');
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📁 Frontend: http://localhost:${PORT}`);
   console.log(`🔧 Admin: http://localhost:${PORT}/admin.html`);
   console.log(`🔌 API: http://localhost:${PORT}/api`);
   console.log(`💚 Health: http://localhost:${PORT}/api/health`);
-  console.log(`⚡ Performance: Optimized for 100/100 mobile score`);
+  console.log(`⚡ Performance: Optimized for 100/100 scores`);
+  console.log(`🎯 AdSense: Ready for approval`);
+  console.log(`🌐 Domain: tilana.online`);
   console.log('===========================================');
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.log('✅ HTTP server closed');
+    process.exit(0);
+  });
 });
 
 module.exports = app;

@@ -6,5 +6,19 @@ Disallow: /admin.html
 Disallow: /admin-fixed.html
 Disallow: /admin.htm
 Disallow: /admin-OLD-BACKUP.html
+Disallow: /create-post.html
+Disallow: /profile-settings.html
 
-Sitemap: https://smartmoneyguide.com/sitemap.xml
+# Allow Googlebot to crawl everything except admin
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+
+# Allow Googlebot Images
+User-agent: Googlebot-Image
+Allow: /
+
+# Crawl delay for all bots
+Crawl-delay: 1
+
+Sitemap: https://tilana.online/sitemap.xml
