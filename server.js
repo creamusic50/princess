@@ -26,7 +26,7 @@ app.use(compression({
   }
 }));
 
-// Enhanced Security Headers for AdSense
+// Enhanced Security Headers for AdSense - FIXED CSP
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -38,6 +38,8 @@ app.use(helmet({
         "https://adservice.google.com",
         "https://googleads.g.doubleclick.net",
         "https://www.googletagservices.com",
+        "https://tpc.googlesyndication.com",
+        "https://www.google.com",
         "https://cdn.jsdelivr.net",
         "https://www.google-analytics.com",
         "https://www.googletagmanager.com"
@@ -49,6 +51,8 @@ app.use(helmet({
         "https://adservice.google.com",
         "https://googleads.g.doubleclick.net",
         "https://www.googletagservices.com",
+        "https://tpc.googlesyndication.com",
+        "https://www.google.com",
         "https://cdn.jsdelivr.net",
         "https://www.google-analytics.com"
       ],
@@ -70,24 +74,29 @@ app.use(helmet({
         "http:",
         "https://pagead2.googlesyndication.com",
         "https://www.google.com",
-        "https://googleads.g.doubleclick.net"
+        "https://googleads.g.doubleclick.net",
+        "https://tpc.googlesyndication.com"
       ],
       connectSrc: [
         "'self'", 
         "https://pagead2.googlesyndication.com",
         "https://www.google-analytics.com",
         "https://www.googletagmanager.com",
-        "https://googleads.g.doubleclick.net"
+        "https://googleads.g.doubleclick.net",
+        "https://adservice.google.com",
+        "https://ep1.adtrafficquality.google",
+        "https://www.google.com"
       ],
       frameSrc: [
         "https://pagead2.googlesyndication.com",
         "https://googleads.g.doubleclick.net",
+        "https://tpc.googlesyndication.com",
         "https://www.google.com",
         "https://www.youtube.com",
         "https://www.youtube-nocookie.com"
       ],
       workerSrc: ["'self'", "blob:"],
-      childSrc: ["'self'", "https://pagead2.googlesyndication.com"]
+      childSrc: ["'self'", "https://pagead2.googlesyndication.com", "https://googleads.g.doubleclick.net"]
     }
   },
   crossOriginEmbedderPolicy: false,
@@ -302,7 +311,7 @@ const server = app.listen(PORT, () => {
   console.log(`🔌 API: http://localhost:${PORT}/api`);
   console.log(`💚 Health: http://localhost:${PORT}/api/health`);
   console.log(`⚡ Performance: Optimized for 100/100 scores`);
-  console.log(`🎯 AdSense: Ready for approval`);
+  console.log(`🎯 AdSense: CSP Fixed - Ads Ready!`);
   console.log(`🌐 Domain: tilana.online`);
   console.log('===========================================');
 });
