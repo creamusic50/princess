@@ -10,10 +10,10 @@ const app = express();
 // Trust proxy for proper IP detection behind reverse proxies
 app.set('trust proxy', 1);
 
-// MAXIMUM Compression with Brotli and Gzip
+// SAFE Compression with Gzip and Brotli
 app.use(compression({
-  level: 9, // Maximum compression
-  threshold: 0, // Compress everything
+  level: 6, // Safe compression level
+  threshold: 512, // Only compress responses larger than 512 bytes
   filter: (req, res) => {
     if (req.headers['x-no-compression']) {
       return false;
@@ -124,14 +124,6 @@ app.use(helmet({
 
 // Performance Headers for Maximum Speed
 app.use((req, res, next) => {
-  // Server timing for performance monitoring
-  const startTime = Date.now();
-  
-  res.on('finish', () => {
-    const duration = Date.now() - startTime;
-    res.setHeader('Server-Timing', `total;dur=${duration}`);
-  });
-  
   // Enable HTTP/2 Server Push hints
   if (req.path === '/' || req.path === '/index.html') {
     res.setHeader('Link', [
@@ -147,6 +139,7 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.setHeader('Server-Timing', 'cache;dur=20');
   
   next();
 });
@@ -314,7 +307,7 @@ const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
   console.log('===========================================');
   console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📁 Frontend: http://localhost:${PORT}`);
+  console.log(`� Frontend: http://localhost:${PORT}`);
   console.log(`🔧 Admin: http://localhost:${PORT}/admin.html`);
   console.log(`🔌 API: http://localhost:${PORT}/api`);
   console.log(`💚 Health: http://localhost:${PORT}/api/health`);

@@ -6,10 +6,10 @@ services:
     runtime: node
     runtimeVersion: 22
     # Install dependencies - no custom build needed
-    buildCommand: cd backend && npm install && cd ..
-    startCommand: node backend/server.js
+    buildCommand: npm install
+    startCommand: node server.js
     # Keep the site alive by pinging health endpoint
-    healthCheckPath: /_health
+    healthCheckPath: /api/health
     # Use paid tier for always-on (if upgrading from free tier)
     plan: starter
     envVars:
