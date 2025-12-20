@@ -54,8 +54,11 @@ app.use(helmet({
         "https://tpc.googlesyndication.com",
         "https://www.google.com",
         "https://cdn.jsdelivr.net",
-        "https://www.google-analytics.com"
+        "https://www.google-analytics.com",
+        "https://*.adtrafficquality.google",
+        "https://ep2.adtrafficquality.google"
       ],
+      scriptSrcAttr: ["'unsafe-inline'"],
       styleSrc: [
         "'self'", 
         "'unsafe-inline'", 
@@ -84,8 +87,11 @@ app.use(helmet({
         "https://www.googletagmanager.com",
         "https://googleads.g.doubleclick.net",
         "https://adservice.google.com",
+        "https://*.adtrafficquality.google",
         "https://ep1.adtrafficquality.google",
-        "https://www.google.com"
+        "https://www.google.com",
+        "https://securepubads.g.doubleclick.net",
+        "https://partner.googleadservices.com"
       ],
       frameSrc: [
         "https://pagead2.googlesyndication.com",
@@ -93,7 +99,9 @@ app.use(helmet({
         "https://tpc.googlesyndication.com",
         "https://www.google.com",
         "https://www.youtube.com",
-        "https://www.youtube-nocookie.com"
+        "https://www.youtube-nocookie.com",
+        "https://td.doubleclick.net",
+        "https://securepubads.g.doubleclick.net"
       ],
       workerSrc: ["'self'", "blob:"],
       childSrc: ["'self'", "https://pagead2.googlesyndication.com", "https://googleads.g.doubleclick.net"]
