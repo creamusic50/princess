@@ -5,8 +5,8 @@ services:
     branch: main
     runtime: node
     runtimeVersion: 22
-    # Use the repo build script and a deterministic Node start command
-    buildCommand: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts\build-deploy.ps1
+    # Install dependencies - no custom build needed
+    buildCommand: cd backend && npm install && cd ..
     startCommand: node backend/server.js
     # Keep the site alive by pinging health endpoint
     healthCheckPath: /_health

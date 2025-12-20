@@ -15,26 +15,24 @@ const STATIC_ASSETS = [
   '/css/style.min.f5f26ea4.css',
   '/css/responsive.min.c014bbda.css',
   '/js/config.min.f841bc00.js',
-  '/js/main.min.eb2549f5.js',
-  '/offline.html'
+  '/js/main.min.eb2549f5.js'
 ];
 
 // Install event - cache critical static assets aggressively
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker v3...');
-  
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => {
         console.log('[SW] Caching static assets');
-        return cache.addAll(STATIC_ASSETS.filter(url => url !== '/offline.html'));
+        return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
         console.log('[SW] Static assets cached');
-        return self.skipWaiting(); // Activate immediately
+        return self.skipWaiting();
       })
       .catch((err) => {
-        console.error('[SW] Failed to cache static assets:', err);
+        console.error('[SW] Install error:', err);
       })
   );
 });
@@ -42,7 +40,6 @@ self.addEventListener('install', (event) => {
 // Activate event - cleanup old caches aggressively
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating service worker...');
-  
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
@@ -57,12 +54,15 @@ self.addEventListener('activate', (event) => {
       })
       .then(() => {
         console.log('[SW] Service worker activated');
-        return self.clients.claim(); // Take control immediately
+        return self.clients.claim();
+      })
+      .catch((err) => {
+        console.error('[SW] Activation error:', err);
       })
   );
 });
 
-// Fetch event - optimized caching strategies for 100/100 scores
+// Fetch event - optimized caching strategies
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -72,13 +72,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip chrome extensions and non-http(s) requests
+  // Skip non-http(s) requests
   if (!url.protocol.startsWith('http')) {
     return;
   }
 
-  // Strategy 1: Cache first for static assets (highest priority for performance)
-  if (/\.(js|css|woff2|ttf|otf)$/.test(request.url)) {
+  // Strategy 1: Cache first for static assets (JS, CSS, fonts)
+  if (/\.(js|css|woff2|ttf|otf|woff)$/.test(request.url)) {
     event.respondWith(
       caches.match(request)
         .then((response) => {
@@ -88,19 +88,22 @@ self.addEventListener('fetch', (event) => {
           }
           return fetch(request)
             .then((response) => {
-              if (!response || response.status !== 200 || response.type === 'error') {
+              if (!response || response.status !== 200) {
                 return response;
               }
               const responseClone = response.clone();
-              caches.open(STATIC_CACHE)
-                .then((cache) => {
-                  cache.put(request, responseClone);
-                });
+              caches.open(STATIC_CACHE).then((cache) => {
+                cache.put(request, responseClone);
+              });
               return response;
+            })
+            .catch(() => {
+              // Return cached version if network fails
+              return caches.match(request);
             });
         })
         .catch(() => {
-          return caches.match('/offline.html');
+          return new Response('Offline', { status: 503 });
         })
     );
     return;
@@ -111,17 +114,15 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.match(request)
         .then((response) => {
-          // Return cached image immediately
           if (response) {
             console.log('[SW] Cache hit (image):', request.url);
             // Revalidate in background
             fetch(request)
               .then((freshResponse) => {
                 if (freshResponse && freshResponse.status === 200) {
-                  caches.open(IMAGE_CACHE)
-                    .then((cache) => {
-                      cache.put(request, freshResponse);
-                    });
+                  caches.open(IMAGE_CACHE).then((cache) => {
+                    cache.put(request, freshResponse);
+                  });
                 }
               })
               .catch(() => {});
@@ -134,10 +135,9 @@ self.addEventListener('fetch', (event) => {
                 return response;
               }
               const responseClone = response.clone();
-              caches.open(IMAGE_CACHE)
-                .then((cache) => {
-                  cache.put(request, responseClone);
-                });
+              caches.open(IMAGE_CACHE).then((cache) => {
+                cache.put(request, responseClone);
+              });
               return response;
             })
             .catch(() => {
@@ -157,19 +157,18 @@ self.addEventListener('fetch', (event) => {
             return response;
           }
           const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE)
-            .then((cache) => {
-              cache.put(request, responseClone);
-            });
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseClone);
+          });
           return response;
         })
         .catch(() => {
           return caches.match(request)
-            .then((response) => {
-              if (response) {
-                return response;
+            .then((cachedResponse) => {
+              if (cachedResponse) {
+                return cachedResponse;
               }
-              return caches.match('/offline.html');
+              return new Response('Offline', { status: 503 });
             });
         })
     );
@@ -185,10 +184,9 @@ self.addEventListener('fetch', (event) => {
             return response;
           }
           const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE)
-            .then((cache) => {
-              cache.put(request, responseClone);
-            });
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseClone);
+          });
           return response;
         })
         .catch(() => {
@@ -203,33 +201,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Strategy 5: Cache first for fonts (hosted or external)
-  if (/fonts\.(googleapis|gstatic)\.com/.test(request.url)) {
-    event.respondWith(
-      caches.match(request)
-        .then((response) => {
-          if (response) {
-            console.log('[SW] Cache hit (font):', request.url);
-            return response;
-          }
-          return fetch(request)
-            .then((response) => {
-              if (!response || response.status !== 200) {
-                return response;
-              }
-              const responseClone = response.clone();
-              caches.open(FONT_CACHE)
-                .then((cache) => {
-                  cache.put(request, responseClone);
-                });
-              return response;
-            });
-        })
-    );
-    return;
-  }
-
-  // Default: Cache first, fallback to network
+  // Default: Cache first with network fallback
   event.respondWith(
     caches.match(request)
       .then((response) => {
@@ -238,238 +210,38 @@ self.addEventListener('fetch', (event) => {
         }
         return fetch(request)
           .then((response) => {
-            if (!response || response.status !== 200 || response.type === 'error') {
+            if (!response || response.status !== 200) {
               return response;
             }
             const responseClone = response.clone();
-            caches.open(DYNAMIC_CACHE)
-              .then((cache) => {
-                cache.put(request, responseClone);
-              });
+            caches.open(DYNAMIC_CACHE).then((cache) => {
+              cache.put(request, responseClone);
+            });
             return response;
           })
           .catch(() => {
-            return caches.match('/offline.html');
+            return new Response('Offline', { status: 503 });
           });
-      })
-  );
-});
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(request)
-        .catch(() => {
-          return new Response(JSON.stringify({ 
-            error: 'Network unavailable',
-            offline: true 
-          }), {
-            headers: { 'Content-Type': 'application/json' }
-          });
-        })
-    );
-    return;
-  }
-
-  // Skip AdSense and external ad-related requests (never cache)
-  if (
-    url.hostname.includes('googlesyndication.com') ||
-    url.hostname.includes('doubleclick.net') ||
-    url.hostname.includes('google-analytics.com') ||
-    url.hostname.includes('googletagmanager.com') ||
-    url.hostname.includes('adservice.google.com')
-  ) {
-    event.respondWith(fetch(request));
-    return;
-  }
-
-  // Skip external resources (fetch fresh)
-  if (url.origin !== location.origin) {
-    event.respondWith(
-      fetch(request)
-        .catch(() => {
-          // Provide fallback for external resources
-          return new Response('', { status: 503 });
-        })
-    );
-    return;
-  }
-
-  // FONTS - Cache first with long expiry
-  if (isFontFile(url.pathname)) {
-    event.respondWith(
-      caches.match(request)
-        .then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          return fetch(request).then((response) => {
-            if (response && response.status === 200) {
-              const responseToCache = response.clone();
-              caches.open(FONT_CACHE).then((cache) => {
-                cache.put(request, responseToCache);
-              });
-            }
-            return response;
-          });
-        })
-    );
-    return;
-  }
-
-  // IMAGES - Cache first with fallback
-  if (isImageFile(url.pathname)) {
-    event.respondWith(
-      caches.match(request)
-        .then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          return fetch(request).then((response) => {
-            if (response && response.status === 200) {
-              const responseToCache = response.clone();
-              caches.open(IMAGE_CACHE).then((cache) => {
-                cache.put(request, responseToCache);
-              });
-            }
-            return response;
-          });
-        })
-    );
-    return;
-  }
-
-  // CSS and JS - Cache first (versioned files)
-  if (isStaticAsset(url.pathname)) {
-    event.respondWith(
-      caches.match(request)
-        .then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          return fetch(request).then((response) => {
-            if (response && response.status === 200) {
-              const responseToCache = response.clone();
-              caches.open(STATIC_CACHE).then((cache) => {
-                cache.put(request, responseToCache);
-              });
-            }
-            return response;
-          });
-        })
-    );
-    return;
-  }
-
-  // HTML pages - Network first with cache fallback
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        if (response && response.status === 200) {
-          const responseToCache = response.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => {
-            cache.put(request, responseToCache);
-          });
-        }
-        return response;
       })
       .catch(() => {
-        // Fallback to cache if network fails
-        return caches.match(request)
-          .then((cachedResponse) => {
-            if (cachedResponse) {
-              return cachedResponse;
-            }
-            // If no cache, show offline page
-            return caches.match('/offline.html')
-              .then((offlinePage) => offlinePage || new Response('Offline', { status: 503 }));
-          });
+        return new Response('Offline', { status: 503 });
       })
   );
 });
-
-// Helper function: Check if file is a static asset
-function isStaticAsset(pathname) {
-  const staticExtensions = ['.css', '.js'];
-  return staticExtensions.some(ext => pathname.endsWith(ext));
-}
-
-// Helper function: Check if file is an image
-function isImageFile(pathname) {
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.ico'];
-  return imageExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
-}
-
-// Helper function: Check if file is a font
-function isFontFile(pathname) {
-  const fontExtensions = ['.woff', '.woff2', '.ttf', '.eot', '.otf'];
-  return fontExtensions.some(ext => pathname.toLowerCase().endsWith(ext));
-}
 
 // Message event handler for cache management
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
   if (event.data && event.data.type === 'CLEAR_CACHE') {
     event.waitUntil(
       caches.keys()
         .then((cacheNames) => {
-          return Promise.all(
-            cacheNames.map((cacheName) => caches.delete(cacheName))
-          );
-        })
-        .then(() => {
-          return self.clients.matchAll();
-        })
-        .then((clients) => {
-          clients.forEach((client) => {
-            client.postMessage({ type: 'CACHE_CLEARED' });
-          });
+          return Promise.all(cacheNames.map((name) => caches.delete(name)));
         })
     );
   }
-  
-  if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({ version: CACHE_VERSION });
-  }
 });
 
-// Background sync for offline form submissions (if needed)
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-forms') {
-    event.waitUntil(syncForms());
-  }
-});
-
-async function syncForms() {
-  // Implement form sync logic if needed
-  console.log('[SW] Syncing forms...');
-}
-
-// Push notification support (for future use)
-self.addEventListener('push', (event) => {
-  const options = {
-    body: event.data ? event.data.text() : 'New notification',
-    icon: '/images/icon-192x192.png',
-    badge: '/images/badge-72x72.png',
-    vibrate: [200, 100, 200],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    }
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification('Smart Money Guide', options)
-  );
-});
-
-// Notification click handler
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow('https://tilana.online')
-  );
-});
-
-console.log('[SW] Service Worker loaded successfully - Version:', CACHE_VERSION);
+console.log('[SW] Service Worker loaded - Version:', CACHE_VERSION);
