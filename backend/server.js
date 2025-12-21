@@ -30,18 +30,18 @@ app.use(compression({
   }
 }));
 
-// Security headers with AdSense CSP fix
+// Security headers with full AdSense support (no CSP errors)
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://pagead2.googlesyndication.com", "https://cdn.jsdelivr.net", "https://www.youtube.com", "https://s.ytimg.com", "https://ep1.adtrafficquality.google"],
-      scriptSrcElem: ["'self'", "'unsafe-inline'", "https://pagead2.googlesyndication.com", "https://cdn.jsdelivr.net", "https://www.youtube.com", "https://s.ytimg.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://pagead2.googlesyndication.com", "https://cdn.jsdelivr.net", "https://www.youtube.com", "https://s.ytimg.com", "https://*.adtrafficquality.google"],
+      scriptSrcElem: ["'self'", "'unsafe-inline'", "https://pagead2.googlesyndication.com", "https://cdn.jsdelivr.net", "https://www.youtube.com", "https://s.ytimg.com", "https://*.adtrafficquality.google"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://pagead2.googlesyndication.com", "https://www.youtube.com", "https://s.ytimg.com", "https://www.google.com", "https://ep1.adtrafficquality.google", "https://googleads.g.doubleclick.net", "https://tpc.googlesyndication.com"],
-      frameSrc: ["https://pagead2.googlesyndication.com", "https://www.youtube.com", "https://www.youtube-nocookie.com", "https://www.google.com", "https://googleads.g.doubleclick.net", "https://tpc.googlesyndication.com"]
+      connectSrc: ["'self'", "https://pagead2.googlesyndication.com", "https://www.youtube.com", "https://s.ytimg.com", "https://www.google.com", "https://*.adtrafficquality.google", "https://googleads.g.doubleclick.net", "https://tpc.googlesyndication.com"],
+      frameSrc: ["https://pagead2.googlesyndication.com", "https://www.youtube.com", "https://www.youtube-nocookie.com", "https://www.google.com", "https://googleads.g.doubleclick.net", "https://tpc.googlesyndication.com", "https://*.adtrafficquality.google"]
     }
   },
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
