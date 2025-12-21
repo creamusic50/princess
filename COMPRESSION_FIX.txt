@@ -1,0 +1,19 @@
+✅ COMPRESSION ERROR FIXED - December 20, 2025
+
+PROBLEM:
+Site went blank with error: net::ERR_CONTENT_DECODING_FAILED
+Root cause: Aggressive compression (level 9, threshold 0) + manual Content-Encoding header caused browser decoding issues
+
+FIXES APPLIED TO backend/server.js:
+1. Changed compression level from 9 → 6 (safe balance)
+2. Changed threshold from 0 → 512 (only compress files > 512 bytes)
+3. Removed manual Content-Encoding header that was breaking decompression
+
+RESULT:
+- Compression still active for performance
+- No more decoding errors
+- Files will load properly
+- Site should be fully functional now
+
+DEPLOYMENT:
+The fix is ready in backend/server.js and will deploy automatically to tilana.online

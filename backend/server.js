@@ -10,8 +10,25 @@ const app = express();
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Disable compression - files are already minified, causing decode errors on Render
-// app.use(compression({...}));
+// Enable compression with optimal settings for 100/100 performance
+app.use(compression({
+  level: 6,  // Balanced compression (9 = max CPU, 6 = good balance)
+  threshold: 0,  // Compress all responses, even small ones
+  filter: (req, res) => {
+    // Don't compress responses with this request header
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    // Don't compress images, fonts, or already-compressed files
+    const contentType = res.getHeader('content-type');
+    if (!contentType) return true;
+    if (contentType.includes('image') || contentType.includes('font') || 
+        contentType.includes('woff') || contentType.includes('woff2')) {
+      return false;
+    }
+    return true;
+  }
+}));
 
 // Security headers
 app.use(helmet({
