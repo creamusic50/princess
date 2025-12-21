@@ -10,20 +10,8 @@ const app = express();
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// SAFE Compression with Gzip
-app.use(compression({ 
-  level: 5,  // Medium compression level for stability
-  threshold: 1024,  // Only compress responses larger than 1KB
-  filter: (req, res) => {
-    if (req.headers['x-no-compression']) return false;
-    // Don't compress already compressed formats
-    const contentType = res.getHeader('content-type');
-    if (contentType && /image|video|audio|application\/pdf|application\/zip/.test(contentType)) {
-      return false;
-    }
-    return compression.filter(req, res);
-  }
-}));
+// Disable compression - files are already minified, causing decode errors on Render
+// app.use(compression({...}));
 
 // Security headers
 app.use(helmet({

@@ -10,23 +10,8 @@ const app = express();
 // Trust proxy for proper IP detection behind reverse proxies
 app.set('trust proxy', 1);
 
-// SAFE Compression with Gzip
-app.use(compression({
-  level: 5, // Medium compression level for stability
-  threshold: 1024, // Only compress responses larger than 1KB
-  filter: (req, res) => {
-    // Don't compress if client doesn't accept it
-    if (req.headers['x-no-compression']) {
-      return false;
-    }
-    // Don't compress already compressed formats
-    const contentType = res.getHeader('content-type');
-    if (contentType && /image|video|audio|application\/pdf|application\/zip/.test(contentType)) {
-      return false;
-    }
-    return compression.filter(req, res);
-  }
-}));
+// Disable compression - files are already minified, causing decode errors on Render
+// app.use(compression({...}));
 
 // Enhanced Security Headers for AdSense - FIXED CSP
 app.use(helmet({
