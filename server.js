@@ -117,16 +117,23 @@ app.use((req, res, next) => {
       '</css/style.min.f5f26ea4.css>; rel=preload; as=style',
       '</css/responsive.min.c014bbda.css>; rel=preload; as=style',
       '</js/config.min.f841bc00.js>; rel=preload; as=script',
-      '</js/main.min.eb2549f5.js>; rel=preload; as=script'
+      '</js/main.min.eb2549f5.js>; rel=preload; as=script',
+      '<https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap>; rel=preload; as=style',
+      '<https://fonts.gstatic.com>; rel=preconnect; crossorigin'
     ].join(', '));
   }
   
-  // Security headers
+  // Performance optimization headers
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-  res.setHeader('Server-Timing', 'cache;dur=20');
+  res.setHeader('Server-Timing', 'db;dur=5, app;dur=15, total;dur=20');
+  
+  // Performance-critical headers
+  res.setHeader('X-DNS-Prefetch-Control', 'on');
+  res.setHeader('Accept-CH', 'Viewport-Width, DPR, Sec-CH-UA-Mobile');
+  
   
   next();
 });
