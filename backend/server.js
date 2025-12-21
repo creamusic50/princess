@@ -10,13 +10,17 @@ const app = express();
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Ultra-aggressive compression for 100/100 performance
-// Compress all responses - critical for Lighthouse scores
+// SAFE Compression with Gzip
 app.use(compression({ 
-  level: 9,  // Maximum compression (best for static sites)
-  threshold: 0,  // Compress everything, even small responses
+  level: 5,  // Medium compression level for stability
+  threshold: 1024,  // Only compress responses larger than 1KB
   filter: (req, res) => {
     if (req.headers['x-no-compression']) return false;
+    // Don't compress already compressed formats
+    const contentType = res.getHeader('content-type');
+    if (contentType && /image|video|audio|application\/pdf|application\/zip/.test(contentType)) {
+      return false;
+    }
     return compression.filter(req, res);
   }
 }));
@@ -48,11 +52,6 @@ app.use((req, res, next) => {
   // Performance optimization headers
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
   
-  // Enable brotli compression (if supported by client)
-  if (req.headers['accept-encoding']?.includes('br')) {
-    res.setHeader('Content-Encoding', 'br');
-  }
-  
   // Add timing headers for performance monitoring
   res.setHeader('Server-Timing', 'db;dur=10, cache;dur=20');
   
@@ -71,7 +70,7 @@ app.use((req, res, next) => {
 });
 
 // Simple health check for keep-alive services (must be before other routes)
-app.get('/_health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -95,9 +94,6 @@ app.use('/api/contact', contactRouter);
 app.use('/api/meta', metaRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/admin', adminRouter);
-
-// Simple health check
-app.get('/_health', (req, res) => res.json({ ok: true }));
 
 // Serve static frontend from backend/frontend
 const staticDir = path.join(__dirname, 'frontend');
