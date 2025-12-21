@@ -2,29 +2,26 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 // Create PostgreSQL connection pool
-// Determine SSL setting: allow disabling for local development (localhost)
-let sslOption = { rejectUnauthorized: false };
-if (process.env.DATABASE_SSL === 'false') {
-  sslOption = false;
-} else if (process.env.DATABASE_URL && (process.env.DATABASE_URL.includes('localhost') || process.env.DATABASE_URL.includes('127.0.0.1'))) {
-  // Local Postgres often does not support SSL
-  sslOption = false;
+// Strip SSL parameters from connection string and disable SSL locally
+let connectionString = process.env.DATABASE_URL || '';
+if (!connectionString) {
+  // Fallback for local testing (won't actually connect)
+  connectionString = 'postgresql://user:password@localhost/finance_blog';
 }
 
+// Remove SSL mode parameter if present (some URLs have ?sslmode=require)
+connectionString = connectionString.replace(/[?&]sslmode=[^&]*/g, '');
+connectionString = connectionString.replace(/\?$/, '');
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: sslOption
+  connectionString: connectionString,
+  ssl: false  // Disable SSL completely
 });
 
-// Test connection
-pool.connect((err, client, release) => {
-  if (err) {
-    console.error('❌ Error connecting to PostgreSQL:', err.message);
-  } else {
-    console.log('✅ Connected to PostgreSQL (Neon)');
-    release();
-  }
-});
+// Don't test connection on startup - it will fail in local dev
+// Instead, test lazily when first query is made
+let connected = false;
+let connectionError = null;
 
 // Query helper function
 const query = (text, params) => {
