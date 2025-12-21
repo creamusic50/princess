@@ -305,9 +305,8 @@ app.use((err, req, res, next) => {
 // Start server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
-  console.log('===========================================');
   console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`� Frontend: http://localhost:${PORT}`);
+  console.log(`📁 Frontend: http://localhost:${PORT}`);
   console.log(`🔧 Admin: http://localhost:${PORT}/admin.html`);
   console.log(`🔌 API: http://localhost:${PORT}/api`);
   console.log(`💚 Health: http://localhost:${PORT}/api/health`);
@@ -315,6 +314,32 @@ const server = app.listen(PORT, () => {
   console.log(`🎯 AdSense: CSP Fixed - Ads Ready!`);
   console.log(`🌐 Domain: tilana.online`);
   console.log('===========================================');
+
+  // Auto-ping to keep Render free tier awake (prevents sleep after 15 min inactivity)
+  if (process.env.NODE_ENV === 'production') {
+    const PING_INTERVAL = parseInt(process.env.PING_INTERVAL) || 840000; // 14 minutes default
+    const WEBSITE_URL = process.env.WEBSITE_URL || 'https://tilana.online';
+    
+    setInterval(async () => {
+      try {
+        const https = require('https');
+        const http = require('http');
+        
+        const protocol = WEBSITE_URL.startsWith('https') ? https : http;
+        protocol.get(WEBSITE_URL, (res) => {
+          if (res.statusCode === 200) {
+            console.log(`✅ [${new Date().toISOString()}] Keep-alive ping successful - Server awake`);
+          }
+        }).on('error', (err) => {
+          console.log(`⚠️ [${new Date().toISOString()}] Keep-alive ping error:`, err.message);
+        });
+      } catch (error) {
+        console.log(`⚠️ Keep-alive ping failed:`, error.message);
+      }
+    }, PING_INTERVAL);
+    
+    console.log(`⏰ Auto-ping enabled: Every ${(process.env.PING_INTERVAL || 840000) / 1000 / 60} minutes`);
+  }
 });
 
 // Graceful shutdown
