@@ -294,6 +294,7 @@ function buildPaginationHtml(currentPage, totalPages) {
     }
     
     return html;
+}
 
 // ============================================================
 // PAGE NAVIGATION

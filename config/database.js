@@ -2,30 +2,65 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 // Create PostgreSQL connection pool
-// Strip SSL parameters from connection string and disable SSL locally
 let connectionString = process.env.DATABASE_URL || '';
+
 if (!connectionString) {
-  // Fallback for local testing (won't actually connect)
+  console.warn('⚠️ DATABASE_URL not set - using fallback (connections will fail)');
   connectionString = 'postgresql://user:password@localhost/finance_blog';
 }
 
-// Remove SSL mode parameter if present (some URLs have ?sslmode=require)
+// Neon and most hosted PostgreSQL require SSL
+// Remove any existing SSL parameter and let us control it
 connectionString = connectionString.replace(/[?&]sslmode=[^&]*/g, '');
 connectionString = connectionString.replace(/\?$/, '');
 
+// Determine if we need SSL based on the connection string
+const isProduction = process.env.NODE_ENV === 'production';
+const isNeon = connectionString.includes('neon.tech');
+const isRemoteDB = !connectionString.includes('localhost') && !connectionString.includes('127.0.0.1');
+
+const sslConfig = (isNeon || isRemoteDB) ? {
+  rejectUnauthorized: false // Required for Neon and most cloud PostgreSQL
+} : false;
+
+console.log('🔧 Database Configuration:');
+console.log('   Environment:', process.env.NODE_ENV || 'development');
+console.log('   SSL Enabled:', !!sslConfig);
+console.log('   Is Neon:', isNeon);
+
 const pool = new Pool({
   connectionString: connectionString,
-  ssl: false  // Disable SSL completely
+  ssl: sslConfig,
+  max: 10, // Maximum number of clients in the pool
+  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+  connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection could not be established
 });
 
-// Don't test connection on startup - it will fail in local dev
-// Instead, test lazily when first query is made
-let connected = false;
-let connectionError = null;
+// Test connection on startup
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('❌ Database connection failed:', err.message);
+    console.error('   Check your DATABASE_URL in .env file');
+  } else {
+    console.log('✅ Database connected successfully');
+    console.log('   Timestamp:', res.rows[0].now);
+  }
+});
 
-// Query helper function
-const query = (text, params) => {
-  return pool.query(text, params);
+// Handle pool errors
+pool.on('error', (err) => {
+  console.error('❌ Unexpected database pool error:', err);
+});
+
+// Query helper function with error handling
+const query = async (text, params) => {
+  try {
+    const result = await pool.query(text, params);
+    return result;
+  } catch (error) {
+    console.error('❌ Database query error:', error.message);
+    throw error;
+  }
 };
 
 // Transaction helper
