@@ -60,6 +60,25 @@
     <!-- Structured data for SEO -->
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Smart Money Guide","url":"https://tilana.online/","description":"Expert advice on personal finance, investing, saving, and building wealth","publisher":{"@type":"Organization","name":"Smart Money Guide","logo":{"@type":"ImageObject","url":"https://tilana.online/images/logo.png"}},"potentialAction":{"@type":"SearchAction","target":"https://tilana.online/search?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
     <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+        <style>
+        /* Footer: clean & professional (Option 1) */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: #777;
+        }
+        .footer a {
+            color: #1a73e8;
+            text-decoration: none;
+            margin: 0 6px;
+        }
+        .footer a:hover { text-decoration: underline; }
+        @media (prefers-color-scheme: dark) {
+            .footer { color: #bbb; }
+            .footer a { color: #84a9ff; }
+        }
+        </style>
 </head>
 <body>
     <header role="banner">
@@ -69,6 +88,7 @@
                     <a href="/" class="logo" aria-label="Smart Money Guide home">💰 Smart Money Guide</a>
                     <ul class="nav-menu" role="menubar">
                         <li role="none"><a href="/" role="menuitem">Home</a></li>
+                        <li role="none"><a href="/phone-lookup.html" role="menuitem">Phone Lookup Guide</a></li>
                         <li role="none"><a href="#categories" role="menuitem">Categories</a></li>
                         <li role="none"><a href="about.html" role="menuitem">About</a></li>
                         <li role="none"><a href="contact.html" role="menuitem">Contact</a></li>
@@ -150,9 +170,13 @@
                     </div>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Smart Money Guide. All rights reserved. | <a href="https://tilana.online">tilana.online</a></p>
-            </div>
+                        <div class="footer-bottom footer">
+                                <p>
+                                    © 2025 Smart Money Guide. All rights reserved. |
+                                    <a href="https://tilana.online" target="_blank">Tilana.online</a> |
+                                    <a href="/phone-lookup.html">Phone Lookup Guide</a>
+                                </p>
+                        </div>
         </div>
     </footer>
     <script src="js/config.min.f841bc00.js" defer fetchpriority="high"></script>
