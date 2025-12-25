@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695"
+ <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695"
      crossorigin="anonymous"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-site-verification" content="p7ObZPC6DOBVi-AUb8yGPQMlDFuLkMFZvLPv0vvfS8w" />
-    <meta name="google-adsense-account" content="ca-pub-4861288278202695">
-    <title>Profile Settings - Smart Money Guide</title>
-    <link rel="stylesheet" href="css/style.6205c462.css">
-    <style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="google-site-verification" content="p7ObZPC6DOBVi-AUb8yGPQMlDFuLkMFZvLPv0vvfS8w" />
+ <meta name="google-adsense-account" content="ca-pub-4861288278202695">
+ <title>Profile Settings - Smart Money Guide</title>
+ <link rel="stylesheet" href="css/style.6205c462.css">
+ <style>
         * {
             margin: 0;
             padding: 0;
@@ -203,64 +203,64 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>⚙️ Profile Settings</h1>
-            <p>Update your account information</p>
-        </div>
+ <div class="container">
+ <div class="header">
+ <h1>️ Profile Settings</h1>
+ <p>Update your account information</p>
+ </div>
 
-        <div class="user-info" id="currentUserInfo">
-            <h3>Current Information</h3>
-            <p><strong>Username:</strong> <span id="currentUsername">Loading...</span></p>
-            <p><strong>Email:</strong> <span id="currentEmail">Loading...</span></p>
-            <p><strong>Role:</strong> <span id="currentRole">Loading...</span></p>
-        </div>
+ <div class="user-info" id="currentUserInfo">
+ <h3>Current Information</h3>
+ <p><strong>Username:</strong> <span id="currentUsername">Loading...</span></p>
+ <p><strong>Email:</strong> <span id="currentEmail">Loading...</span></p>
+ <p><strong>Role:</strong> <span id="currentRole">Loading...</span></p>
+ </div>
 
-        <div class="alert success" id="successAlert"></div>
-        <div class="alert error" id="errorAlert"></div>
+ <div class="alert success" id="successAlert"></div>
+ <div class="alert error" id="errorAlert"></div>
 
-        <!-- Update Email Section -->
-        <div class="form-section">
-            <h2>Update Email Address</h2>
-            <form id="emailForm">
-                <div class="form-group">
-                    <label for="newEmail">New Email Address</label>
-                    <input type="email" id="newEmail" placeholder="Enter new email" required>
-                </div>
-                <button type="submit" class="button" id="emailBtn">Update Email</button>
-            </form>
-        </div>
+ <!-- Update Email Section -->
+ <div class="form-section">
+ <h2>Update Email Address</h2>
+ <form id="emailForm">
+ <div class="form-group">
+ <label for="newEmail">New Email Address</label>
+ <input type="email" id="newEmail" placeholder="Enter new email" required>
+ </div>
+ <button type="submit" class="button" id="emailBtn">Update Email</button>
+ </form>
+ </div>
 
-        <!-- Update Password Section -->
-        <div class="form-section">
-            <h2>Change Password</h2>
-            <form id="passwordForm">
-                <div class="form-group">
-                    <label for="newPassword">New Password</label>
-                    <input type="password" id="newPassword" placeholder="Enter new password" required minlength="6">
-                </div>
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm New Password</label>
-                    <input type="password" id="confirmPassword" placeholder="Confirm new password" required minlength="6">
-                </div>
-                <div class="password-requirements">
-                    <h4>Password Requirements:</h4>
-                    <ul>
-                        <li>At least 6 characters long</li>
-                        <li>Mix of letters and numbers recommended</li>
-                        <li>Use special characters for extra security</li>
-                    </ul>
-                </div>
-                <button type="submit" class="button" id="passwordBtn">Change Password</button>
-            </form>
-        </div>
-    </div>
+ <!-- Update Password Section -->
+ <div class="form-section">
+ <h2>Change Password</h2>
+ <form id="passwordForm">
+ <div class="form-group">
+ <label for="newPassword">New Password</label>
+ <input type="password" id="newPassword" placeholder="Enter new password" required minlength="6">
+ </div>
+ <div class="form-group">
+ <label for="confirmPassword">Confirm New Password</label>
+ <input type="password" id="confirmPassword" placeholder="Confirm new password" required minlength="6">
+ </div>
+ <div class="password-requirements">
+ <h4>Password Requirements:</h4>
+ <ul>
+ <li>At least 6 characters long</li>
+ <li>Mix of letters and numbers recommended</li>
+ <li>Use special characters for extra security</li>
+ </ul>
+ </div>
+ <button type="submit" class="button" id="passwordBtn">Change Password</button>
+ </form>
+ </div>
+ </div>
 
-    <script>
+ <script>
         // Load config first
     </script>
-    <script src="js/config.a70a3591.js"></script>
-    <script>
+ <script src="js/config.a70a3591.js"></script>
+ <script>
         const API_URL = CONFIG.API_BASE_URL;
         let token = localStorage.getItem('token');
 

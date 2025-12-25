@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695"
+ <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695"
      crossorigin="anonymous"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-adsense-account" content="ca-pub-4861288278202695">
-    <title>Create/Edit Post - Admin</title>
-    <!-- TinyMCE (deferred) -->
-    <link rel="preconnect" href="https://cdn.tiny.cloud">
-    <script src="https://cdn.tiny.cloud/1/v7bfsqb0ba3da5vy3u355752quw0vqxixhb1pa9k8g9ndo4g/tinymce/6/tinymce.min.js" referrerpolicy="origin" defer></script>
-    <style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="google-adsense-account" content="ca-pub-4861288278202695">
+ <title>Create/Edit Post - Admin</title>
+ <!-- TinyMCE (deferred) -->
+ <link rel="preconnect" href="https://cdn.tiny.cloud">
+ <script src="https://cdn.tiny.cloud/1/v7bfsqb0ba3da5vy3u355752quw0vqxixhb1pa9k8g9ndo4g/tinymce/6/tinymce.min.js" referrerpolicy="origin" defer></script>
+ <style>
         * {
             margin: 0;
             padding: 0;
@@ -200,62 +200,62 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div class="header-content">
-            <h1 id="pageTitle">✍️ Create New Post</h1>
-            <a href="admin-new.html" class="btn-back">← Back to Dashboard</a>
-        </div>
-    </div>
+ <!-- Header -->
+ <div class="header">
+ <div class="header-content">
+ <h1 id="pageTitle">️ Create New Post</h1>
+ <a href="admin-new.html" class="btn-back">← Back to Dashboard</a>
+ </div>
+ </div>
 
-    <!-- Main Container -->
-    <div class="container">
-        <div class="form-card">
-            <div id="alertBox" class="alert"></div>
+ <!-- Main Container -->
+ <div class="container">
+ <div class="form-card">
+ <div id="alertBox" class="alert"></div>
 
-            <form id="postForm">
-                <input type="hidden" id="postId">
+ <form id="postForm">
+ <input type="hidden" id="postId">
 
-                <div class="form-group">
-                    <label for="title">Post Title *</label>
-                    <input type="text" id="title" placeholder="Enter post title" required>
-                </div>
+ <div class="form-group">
+ <label for="title">Post Title *</label>
+ <input type="text" id="title" placeholder="Enter post title" required>
+ </div>
 
-                <div class="form-group">
-                    <label for="category">Category *</label>
-                    <select id="category" required>
-                        <option value="">Select Category</option>
-                        <option value="Saving Tips">💰 Saving Tips</option>
-                        <option value="Investing">📈 Investing</option>
-                        <option value="Budgeting">📊 Budgeting</option>
-                        <option value="Retirement">🏖️ Retirement</option>
-                        <option value="Credit Cards">💳 Credit Cards</option>
-                        <option value="Money Management">💵 Money Management</option>
-                    </select>
-                </div>
+ <div class="form-group">
+ <label for="category">Category *</label>
+ <select id="category" required>
+ <option value="">Select Category</option>
+ <option value="Saving Tips"> Saving Tips</option>
+ <option value="Investing"> Investing</option>
+ <option value="Budgeting"> Budgeting</option>
+ <option value="Retirement">️ Retirement</option>
+ <option value="Credit Cards"> Credit Cards</option>
+ <option value="Money Management"> Money Management</option>
+ </select>
+ </div>
 
-                <div class="form-group">
-                    <label for="excerpt">Excerpt (Short Description) *</label>
-                    <textarea id="excerpt" rows="3" placeholder="Brief description of the post" required></textarea>
-                    <p class="helper-text">This will appear in post previews and meta descriptions</p>
-                </div>
+ <div class="form-group">
+ <label for="excerpt">Excerpt (Short Description) *</label>
+ <textarea id="excerpt" rows="3" placeholder="Brief description of the post" required></textarea>
+ <p class="helper-text">This will appear in post previews and meta descriptions</p>
+ </div>
 
-                <div class="form-group">
-                    <label for="content">Content *</label>
-                    <textarea id="content"></textarea>
-                    <div class="word-count" id="wordCount">Word count: 0 / 1000 minimum</div>
-                </div>
+ <div class="form-group">
+ <label for="content">Content *</label>
+ <textarea id="content"></textarea>
+ <div class="word-count" id="wordCount">Word count: 0 / 1000 minimum</div>
+ </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary" id="publishBtn">Publish Post</button>
-                    <a href="admin-new.html" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
-        </div>
-    </div>
+ <div class="form-actions">
+ <button type="submit" class="btn btn-primary" id="publishBtn">Publish Post</button>
+ <a href="admin-new.html" class="btn btn-secondary">Cancel</a>
+ </div>
+ </form>
+ </div>
+ </div>
 
-    <script src="js/config.a70a3591.js"></script>
-    <script>
+ <script src="js/config.a70a3591.js"></script>
+ <script>
         const API_URL = CONFIG.API_BASE_URL;
         let token = localStorage.getItem('token');
         let editor;
