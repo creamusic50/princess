@@ -3,14 +3,23 @@ const router = express.Router();
 const { uploadPostImage, uploadPostImages, deleteFile, getFileUrl } = require('../middleware/upload');
 const { protect, admin } = require('../middleware/auth');
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
 
-// Configure cloudinary from environment (CLOUDINARY_URL or individual vars)
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
+// Cloudinary is optional. Try to require and configure it, but don't crash the server
+let cloudinary;
+try {
+  // lazy-require cloudinary so missing module doesn't crash startup
+  cloudinary = require('cloudinary').v2;
+
+  // Configure cloudinary from environment (CLOUDINARY_URL or individual vars)
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+  });
+} catch (err) {
+  console.warn('[upload] cloudinary module not available or failed to configure — cloudinary endpoints will be disabled.');
+  cloudinary = null;
+}
 
 const memoryUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
@@ -171,8 +180,9 @@ router.post('/cloudinary', protect, admin, memoryUpload.single('file'), async (r
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
 
-    if (!process.env.CLOUDINARY_URL && !(process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET && process.env.CLOUDINARY_CLOUD_NAME)) {
-      return res.status(500).json({ success: false, message: 'Cloudinary not configured on server' });
+    if (!cloudinary || (!process.env.CLOUDINARY_URL && !(process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET && process.env.CLOUDINARY_CLOUD_NAME))) {
+      // Cloudinary not available — return a clear message that client can use to fallback
+      return res.status(501).json({ success: false, message: 'Cloudinary not available on server' });
     }
 
     const file = req.file;
