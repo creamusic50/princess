@@ -5,8 +5,8 @@ services:
     branch: main
     runtime: node
     runtimeVersion: 22
-    # Install dependencies - no custom build needed
-    buildCommand: npm install
+    # Install dependencies for backend explicitly to ensure server deps (cloudinary, pg, etc.) are installed
+    buildCommand: npm --prefix backend install
     startCommand: node server.js
     # Keep the site alive by pinging health endpoint
     healthCheckPath: /api/health
