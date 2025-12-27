@@ -38,4 +38,5 @@ services:
       - key: PING_INTERVAL
         # Ping every 14 minutes to keep awake (free tier sleeps after 15 min inactivity)
         value: "840000"
-    staticPublishPath: frontend
+    # staticPublishPath removed so the backend Node server serves the frontend files (backend/frontend)
+    # staticPublishPath: frontend
