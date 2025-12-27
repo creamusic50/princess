@@ -696,25 +696,63 @@
 
             // Cloudinary upload helper
             async function uploadImageToCloudinary(file) {
-                // Prefer server-side upload endpoint which uses signed credentials
-                const fd = new FormData();
-                fd.append('file', file);
-
+                // Try Cloudinary signed upload on server first
                 const tokenLocal = localStorage.getItem('token') || localStorage.getItem('authToken');
-                const resp = await fetch(`${API_URL}/upload/cloudinary`, {
-                    method: 'POST',
-                    headers: tokenLocal ? { 'x-auth-token': tokenLocal } : {},
-                    body: fd
-                });
 
-                if (!resp.ok) {
-                    const txt = await resp.text();
-                    throw new Error('Server upload failed: ' + txt);
+                // Helper to upload to local server storage (/api/upload/image)
+                async function uploadToLocal(file) {
+                    const fdLocal = new FormData();
+                    // server expects field name 'image' for disk storage middleware
+                    fdLocal.append('image', file);
+                    const respLocal = await fetch(`${API_URL}/upload/image`, {
+                        method: 'POST',
+                        headers: tokenLocal ? { 'x-auth-token': tokenLocal } : {},
+                        body: fdLocal
+                    });
+
+                    if (!respLocal.ok) {
+                        const txt = await respLocal.text();
+                        throw new Error('Local upload failed: ' + txt);
+                    }
+
+                    const d = await respLocal.json();
+                    if (!d.success) throw new Error(d.message || 'Local upload returned error');
+                    // returned url may be relative (/uploads/...), make absolute
+                    const url = d.file && d.file.url ? d.file.url : (d.url || d.secure_url);
+                    if (!url) throw new Error('Local upload did not return a file URL');
+                    return url.startsWith('http') ? url : (window.location.origin.replace(/:\d+$/, ':5000') + url);
                 }
 
-                const data = await resp.json();
-                if (!data.success) throw new Error(data.message || 'Unknown upload error');
-                return data.url || data.secure_url || (data.raw && data.raw.secure_url) || null;
+                try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+
+                    const resp = await fetch(`${API_URL}/upload/cloudinary`, {
+                        method: 'POST',
+                        headers: tokenLocal ? { 'x-auth-token': tokenLocal } : {},
+                        body: fd
+                    });
+
+                    // If cloudinary route not configured on server, fallback to local upload
+                    if (!resp.ok) {
+                        let txt;
+                        try { txt = await resp.text(); } catch (e) { txt = ''; }
+                        const lowered = (txt || '').toLowerCase();
+                        if (resp.status === 500 && lowered.includes('cloudinary not configured')) {
+                            console.warn('Cloudinary not configured on server, falling back to local upload');
+                            return await uploadToLocal(file);
+                        }
+                        throw new Error('Server upload failed: ' + txt);
+                    }
+
+                    const data = await resp.json();
+                    if (!data.success) throw new Error(data.message || 'Unknown upload error');
+                    return data.url || data.secure_url || (data.raw && data.raw.secure_url) || null;
+                } catch (err) {
+                    // If cloudinary failed for any reason, attempt local upload as a final fallback
+                    console.warn('Primary upload failed, attempting local upload:', err.message || err);
+                    return await uploadToLocal(file);
+                }
             }
 
             // Image input preview handling

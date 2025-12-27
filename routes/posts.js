@@ -94,22 +94,53 @@ router.get('/:slug', async (req, res) => {
         if (fs.existsSync(staticFile)) {
           const html = fs.readFileSync(staticFile, 'utf8');
 
-          // Simple extraction heuristics: title from <h1>, article content from <article>...</article>
+          // Extract title from <h1>
           const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
-          const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
 
+          // Extract main article HTML if present
+          const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+          const contentHtml = articleMatch ? articleMatch[1] : html;
+
+          // Extract meta description (<meta name="description" content="...">)
+          let metaDesc = '';
+          const metaMatch = html.match(/<meta\s+name=["']description["']\s+content=["']([\s\S]*?)["']\s*\/?>/i);
+          if (metaMatch) metaDesc = metaMatch[1].trim();
+
+          // Find first image in article content or og:image
+          let imageUrl = '';
+          const imgMatch = contentHtml.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+          if (imgMatch) {
+            imageUrl = imgMatch[1];
+          } else {
+            const ogMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']\s*\/?>/i);
+            if (ogMatch) imageUrl = ogMatch[1];
+          }
+
+          // Create a short plain-text excerpt: first paragraph inside article or first 160 chars of text
+          let excerpt = '';
+          const pMatch = contentHtml.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+          if (pMatch) {
+            excerpt = pMatch[1].replace(/<[^>]*>/g, '').trim();
+          }
+          if (!excerpt) {
+            // fallback: strip all tags and truncate
+            excerpt = contentHtml.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 200);
+          }
+
+          const stats = fs.statSync(staticFile);
           const postObj = {
             id: null,
             slug,
             title: titleMatch ? titleMatch[1].trim() : slug.replace(/-/g, ' '),
-            excerpt: '',
-            content: articleMatch ? articleMatch[1] : html,
+            excerpt: metaDesc || (excerpt.length > 160 ? excerpt.slice(0, 157) + '...' : excerpt),
+            content: contentHtml,
             category: 'Uncategorized',
             author_name: 'Smart Money Guide',
             views: 0,
+            image_url: imageUrl || null,
             published: true,
-            created_at: fs.statSync(staticFile).mtime.toISOString(),
-            updated_at: fs.statSync(staticFile).mtime.toISOString()
+            created_at: stats.birthtime.toISOString(),
+            updated_at: stats.mtime.toISOString()
           };
 
           // Cache the fallback result for a short time
