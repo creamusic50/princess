@@ -9,6 +9,7 @@ class Post {
         id SERIAL PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
         slug VARCHAR(300) UNIQUE NOT NULL,
+        image_url VARCHAR(1000),
         category VARCHAR(100) NOT NULL,
         excerpt TEXT,
         content TEXT NOT NULL,
@@ -51,25 +52,26 @@ class Post {
     author_id, 
     published = true,
     meta_description = null,
-    keywords = null
+    keywords = null,
+    image_url = null
   }) {
     try {
       const slug = this.generateSlug(title);
       
-      // Some deployments may not have meta_description/keywords columns
-      // to remain compatible we only insert the core columns here.
+      // Ensure deployments can opt-in to storing an image URL.
+      // Insert core columns + optional image_url support.
       const sql = `
         INSERT INTO posts (
           title, slug, category, excerpt, content, 
-          author_id, published
+          author_id, published, image_url
         ) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7) 
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
         RETURNING *
       `;
 
       const result = await query(sql, [
         title, slug, category, excerpt, content, 
-        author_id, published
+        author_id, published, image_url
       ]);
       
       return result.rows[0];
@@ -290,6 +292,12 @@ class Post {
       if (updates.keywords !== undefined) {
         fields.push(`keywords = $${paramCount}`);
         values.push(updates.keywords ? updates.keywords.split(',').map(k => k.trim()) : null);
+        paramCount++;
+      }
+
+      if (updates.image_url !== undefined) {
+        fields.push(`image_url = $${paramCount}`);
+        values.push(updates.image_url || null);
         paramCount++;
       }
       

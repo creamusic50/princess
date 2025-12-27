@@ -38,6 +38,34 @@
  <style>
         *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Lato',sans-serif;background:#f8f9fa;color:#333;line-height:1.6}header{background:linear-gradient(135deg,#1a252f 0%,#2c3e50 100%);box-shadow:0 4px 12px rgba(0,0,0,.15);position:sticky;top:0;z-index:1000;border-bottom:3px solid #3498db}.navbar{padding:15px 0}.container{max-width:1200px;margin:0 auto;padding:0 20px}.post-body{line-height:1.8;color:#333}.post-body h2{color:#2c3e50;margin:30px 0 15px;font-size:28px}.post-body h3{color:#34495e;margin:25px 0 12px;font-size:22px}.post-body p{margin:15px 0;font-size:17px}.post-body ul,.post-body ol{margin:15px 0;padding-left:30px}.post-body li{margin:8px 0;font-size:17px}.post-body strong{color:#2c3e50;font-weight:600}.post-body img{max-width:100%;height:auto;border-radius:8px;margin:20px 0;display:block}
     </style>
+    <style>
+        /* Table of contents styles */
+        .post-toc{background:#fff;border:1px solid #e6e9ee;padding:16px;border-radius:8px;margin:20px 0;font-size:15px}
+        .post-toc h3{margin:0 0 8px;font-size:16px}
+        .toc-list{list-style:none;padding-left:0;margin:8px 0}
+        .toc-list li{margin:6px 0}
+        .toc-list li a{color:#2c3e50;text-decoration:none}
+        .toc-list li .toc-sub{margin-left:14px;color:#4b5563}
+        html{scroll-behavior:smooth}
+        /* Layout: show TOC as sidebar on wide screens */
+        .post-main{display:block}
+        .post-toc{position:relative}
+        .post-toc .toc-toggle{display:inline-block;background:#f1f5f9;border:none;padding:8px 10px;border-radius:6px;cursor:pointer;margin-bottom:8px}
+        .post-toc .toc-toggle:focus{outline:2px solid #3498db}
+        .toc-list a.active{font-weight:700;color:#104d8a}
+
+        @media (min-width: 980px){
+            .post-main{display:grid;grid-template-columns:1fr 300px;grid-gap:32px;align-items:start}
+            .post-toc{margin:0;position:sticky;top:84px;height:calc(100vh - 120px);overflow:auto;padding:20px}
+            .post-toc .toc-toggle{display:none}
+        }
+
+        /* Mobile: collapsed by default, toggle shows list */
+        @media (max-width: 979px){
+            .post-toc[hidden]{display:block}
+            .post-toc.collapsed .toc-list{display:none}
+        }
+    </style>
  
  <!-- Load fonts asynchronously -->
  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" media="print" onload="this.media='all'">
@@ -50,7 +78,21 @@
  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
  
  <!-- Structured Data -->
- <script type="application/ld+json" id="article-schema"></script>
+ <script type="application/ld+json" id="article-schema">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "datePublished": "2025-12-26",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Smart Money Guide",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://tilana.online/images/logo.png"
+    }
+  }
+}
+</script>
 </head>
 <body>
  <header role="banner">
@@ -81,12 +123,20 @@
  <span class="views">️ <span id="post-views">0</span> views</span>
  </div>
  </div>
- 
- <div class="post-body" id="post-content">
+
+<!-- Post main area: TOC + content -->
+<div class="post-main">
+    <!-- Table of contents will be generated here -->
+    <nav id="post-toc" aria-label="Table of contents" class="post-toc" hidden>
+        <button class="toc-toggle" aria-expanded="false" aria-controls="post-toc-list">Contents ▾</button>
+    </nav>
+
+    <div class="post-body" id="post-content">
  <div class="loading">
  <div class="spinner"></div>
  <p>Loading article content...</p>
- </div>
+    </div>
+</div>
  </div>
  
  <div class="post-footer">
@@ -196,6 +246,9 @@
             document.getElementById('post-date').setAttribute('datetime', post.created_at);
             document.getElementById('post-views').textContent = post.views || 0;
             document.getElementById('post-content').innerHTML = post.content;
+
+            // Generate Table of Contents based on headings in the content
+            generateTOC();
             
             // Set meta tags
             document.getElementById('meta-description').setAttribute('content', post.excerpt || post.title);
@@ -203,6 +256,54 @@
             document.getElementById('og-description').setAttribute('content', post.excerpt || post.title);
             document.getElementById('twitter-title').setAttribute('content', post.title);
             document.getElementById('twitter-description').setAttribute('content', post.excerpt || post.title);
+
+            // Populate Article JSON-LD for better indexing and AdSense signals
+            try {
+                const schemaEl = document.getElementById('article-schema');
+                const pageUrl = window.location.href;
+                const siteOrigin = window.location.origin || (window.location.protocol + '//' + window.location.host);
+
+                const articleJson = {
+                    "@context": "https://schema.org",
+                    "@type": "Article",
+                    "mainEntityOfPage": {"@type":"WebPage","@id": pageUrl},
+                    "headline": post.title,
+                    "description": post.excerpt || post.title,
+                    "author": {"@type":"Person","name": post.author_name || 'Smart Money Guide'},
+                    "datePublished": post.created_at,
+                    "dateModified": post.updated_at || post.created_at,
+                    "publisher": {
+                        "@type": "Organization",
+                        "name": "Smart Money Guide",
+                        "logo": {
+                            "@type": "ImageObject",
+                            "url": siteOrigin + '/images/logo.png'
+                        }
+                    }
+                };
+
+                // Attach image if available
+                if (post.featured_image) {
+                    articleJson.image = post.featured_image.startsWith('http') ? post.featured_image : siteOrigin + '/' + post.featured_image.replace(/^\//, '');
+                } else if (post.image) {
+                    articleJson.image = post.image.startsWith('http') ? post.image : siteOrigin + '/' + post.image.replace(/^\//, '');
+                }
+
+                if (schemaEl) {
+                    schemaEl.textContent = JSON.stringify(articleJson);
+                }
+
+                // Ensure canonical URL is set
+                let linkCanonical = document.querySelector("link[rel='canonical']");
+                if (!linkCanonical) {
+                    linkCanonical = document.createElement('link');
+                    linkCanonical.rel = 'canonical';
+                    document.head.appendChild(linkCanonical);
+                }
+                linkCanonical.href = pageUrl.replace(/\?.*$/, '');
+            } catch (e) {
+                console.warn('Failed to populate Article JSON-LD', e);
+            }
             
             // Optimize images in content
             setTimeout(() => {
@@ -222,6 +323,127 @@
                     alert('Link copied to clipboard!');
                 }
             };
+        }
+
+        function generateTOC() {
+            const toc = document.getElementById('post-toc');
+            const content = document.getElementById('post-content');
+            if (!content || !toc) return;
+
+            // Find headings (h2 and h3) inside content
+            const headings = content.querySelectorAll('h2, h3');
+            if (!headings || headings.length === 0) {
+                toc.hidden = true;
+                return;
+            }
+
+            // Build unique IDs for each heading if missing
+            const ids = new Set();
+            headings.forEach((h, i) => {
+                if (!h.id) {
+                    // slugify text
+                    let slug = (h.textContent || 'heading').toLowerCase().trim()
+                        .replace(/[^a-z0-9\s-]/g, '')
+                        .replace(/\s+/g, '-');
+                    let unique = slug;
+                    let idx = 1;
+                    while (ids.has(unique)) {
+                        unique = `${slug}-${idx++}`;
+                    }
+                    ids.add(unique);
+                    h.id = unique;
+                } else {
+                    ids.add(h.id);
+                }
+            });
+
+            // Build nested list (h2 top-level, h3 nested)
+            const list = document.createElement('ul');
+            list.className = 'toc-list';
+
+            let lastLi = null;
+            headings.forEach(h => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = `#${h.id}`;
+                a.textContent = h.textContent;
+                if (h.tagName.toLowerCase() === 'h3') {
+                    const span = document.createElement('span');
+                    span.className = 'toc-sub';
+                    span.appendChild(a);
+                    li.appendChild(span);
+                } else {
+                    li.appendChild(a);
+                }
+                list.appendChild(li);
+                lastLi = li;
+            });
+
+            // Populate TOC nav
+            toc.innerHTML = '';
+                const title = document.createElement('h3');
+                title.textContent = 'Contents';
+                // Create container for list (used by toggle)
+                const listContainer = document.createElement('div');
+                listContainer.id = 'post-toc-list';
+                listContainer.appendChild(list);
+
+                toc.appendChild(title);
+                toc.appendChild(listContainer);
+                toc.hidden = false;
+
+                // Mobile: collapse by default
+                if (window.innerWidth < 980) {
+                    toc.classList.add('collapsed');
+                    const toggle = toc.querySelector('.toc-toggle');
+                    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+                } else {
+                    toc.classList.remove('collapsed');
+                }
+
+                // Setup toggle button behavior
+                const toggleBtn = toc.querySelector('.toc-toggle');
+                if (toggleBtn) {
+                    toggleBtn.onclick = () => {
+                        const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+                        toggleBtn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                        toc.classList.toggle('collapsed');
+                    };
+                }
+
+                // Highlight active section on scroll using IntersectionObserver
+                const anchors = Array.from(toc.querySelectorAll('.toc-list a'));
+                const headingElements = Array.from(document.querySelectorAll('#post-content h2, #post-content h3'));
+
+                // Remove previous observers if any
+                if (window.__tocObserver) {
+                    window.__tocObserver.disconnect();
+                }
+
+                const observerOptions = {root: null, rootMargin: '0px 0px -60% 0px', threshold: 0};
+                window.__tocObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const id = entry.target.id;
+                            anchors.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${id}`));
+                        }
+                    });
+                }, observerOptions);
+
+                headingElements.forEach(h => {
+                    if (h.id) window.__tocObserver.observe(h);
+                });
+
+                // Close TOC on mobile when a link is clicked
+                anchors.forEach(a => {
+                    a.addEventListener('click', () => {
+                        if (window.innerWidth < 980) {
+                            toc.classList.add('collapsed');
+                            const t = toc.querySelector('.toc-toggle');
+                            if (t) t.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                });
         }
         
         async function loadRelatedPosts(category) {

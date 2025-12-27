@@ -1,5 +1,7 @@
 const express = require('express');
 const path = require('path');
+// Load environment variables from project root .env when running backend directly
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const compression = require('compression');
 const helmet = require('helmet');
 const expressStaticGzip = require('express-static-gzip');

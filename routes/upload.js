@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const { uploadPostImage, uploadPostImages, deleteFile, getFileUrl } = require('../middleware/upload');
 const { protect, admin } = require('../middleware/auth');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+
+// Configure cloudinary from environment (CLOUDINARY_URL or individual vars)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const memoryUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 // @route   POST /api/upload/image
 // @desc    Upload single image
@@ -148,6 +159,32 @@ router.get('/list', protect, admin, (req, res) => {
       success: false,
       message: 'Error listing files'
     });
+  }
+});
+
+// @route   POST /api/upload/cloudinary
+// @desc    Upload single image to Cloudinary (server-side, signed)
+// @access  Private/Admin
+router.post('/cloudinary', protect, admin, memoryUpload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+
+    if (!process.env.CLOUDINARY_URL && !(process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET && process.env.CLOUDINARY_CLOUD_NAME)) {
+      return res.status(500).json({ success: false, message: 'Cloudinary not configured on server' });
+    }
+
+    const file = req.file;
+    // Convert buffer to data URI
+    const dataUri = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+
+    const result = await cloudinary.uploader.upload(dataUri, { folder: 'posts' });
+
+    res.json({ success: true, url: result.secure_url, public_id: result.public_id, raw: result });
+  } catch (error) {
+    console.error('Cloudinary upload error:', error);
+    res.status(500).json({ success: false, message: 'Error uploading to Cloudinary', error: error.message });
   }
 });
 

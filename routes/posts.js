@@ -82,11 +82,47 @@ router.get('/:slug', async (req, res) => {
       post
     });
   } catch (error) {
+    // If the post is not in the database, try falling back to a static HTML file
     if (error.message === 'Post not found') {
-      return res.status(404).json({
-        success: false,
-        message: 'Post not found'
-      });
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const slug = req.params.slug;
+        const frontendDir = path.join(__dirname, '..', 'frontend');
+        const staticFile = path.join(frontendDir, `${slug}.html`);
+
+        if (fs.existsSync(staticFile)) {
+          const html = fs.readFileSync(staticFile, 'utf8');
+
+          // Simple extraction heuristics: title from <h1>, article content from <article>...</article>
+          const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+          const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+
+          const postObj = {
+            id: null,
+            slug,
+            title: titleMatch ? titleMatch[1].trim() : slug.replace(/-/g, ' '),
+            excerpt: '',
+            content: articleMatch ? articleMatch[1] : html,
+            category: 'Uncategorized',
+            author_name: 'Smart Money Guide',
+            views: 0,
+            published: true,
+            created_at: fs.statSync(staticFile).mtime.toISOString(),
+            updated_at: fs.statSync(staticFile).mtime.toISOString()
+          };
+
+          // Cache the fallback result for a short time
+          detailCache.set(`post:${slug}`, postObj);
+
+          return res.json({ success: true, post: postObj });
+        }
+
+        return res.status(404).json({ success: false, message: 'Post not found' });
+      } catch (fsErr) {
+        console.error('Error reading static post file fallback:', fsErr);
+        return res.status(500).json({ success: false, message: 'Server error' });
+      }
     }
     
     console.error('Error getting post:', error);
@@ -163,7 +199,8 @@ router.post('/', [
       author_id: req.user.id,
       published: req.body.published !== undefined ? req.body.published : true,
       meta_description: req.body.meta_description || null,
-      keywords: req.body.keywords || null
+      keywords: req.body.keywords || null,
+      image_url: req.body.image_url || null
     });
     
     // Invalidate cache on new post
