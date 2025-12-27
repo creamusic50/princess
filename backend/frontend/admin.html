@@ -5,8 +5,9 @@
      crossorigin="anonymous"></script>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <meta name="robots" content="noindex, nofollow">
+ <meta name="google-site-verification" content="p7ObZPC6DOBVi-AUb8yGPQMlDFuLkMFZvLPv0vvfS8w" />
  <meta name="google-adsense-account" content="ca-pub-4861288278202695">
+ <meta name="robots" content="noindex, nofollow">
  <title>Admin Dashboard - Smart Money Guide</title>
  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
  <style>
@@ -369,6 +370,15 @@
  </small>
  </div>
  
+ <div class="form-group">
+ <label for="post-image"> Feature Image (optional)</label>
+ <input type="file" id="post-image" accept="image/*">
+ <div id="post-image-preview" style="margin-top:10px; display:none;">
+     <img id="post-image-thumb" src="" alt="preview" style="max-width:240px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.08);" />
+ </div>
+ <small style="color:#718096; display:block; margin-top:8px;">Images will be uploaded to Cloudinary CDN. Configure Cloudinary in Settings.</small>
+ </div>
+
  <button id="publish-btn" type="submit" class="btn btn-success"> Publish Post</button>
  <button id="btn-cancel-post" type="button" class="btn" style="background: #a0aec0;"> Cancel</button>
  </form>
@@ -394,6 +404,17 @@
  <div class="form-group">
  <label for="settings-email"> Email</label>
  <input type="email" id="settings-email" placeholder="your@email.com">
+ </div>
+ 
+ <div class="form-group">
+ <label for="cloud-name">Cloudinary Cloud Name</label>
+ <input type="text" id="cloud-name" placeholder="your-cloud-name (e.g. demo)">
+ </div>
+
+ <div class="form-group">
+ <label for="cloud-upload-preset">Cloudinary Upload Preset (unsigned)</label>
+ <input type="text" id="cloud-upload-preset" placeholder="upload_preset">
+ <small style="color:#718096; display:block; margin-top:6px;">Create an unsigned upload preset in your Cloudinary dashboard and paste it here.</small>
  </div>
  
  <div class="form-group">
@@ -597,6 +618,26 @@
                         return;
                     }
 
+                    // If an image file is attached, upload it to Cloudinary first
+                    let imageUrl = null;
+                    try {
+                        const imgInput = document.getElementById('post-image');
+                        const file = imgInput && imgInput.files && imgInput.files[0];
+                        if (file) {
+                            console.log('[ADMIN] Uploading image to Cloudinary...');
+                            imageUrl = await uploadImageToCloudinary(file);
+                            console.log('[ADMIN] Image uploaded:', imageUrl);
+                        }
+                    } catch (uErr) {
+                        console.error('[ADMIN] Image upload failed:', uErr);
+                        showMessage('❌ Image upload failed: ' + (uErr.message || ''), 'error');
+                        if (publishBtn) {
+                            publishBtn.disabled = false;
+                            publishBtn.textContent = originalText;
+                        }
+                        return;
+                    }
+
                     console.log('[ADMIN] Sending fetch request...');
                     const response = await fetch(url, {
                         method,
@@ -609,7 +650,8 @@
                             category, 
                             excerpt, 
                             content, 
-                            published: true 
+                            published: true,
+                            image_url: imageUrl
                         })
                     });
 
@@ -641,6 +683,97 @@
                     console.log('[ADMIN] === PUBLISH HANDLER COMPLETE ===');
                 }
             });
+
+            // Initialize cloudinary settings in modal
+            (function populateCloudinarySettings() {
+                const cloudName = localStorage.getItem('cloudinary.cloudName') || '';
+                const uploadPreset = localStorage.getItem('cloudinary.uploadPreset') || '';
+                const cloudEl = document.getElementById('cloud-name');
+                const presetEl = document.getElementById('cloud-upload-preset');
+                if (cloudEl) cloudEl.value = cloudName;
+                if (presetEl) presetEl.value = uploadPreset;
+            })();
+
+            // Cloudinary upload helper
+            async function uploadImageToCloudinary(file) {
+                // Try Cloudinary signed upload on server first
+                const tokenLocal = localStorage.getItem('token') || localStorage.getItem('authToken');
+
+                // Helper to upload to local server storage (/api/upload/image)
+                async function uploadToLocal(file) {
+                    const fdLocal = new FormData();
+                    // server expects field name 'image' for disk storage middleware
+                    fdLocal.append('image', file);
+                    const respLocal = await fetch(`${API_URL}/upload/image`, {
+                        method: 'POST',
+                        headers: tokenLocal ? { 'x-auth-token': tokenLocal } : {},
+                        body: fdLocal
+                    });
+
+                    if (!respLocal.ok) {
+                        const txt = await respLocal.text();
+                        throw new Error('Local upload failed: ' + txt);
+                    }
+
+                    const d = await respLocal.json();
+                    if (!d.success) throw new Error(d.message || 'Local upload returned error');
+                    // returned url may be relative (/uploads/...), make absolute
+                    const url = d.file && d.file.url ? d.file.url : (d.url || d.secure_url);
+                    if (!url) throw new Error('Local upload did not return a file URL');
+                    return url.startsWith('http') ? url : (window.location.origin.replace(/:\d+$/, ':5000') + url);
+                }
+
+                try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+
+                    const resp = await fetch(`${API_URL}/upload/cloudinary`, {
+                        method: 'POST',
+                        headers: tokenLocal ? { 'x-auth-token': tokenLocal } : {},
+                        body: fd
+                    });
+
+                    // If cloudinary route not configured on server, fallback to local upload
+                    if (!resp.ok) {
+                        let txt;
+                        try { txt = await resp.text(); } catch (e) { txt = ''; }
+                        const lowered = (txt || '').toLowerCase();
+                        if (resp.status === 500 && lowered.includes('cloudinary not configured')) {
+                            console.warn('Cloudinary not configured on server, falling back to local upload');
+                            return await uploadToLocal(file);
+                        }
+                        throw new Error('Server upload failed: ' + txt);
+                    }
+
+                    const data = await resp.json();
+                    if (!data.success) throw new Error(data.message || 'Unknown upload error');
+                    return data.url || data.secure_url || (data.raw && data.raw.secure_url) || null;
+                } catch (err) {
+                    // If cloudinary failed for any reason, attempt local upload as a final fallback
+                    console.warn('Primary upload failed, attempting local upload:', err.message || err);
+                    return await uploadToLocal(file);
+                }
+            }
+
+            // Image input preview handling
+            const postImageInput = document.getElementById('post-image');
+            if (postImageInput) {
+                postImageInput.addEventListener('change', (e) => {
+                    const f = e.target.files && e.target.files[0];
+                    const previewWrap = document.getElementById('post-image-preview');
+                    const thumb = document.getElementById('post-image-thumb');
+                    if (f && thumb) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev) {
+                            thumb.src = ev.target.result;
+                            if (previewWrap) previewWrap.style.display = 'block';
+                        };
+                        reader.readAsDataURL(f);
+                    } else if (previewWrap) {
+                        previewWrap.style.display = 'none';
+                    }
+                });
+            }
         }
 
         // Edit post
@@ -659,6 +792,19 @@
                     
                     // Set textarea content
                     const ed = document.getElementById('post-content'); if (ed) ed.value = post.content || ''; 
+                    // Set existing image preview if available
+                    try {
+                        const thumb = document.getElementById('post-image-thumb');
+                        const previewWrap = document.getElementById('post-image-preview');
+                        if (post.image_url && thumb) {
+                            thumb.src = post.image_url;
+                            if (previewWrap) previewWrap.style.display = 'block';
+                        } else if (previewWrap) {
+                            previewWrap.style.display = 'none';
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
                     
                     document.getElementById('post-form').classList.add('active');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -763,6 +909,12 @@
                     document.getElementById('user-email').textContent = data.user.email;
                     messageDiv.textContent = '✅ Settings updated successfully!';
                     messageDiv.className = 'message success show';
+                    // Save Cloudinary config to localStorage as well
+                    const cloudName = document.getElementById('cloud-name') ? document.getElementById('cloud-name').value : '';
+                    const uploadPreset = document.getElementById('cloud-upload-preset') ? document.getElementById('cloud-upload-preset').value : '';
+                    if (cloudName) localStorage.setItem('cloudinary.cloudName', cloudName);
+                    if (uploadPreset) localStorage.setItem('cloudinary.uploadPreset', uploadPreset);
+
                     setTimeout(() => {
                         closeSettings();
                     }, 2000);
