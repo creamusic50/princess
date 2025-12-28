@@ -240,7 +240,7 @@
  <label>
  <input type="checkbox" id="remember"> Remember me
  </label>
- <a href="#" onclick="alert('Please contact support at contact.html'); return false;">Forgot password?</a>
+ <a href="#" data-action="alert" data-arg-message="Please contact support at contact.html" data-preserve-default="false">Forgot password?</a>
  </div>
  
  <button type="submit" class="btn-submit">Sign In</button>
@@ -324,5 +324,6 @@
             messageDiv.className = `message ${type} show`;
         }
     </script>
+<script src="js/csp-handlers.js" defer></script>
 </body>
 </html>

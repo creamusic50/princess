@@ -271,7 +271,7 @@ function buildPaginationHtml(currentPage, totalPages) {
     
     // Previous button
     if (currentPage > 1) {
-        html += `<button class="page-btn" onclick="goToPage(${currentPage - 1})">← Previous</button>`;
+        html += `<button class="page-btn" data-action="goToPage" data-arg-page="${currentPage - 1}">← Previous</button>`;
     }
     
     // Page number buttons
@@ -280,9 +280,9 @@ function buildPaginationHtml(currentPage, totalPages) {
         const isNearCurrent = (i >= currentPage - 1 && i <= currentPage + 1);
         const isEdge = (i === 1 || i === totalPages);
         
-        if (isEdge || isNearCurrent) {
+            if (isEdge || isNearCurrent) {
             const activeClass = isCurrentPage ? 'active' : '';
-            html += `<button class="page-btn ${activeClass}" onclick="goToPage(${i})">${i}</button>`;
+            html += `<button class="page-btn ${activeClass}" data-action="goToPage" data-arg-page="${i}">${i}</button>`;
         } else if (i === currentPage - 2 || i === currentPage + 2) {
             html += `<span class="page-ellipsis">...</span>`;
         }
@@ -290,7 +290,7 @@ function buildPaginationHtml(currentPage, totalPages) {
     
     // Next button
     if (currentPage < totalPages) {
-        html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})">Next →</button>`;
+        html += `<button class="page-btn" data-action="goToPage" data-arg-page="${currentPage + 1}">Next →</button>`;
     }
     
     return html;
@@ -306,6 +306,9 @@ function goToPage(page) {
     // Load posts for the requested page
     loadPosts(page, currentCategory, currentSearch);
 }
+
+// Expose pagination helper globally for CSP dispatcher
+if (typeof goToPage === 'function') window.goToPage = goToPage;
 
 // ============================================================
 // LOADING & ERROR STATES
@@ -336,7 +339,7 @@ function showError(message) {
         container.innerHTML = `
             <div class="error-message">
                 <p>⚠️ ${escapeHtml(message)}</p>
-                <button onclick="location.reload()">Retry</button>
+                <button data-action="reload">Retry</button>
             </div>
         `;
     }

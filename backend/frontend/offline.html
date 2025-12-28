@@ -14,7 +14,7 @@
  <div class="offline-icon"></div>
  <h1>You're Offline</h1>
  <p>It looks like you've lost your internet connection. Don't worry, you can still browse cached pages!</p>
- <a href="/" class="btn" onclick="window.location.reload(); return false;">Try Again</a>
+ <a href="#" class="btn" data-action="reload">Try Again</a>
  
  <div class="tips">
  <h2> Quick Tips:</h2>
@@ -43,5 +43,6 @@
             });
         }
     </script>
+    <script src="js/csp-handlers.js" defer></script>
 </body>
 </html>

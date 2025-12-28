@@ -10,6 +10,20 @@ let currentEditPostId = null;
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     setupEventListeners();
+    // Expose admin functions to window for CSP dispatcher compatibility (backend copy)
+    try {
+        if (typeof editPost === 'function') window.editPost = editPost;
+        if (typeof deletePost === 'function') window.deletePost = deletePost;
+        if (typeof loadPosts === 'function') window.loadPosts = loadPosts;
+        if (typeof loadStats === 'function') window.loadStats = loadStats;
+        if (typeof handleLogout === 'function') window.logout = handleLogout;
+        if (typeof showNewPostForm === 'function') window.showNewPostForm = showNewPostForm;
+        if (typeof hidePostForm === 'function') window.hidePostForm = hidePostForm;
+        if (typeof openSettings === 'function') window.openSettings = openSettings;
+        if (typeof closeSettings === 'function') window.closeSettings = closeSettings;
+    } catch (e) {
+        console.warn('Error exposing admin globals', e);
+    }
 });
 
 // Check if user is authenticated

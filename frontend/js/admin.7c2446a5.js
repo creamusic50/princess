@@ -224,8 +224,8 @@ function displayAdminPosts(posts) {
                 </div>
             </div>
             <div class="post-actions">
-                <button class="btn btn-edit" onclick="editPost('${post._id}')">Edit</button>
-                <button class="btn btn-delete" onclick="deletePost('${post._id}')">Delete</button>
+                <button class="btn btn-edit" data-action="editPost" data-arg-id="${post._id}">Edit</button>
+                <button class="btn btn-delete" data-action="deletePost" data-arg-id="${post._id}">Delete</button>
             </div>
         </div>
     `).join('');

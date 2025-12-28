@@ -10,6 +10,21 @@ let currentEditPostId = null;
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     setupEventListeners();
+        // Expose admin functions to window for CSP dispatcher compatibility
+        try {
+            if (typeof editPost === 'function') window.editPost = editPost;
+            if (typeof deletePost === 'function') window.deletePost = deletePost;
+            if (typeof loadPosts === 'function') window.loadPosts = loadPosts;
+            if (typeof loadStats === 'function') window.loadStats = loadStats;
+            if (typeof handleLogout === 'function') window.logout = handleLogout;
+            // modal/show helpers (if present)
+            if (typeof showNewPostForm === 'function') window.showNewPostForm = showNewPostForm;
+            if (typeof hidePostForm === 'function') window.hidePostForm = hidePostForm;
+            if (typeof openSettings === 'function') window.openSettings = openSettings;
+            if (typeof closeSettings === 'function') window.closeSettings = closeSettings;
+        } catch (e) {
+            console.warn('Error exposing admin globals', e);
+        }
 });
 
 // Check if user is authenticated
@@ -280,8 +295,8 @@ function displayAdminPosts(posts) {
                 </div>
             </div>
             <div class="post-actions">
-                <button class="btn btn-edit" onclick="editPost('${post._id}')">Edit</button>
-                <button class="btn btn-delete" onclick="deletePost('${post._id}')">Delete</button>
+                <button class="btn btn-edit" data-action="editPost" data-arg-id="${post._id}">Edit</button>
+                <button class="btn btn-delete" data-action="deletePost" data-arg-id="${post._id}">Delete</button>
             </div>
         </div>
     `).join('');

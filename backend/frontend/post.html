@@ -67,9 +67,14 @@
         }
     </style>
  
- <!-- Load fonts asynchronously -->
- <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" media="print" onload="this.media='all'">
- <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap"></noscript>
+<!-- Load fonts -->
+ <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
+ <!-- Load Lora for article typography (server-side) -->
+ <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap">
+ <noscript>
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
+     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400;1,700&display=swap">
+ </noscript>
  
  <!-- Load main stylesheet -->
  <link rel="stylesheet" href="css/style.6205c462.css">
@@ -142,7 +147,7 @@
  <div class="post-footer">
  <div class="post-tags" id="post-tags"></div>
  <div class="post-actions">
- <button class="action-btn" onclick="window.history.back()" aria-label="Go back">← Back</button>
+ <button class="action-btn" id="back-btn" aria-label="Go back">← Back</button>
  <button class="action-btn" id="share-btn" aria-label="Share article">Share </button>
  </div>
  </div>
@@ -236,6 +241,9 @@
                 showError('Failed to load article');
             }
         });
+        // Attach back button handler (CSP-safe)
+        const backBtn = document.getElementById('back-btn');
+        if (backBtn) backBtn.addEventListener('click', () => window.history.back());
         
         function displayPost(post) {
             document.getElementById('page-title').textContent = `${post.title} - Smart Money Guide`;
@@ -435,8 +443,22 @@
                 });
 
                 // Close TOC on mobile when a link is clicked
+                // Also perform smooth scroll with offset so headings are visible below sticky header
                 anchors.forEach(a => {
-                    a.addEventListener('click', () => {
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const href = a.getAttribute('href');
+                        const id = href && href.startsWith('#') ? href.slice(1) : null;
+                        const target = id ? document.getElementById(id) : null;
+                        const header = document.querySelector('header');
+                        const headerOffset = header ? header.offsetHeight + 16 : 110; // extra gap
+                        if (target) {
+                            const top = target.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+                            window.scrollTo({ top, behavior: 'smooth' });
+                            // update hash without jumping
+                            try { history.replaceState(null, '', '#' + id); } catch (e) {}
+                        }
+
                         if (window.innerWidth < 980) {
                             toc.classList.add('collapsed');
                             const t = toc.querySelector('.toc-toggle');
@@ -470,12 +492,20 @@
         }
         
         function showError(message) {
-            document.getElementById('post-content').innerHTML = `
-                <div class="error">
-                    <p>⚠️ ${message}</p>
-                    <button onclick="window.location.href='index.html'">Go Home</button>
-                </div>
-            `;
+            const container = document.getElementById('post-content');
+            container.innerHTML = '';
+            const wrap = document.createElement('div');
+            wrap.className = 'error';
+            const p = document.createElement('p');
+            p.textContent = '⚠️ ' + message;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-primary';
+            btn.textContent = 'Go Home';
+            btn.addEventListener('click', function() { window.location.href = 'index.html'; });
+            wrap.appendChild(p);
+            wrap.appendChild(btn);
+            container.appendChild(wrap);
         }
     </script>
  
@@ -506,5 +536,6 @@
             });
         });
     </script>
+<script src="js/csp-handlers.js" defer></script>
 </body>
 </html>

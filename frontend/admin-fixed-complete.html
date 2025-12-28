@@ -301,8 +301,8 @@
  <h1>️ Admin Dashboard</h1>
  <div class="user-info">
  <span id="user-email" style="font-weight: 500;">Loading...</span>
- <button onclick="openSettings()" class="settings-btn">️ Settings</button>
- <button onclick="logout()" class="logout-btn"> Logout</button>
+ <button data-action="openSettings" class="settings-btn">️ Settings</button>
+ <button data-action="logout" class="logout-btn"> Logout</button>
  </div>
  </div>
  </div>
@@ -331,8 +331,8 @@
 
  <div class="actions-panel">
  <h2> Quick Actions</h2>
- <button onclick="showNewPostForm()" class="btn btn-success"> New Post</button>
- <button onclick="loadPosts()" class="btn"> Refresh Posts</button>
+ <button data-action="showNewPostForm" class="btn btn-success"> New Post</button>
+ <button data-action="loadPosts" class="btn"> Refresh Posts</button>
  <a href="index.html" class="btn" target="_blank">️ View Website</a>
  </div>
 
@@ -373,7 +373,7 @@
  </div>
  
  <button id="publish-btn" type="submit" class="btn btn-success"> Publish Post</button>
- <button type="button" onclick="hidePostForm()" class="btn" style="background: #a0aec0;"> Cancel</button>
+ <button type="button" data-action="hidePostForm" class="btn" style="background: #a0aec0;"> Cancel</button>
  </form>
  </div>
 
@@ -388,7 +388,7 @@
  <!-- Settings Modal -->
  <div id="settings-modal" class="modal">
  <div class="modal-content">
- <span class="close" onclick="closeSettings()">&times;</span>
+ <span class="close" data-action="closeSettings">&times;</span>
  <h2 style="margin-bottom: 25px; color: #2d3748; font-weight: 600;">️ Account Settings</h2>
  
  <div id="settings-message" class="message"></div>
@@ -415,7 +415,7 @@
  </div>
  
  <button type="submit" class="btn btn-success"> Save Changes</button>
- <button type="button" onclick="closeSettings()" class="btn" style="background: #a0aec0;">Cancel</button>
+ <button type="button" data-action="closeSettings" class="btn" style="background: #a0aec0;">Cancel</button>
  </form>
  </div>
  </div>
@@ -505,8 +505,8 @@
                                 </p>
                             </div>
                             <div class="post-actions">
-                                <button class="btn-edit" onclick="editPost(${post.id})">✏️ Edit</button>
-                                <button class="btn-delete" onclick="deletePost(${post.id}, '${escapeHtml(post.title).replace(/'/g, "\\'")}')">🗑️ Delete</button>
+                                <button class="btn-edit" data-action="editPost" data-arg-id="${post.id}">✏️ Edit</button>
+                                <button class="btn-delete" data-action="deletePost" data-arg-id="${post.id}" data-arg-title="${escapeHtml(post.title).replace(/'/g, "\\'")}">🗑️ Delete</button>
                             </div>
                         </div>
                     `).join('');
@@ -790,5 +790,6 @@
         // Initialize
         checkAuth();
     </script>
+    <script src="js/csp-handlers.js" defer></script>
 </body>
 </html>

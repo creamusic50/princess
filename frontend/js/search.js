@@ -137,13 +137,13 @@ class Search {
         const html = `
             <div class="search-result-header">
                 <h4>Recent Searches</h4>
-                <button class="search-clear-recent" onclick="search.clearRecentSearches()">Clear</button>
+                <button class="search-clear-recent" data-action="search.clearRecentSearches">Clear</button>
             </div>
             ${recentSearches.map(term => `
-                <div class="search-recent-item" onclick="search.setSearchTerm('${this.escapeHtml(term)}')">
+                <div class="search-recent-item" data-action="search.setSearchTerm" data-arg-term="${this.escapeHtml(term)}">
                     <span class="search-recent-icon">🔍</span>
                     <span class="search-recent-term">${this.escapeHtml(term)}</span>
-                    <button class="search-recent-remove" onclick="event.stopPropagation(); search.removeRecentSearch('${this.escapeHtml(term)}')">×</button>
+                    <button class="search-recent-remove" data-action="search.removeRecentSearch" data-arg-term="${this.escapeHtml(term)}" data-stop-propagation="true">×</button>
                 </div>
             `).join('')}
         `;

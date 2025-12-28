@@ -319,10 +319,10 @@ function displayPosts(posts) {
             </td>
             <td><strong>${post.views || 0}</strong> views</td>
             <td>
-                <button class="btn btn-sm btn-primary" onclick="editPost(${post.id})" title="Edit Post">
+                <button class="btn btn-sm btn-primary" data-action="editPost" data-arg-id="${post.id}" title="Edit Post">
                     ✏️ Edit
                 </button>
-                <button class="btn btn-sm btn-danger" onclick="deletePost(${post.id})" title="Delete Post">
+                <button class="btn btn-sm btn-danger" data-action="deletePost" data-arg-id="${post.id}" title="Delete Post">
                     🗑️ Delete
                 </button>
             </td>

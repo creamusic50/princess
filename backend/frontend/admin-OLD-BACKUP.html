@@ -195,7 +195,7 @@
  <h1>️ Admin Dashboard</h1>
  <div class="user-info">
  <span id="user-email">Loading...</span>
- <button onclick="logout()" class="logout-btn">Logout</button>
+ <button data-action="logout" class="logout-btn">Logout</button>
  </div>
  </div>
  </div>
@@ -224,8 +224,8 @@
 
  <div class="actions-panel">
  <h2>Quick Actions</h2>
- <button onclick="showNewPostForm()" class="btn btn-success"> New Post</button>
- <button onclick="loadPosts()" class="btn"> Refresh Posts</button>
+ <button data-action="showNewPostForm" class="btn btn-success"> New Post</button>
+ <button data-action="loadPosts" class="btn"> Refresh Posts</button>
  <a href="index.html" class="btn" target="_blank">️ View Website</a>
  </div>
 
@@ -264,7 +264,7 @@
  </div>
  
  <button id="publish-btn" type="submit" class="btn btn-success">Publish Post</button>
- <button type="button" onclick="hidePostForm()" class="btn" style="background: #95a5a6;">Cancel</button>
+ <button type="button" data-action="hidePostForm" class="btn" style="background: #95a5a6;">Cancel</button>
  </form>
  </div>
 
@@ -414,8 +414,8 @@
                                 <p>${post.category} | ${post.views || 0} views | ${new Date(post.created_at).toLocaleDateString()}</p>
                             </div>
                             <div class="post-actions">
-                                <button class="btn-edit" onclick="editPost(${post.id})">Edit</button>
-                                <button class="btn-delete" onclick="deletePost(${post.id}, '${escapeHtml(post.title)}')">Delete</button>
+                                <button class="btn-edit" data-action="editPost" data-arg-id="${post.id}">Edit</button>
+                                <button class="btn-delete" data-action="deletePost" data-arg-id="${post.id}" data-arg-title="${escapeHtml(post.title)}">Delete</button>
                             </div>
                         </div>
                     `).join('');

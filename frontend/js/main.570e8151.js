@@ -209,7 +209,7 @@ function updatePagination(currentPage, totalPages) {
     
     // Previous button
     if (currentPage > 1) {
-        html += `<button class="page-btn" onclick="goToPage(${currentPage - 1})">← Previous</button>`;
+        html += `<button class="page-btn" data-action="goToPage" data-arg-page="${currentPage - 1}">← Previous</button>`;
     }
     
     // Page numbers
@@ -219,7 +219,7 @@ function updatePagination(currentPage, totalPages) {
             i === totalPages || 
             (i >= currentPage - 1 && i <= currentPage + 1)
         ) {
-            html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-action="goToPage" data-arg-page="${i}">${i}</button>`;
         } else if (i === currentPage - 2 || i === currentPage + 2) {
             html += `<span class="page-ellipsis">...</span>`;
         }
@@ -227,7 +227,7 @@ function updatePagination(currentPage, totalPages) {
     
     // Next button
     if (currentPage < totalPages) {
-        html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})">Next →</button>`;
+        html += `<button class="page-btn" data-action="goToPage" data-arg-page="${currentPage + 1}">Next →</button>`;
     }
     
     container.innerHTML = html;
