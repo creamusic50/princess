@@ -375,6 +375,10 @@
  <input type="file" id="post-image" accept="image/*">
  <div id="post-image-preview" style="margin-top:10px; display:none;">
      <img id="post-image-thumb" src="" alt="preview" style="max-width:240px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.08);" />
+     <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+         <button id="copy-image-url-btn" type="button" class="btn" style="padding:6px 10px; display:none;">📋 Copy image address</button>
+         <span id="copy-image-url-status" style="color:#4a5568; font-size:12px; display:none;">Copied!</span>
+     </div>
  </div>
  <small style="color:#718096; display:block; margin-top:8px;">Images will be uploaded to Cloudinary CDN. Configure Cloudinary in Settings.</small>
  </div>
@@ -446,6 +450,8 @@
         // Read token from both current and legacy keys
         let token = localStorage.getItem('token') || localStorage.getItem('authToken');
         let currentUser = null;
+        // lastUploadedImageUrl holds the final URL returned by the server for the uploaded image
+        let lastUploadedImageUrl = null;
 
         // Check authentication
         async function checkAuth() {
@@ -627,6 +633,18 @@
                             console.log('[ADMIN] Uploading image to Cloudinary...');
                             imageUrl = await uploadImageToCloudinary(file);
                             console.log('[ADMIN] Image uploaded:', imageUrl);
+                            // store and update preview to final URL when available
+                            lastUploadedImageUrl = imageUrl || null;
+                            try {
+                                const thumb = document.getElementById('post-image-thumb');
+                                const previewWrap = document.getElementById('post-image-preview');
+                                const copyBtn = document.getElementById('copy-image-url-btn');
+                                if (lastUploadedImageUrl && thumb) {
+                                    thumb.src = lastUploadedImageUrl;
+                                    if (previewWrap) previewWrap.style.display = 'block';
+                                    if (copyBtn) copyBtn.style.display = 'inline-block';
+                                }
+                            } catch (e) { /* ignore */ }
                         }
                     } catch (uErr) {
                         console.error('[ADMIN] Image upload failed:', uErr);
@@ -767,6 +785,9 @@
                         reader.onload = function(ev) {
                             thumb.src = ev.target.result;
                             if (previewWrap) previewWrap.style.display = 'block';
+                            // clear any previous uploaded URL until upload completes
+                            lastUploadedImageUrl = null;
+                            const copyBtn = document.getElementById('copy-image-url-btn'); if (copyBtn) copyBtn.style.display = 'none';
                         };
                         reader.readAsDataURL(f);
                     } else if (previewWrap) {
@@ -798,6 +819,8 @@
                         const previewWrap = document.getElementById('post-image-preview');
                         if (post.image_url && thumb) {
                             thumb.src = post.image_url;
+                            lastUploadedImageUrl = post.image_url;
+                            const copyBtn = document.getElementById('copy-image-url-btn'); if (copyBtn) copyBtn.style.display = 'inline-block';
                             if (previewWrap) previewWrap.style.display = 'block';
                         } else if (previewWrap) {
                             previewWrap.style.display = 'none';
@@ -1010,6 +1033,22 @@
                 });
             }
         }
+            // Copy image URL button handler
+            const copyBtn = document.getElementById('copy-image-url-btn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', async () => {
+                    try {
+                        const thumb = document.getElementById('post-image-thumb');
+                        const status = document.getElementById('copy-image-url-status');
+                        const urlToCopy = lastUploadedImageUrl || (thumb && thumb.src) || '';
+                        if (!urlToCopy) return;
+                        await navigator.clipboard.writeText(urlToCopy);
+                        if (status) { status.style.display = 'inline'; setTimeout(() => { status.style.display = 'none'; }, 1600); }
+                    } catch (e) {
+                        console.warn('Copy failed', e);
+                    }
+                });
+            }
 
         // Initialize
         // Attach handlers before auth check so listeners remain even if checkAuth redirects

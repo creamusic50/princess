@@ -61,6 +61,36 @@ router.get('/', async (req, res) => {
 // @route   GET /api/posts/:slug
 // @desc    Get single post by slug
 // @access  Public
+// NOTE: Add numeric-id route above so requests like /api/posts/79 are handled as IDs
+router.get('/:id(\\d+)', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const cacheKey = `post:id:${id}`;
+
+    let post = detailCache.get(cacheKey);
+    if (!post) {
+      post = await Post.findById(id);
+      if (!post || !post.published) return res.status(404).json({ success: false, message: 'Post not found' });
+
+      // Try incrementing view count by id (best-effort)
+      try {
+        const db = require('../config/database');
+        await db.query('UPDATE posts SET views = views + 1 WHERE id = $1', [id]);
+      } catch (e) {
+        console.warn('Failed to increment view for id', id, e && e.message);
+      }
+
+      detailCache.set(cacheKey, post);
+    }
+
+    res.set('Cache-Control', 'public, max-age=600, s-maxage=1200');
+    return res.json({ success: true, post });
+  } catch (error) {
+    console.error(`Error getting post by id ${req.params.id}:`, error.stack || error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 router.get('/:slug', async (req, res) => {
   try {
     const cacheKey = `post:${req.params.slug}`;
@@ -242,17 +272,19 @@ router.post('/', [
       post
     });
   } catch (error) {
-    if (error.message.includes('already exists')) {
-      return res.status(400).json({
-        success: false,
-        message: error.message
-      });
+    if (error.message && error.message.includes('already exists')) {
+      return res.status(400).json({ success: false, message: error.message });
     }
-    
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+
+    // Log full error for debugging
+    console.error('Error creating post:', error.stack || error);
+
+    // In development, return the error message to help debugging
+    if (process.env.NODE_ENV !== 'production') {
+      return res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -317,31 +349,95 @@ router.put('/:id', [
 // @access  Private/Admin
 router.delete('/:id', protect, admin, async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
-    
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: 'Post not found'
-      });
+    const id = parseInt(req.params.id, 10);
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid post id' });
     }
-    
-    await Post.delete(req.params.id);
-    
+
+    // Verify existence
+    let post;
+    try {
+      post = await Post.findById(id);
+    } catch (err) {
+      if (err && err.message === 'Post not found') {
+        // Idempotent delete: treat missing post as success so UI won't show stale items
+        console.log(`Delete requested for missing post id=${id} — treating as success`);
+        // Flush caches in case stale data remains
+        postCache.flush();
+        detailCache.flush();
+        return res.json({ success: true, message: 'Post already removed' });
+      }
+      console.error(`Error finding post id=${id}:`, err.stack || err);
+      return res.status(500).json({ success: false, message: 'Server error finding post' });
+    }
+
+    // Attempt delete
+    try {
+      await Post.delete(id);
+    } catch (delErr) {
+      console.error(`Error deleting post id=${id}:`, delErr.stack || delErr);
+      // If foreign key or other DB constraint, surface a helpful message
+      if (delErr.code) {
+        return res.status(500).json({ success: false, message: `Database error (${delErr.code})` });
+      }
+      return res.status(500).json({ success: false, message: 'Server error deleting post' });
+    }
+
+    // Cleanup static fallback files and local uploads if present
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const uploadMiddleware = require('../middleware/upload');
+
+      const slug = post.slug || null;
+      if (slug) {
+        // possible static file locations
+        const possiblePaths = [
+          path.join(__dirname, '..', 'frontend', `${slug}.html`),
+          path.join(__dirname, '..', 'frontend', slug, 'index.html'),
+          path.join(__dirname, '..', 'backend', 'frontend', `${slug}.html`),
+          path.join(__dirname, '..', 'backend', 'frontend', slug, 'index.html')
+        ];
+
+        possiblePaths.forEach(p => {
+          try {
+            if (fs.existsSync(p)) {
+              fs.unlinkSync(p);
+              console.log('Deleted static fallback file:', p);
+            }
+          } catch (e) {
+            console.warn('Failed to delete static file', p, e && e.message);
+          }
+        });
+      }
+
+      // If the post had a local upload image (e.g. /uploads/filename), delete that file
+      if (post.image_url && typeof post.image_url === 'string') {
+        const img = post.image_url;
+        // If URL contains '/uploads/' assume local file
+        const idx = img.indexOf('/uploads/');
+        if (idx !== -1) {
+          const filename = path.basename(img);
+          try {
+            const deleted = uploadMiddleware.deleteFile(filename);
+            if (deleted) console.log('Deleted uploaded image for post:', filename);
+          } catch (e) {
+            console.warn('Failed to delete uploaded image file', filename, e && e.message);
+          }
+        }
+      }
+    } catch (cleanupErr) {
+      console.warn('Post delete cleanup encountered errors:', cleanupErr && cleanupErr.message);
+    }
+
     // Invalidate cache on delete
     postCache.flush();
     detailCache.flush();
-    
-    res.json({
-      success: true,
-      message: 'Post deleted successfully'
-    });
+
+    res.json({ success: true, message: 'Post deleted successfully' });
   } catch (error) {
-    console.error('Error deleting post:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    console.error('Unexpected error in delete route:', error.stack || error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

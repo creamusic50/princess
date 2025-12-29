@@ -60,7 +60,7 @@ class Post {
       
       // Ensure deployments can opt-in to storing an image URL.
       // Insert core columns + optional image_url support.
-      const sql = `
+      const sqlWithImage = `
         INSERT INTO posts (
           title, slug, category, excerpt, content, 
           author_id, published, image_url
@@ -69,12 +69,32 @@ class Post {
         RETURNING *
       `;
 
-      const result = await query(sql, [
-        title, slug, category, excerpt, content, 
-        author_id, published, image_url
-      ]);
-      
-      return result.rows[0];
+      try {
+        const result = await query(sqlWithImage, [
+          title, slug, category, excerpt, content, 
+          author_id, published, image_url
+        ]);
+        return result.rows[0];
+      } catch (err) {
+        // If image_url column doesn't exist, retry without it (defensive)
+        if (err.message && err.message.toLowerCase().includes('image_url')) {
+          const sql = `
+            INSERT INTO posts (
+              title, slug, category, excerpt, content, 
+              author_id, published
+            ) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7) 
+            RETURNING *
+          `;
+
+          const result = await query(sql, [
+            title, slug, category, excerpt, content,
+            author_id, published
+          ]);
+          return result.rows[0];
+        }
+        throw err;
+      }
     } catch (error) {
       if (error.code === '23505') { // Unique violation
         throw new Error('Slug already exists, try a different title');
@@ -296,9 +316,18 @@ class Post {
       }
 
       if (updates.image_url !== undefined) {
-        fields.push(`image_url = $${paramCount}`);
-        values.push(updates.image_url || null);
-        paramCount++;
+        // Add image_url only if the column exists (defensive)
+        try {
+          const colCheck = await query("SELECT column_name FROM information_schema.columns WHERE table_name='posts' AND column_name='image_url'");
+          if (colCheck && colCheck.rows && colCheck.rows.length > 0) {
+            fields.push(`image_url = $${paramCount}`);
+            values.push(updates.image_url || null);
+            paramCount++;
+          }
+        } catch (e) {
+          // ignore and continue without image_url
+          console.warn('Could not verify image_url column existence, skipping image update', e && e.message);
+        }
       }
       
       fields.push(`updated_at = CURRENT_TIMESTAMP`);

@@ -1,6 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
+const fs = require('fs');
+const path = require('path');
+
+const SETTINGS_FILE = path.join(__dirname, '..', 'data', 'site-settings.json');
+
+function readSettings() {
+  try {
+    if (!fs.existsSync(SETTINGS_FILE)) return {};
+    const raw = fs.readFileSync(SETTINGS_FILE, 'utf8');
+    return JSON.parse(raw || '{}');
+  } catch (e) {
+    console.error('Error reading settings:', e);
+    return {};
+  }
+}
 
 // @route   GET /api/meta/stats
 // @desc    Get website statistics
@@ -98,3 +113,14 @@ router.get('/sitemap', async (req, res) => {
 });
 
 module.exports = router;
+
+// Public endpoint to expose GA Measurement ID for public pages
+router.get('/ga', (req, res) => {
+  try {
+    const settings = readSettings();
+    res.json({ success: true, measurementId: settings.gaMeasurementId || null });
+  } catch (e) {
+    console.error('Error reading GA setting (meta):', e);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});

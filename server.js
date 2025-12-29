@@ -205,6 +205,23 @@ app.get('/ads.txt', (req, res) => {
 const frontendPath = path.join(__dirname, 'frontend');
 console.log('📁 Serving frontend from:', frontendPath);
 
+// Backwards-compat: serve SVG logo when legacy PNG path is requested
+// Many HTML files reference /images/logo.png; if the PNG is missing we
+// return the SVG logo so pages display correctly without changing HTML.
+app.get('/images/logo.png', (req, res) => {
+  const svgPath1 = path.join(frontendPath, 'images', 'logo.svg');
+  const svgPath2 = path.join(__dirname, 'backend', 'frontend', 'images', 'logo.svg');
+  // Prefer frontend/images logo, fallback to backend/frontend/images
+  const servePath = require('fs').existsSync(svgPath1) ? svgPath1 : svgPath2;
+  if (servePath) {
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Cache-Control', 'public, max-age=604800');
+    return res.sendFile(servePath);
+  }
+  // Let static middleware handle it (will likely return index.html)
+  return res.status(404).send('Not found');
+});
+
 // Static file serving with optimized cache headers
 app.use(express.static(frontendPath, {
   maxAge: '0', // We'll set this per-file type

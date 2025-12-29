@@ -375,6 +375,10 @@
  <input type="file" id="post-image" accept="image/*">
  <div id="post-image-preview" style="margin-top:10px; display:none;">
      <img id="post-image-thumb" src="" alt="preview" style="max-width:240px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.08);" />
+     <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+         <button id="copy-image-url-btn" type="button" class="btn" style="padding:6px 10px; display:none;">📋 Copy image address</button>
+         <span id="copy-image-url-status" style="color:#4a5568; font-size:12px; display:none;">Copied!</span>
+     </div>
  </div>
  <small style="color:#718096; display:block; margin-top:8px;">Images will be uploaded to Cloudinary CDN. Configure Cloudinary in Settings.</small>
  </div>
@@ -418,6 +422,12 @@
  </div>
  
  <div class="form-group">
+ <label for="ga-measurement-id">Google Analytics Measurement ID (GA4)</label>
+ <input type="text" id="ga-measurement-id" placeholder="G-XXXXXXXXXX">
+ <small style="color:#718096; display:block; margin-top:6px;">Enter your GA4 Measurement ID (starts with G-). This will load gtag.js for the admin panel only.</small>
+ </div>
+ 
+ <div class="form-group">
  <label for="current-password"> Current Password (required to change)</label>
  <input type="password" id="current-password" placeholder="Enter current password">
  </div>
@@ -446,6 +456,8 @@
         // Read token from both current and legacy keys
         let token = localStorage.getItem('token') || localStorage.getItem('authToken');
         let currentUser = null;
+        // lastUploadedImageUrl holds the final URL returned by the server for the uploaded image
+        let lastUploadedImageUrl = null;
 
         // Check authentication
         async function checkAuth() {
@@ -493,16 +505,25 @@
             }
         }
 
-        // Load all posts
+        // Load all posts (use admin endpoint when authenticated to reflect drafts/deletes)
         async function loadPosts() {
             const container = document.getElementById('posts-container');
             container.innerHTML = '<p style="text-align: center; padding: 20px;">Loading...</p>';
 
             try {
-                const response = await fetch(`${API_URL}/posts?page=1&limit=100`);
+                const tokenLocal = localStorage.getItem('token') || localStorage.getItem('authToken');
+                let response;
+                if (tokenLocal) {
+                    response = await fetch(`${API_URL}/admin/posts?page=1&limit=200`, {
+                        headers: { 'x-auth-token': tokenLocal }
+                    });
+                } else {
+                    response = await fetch(`${API_URL}/posts?page=1&limit=100`);
+                }
+
                 const data = await response.json();
 
-                if (data.success && data.posts.length > 0) {
+                if (data.success && data.posts && data.posts.length > 0) {
                     document.getElementById('total-posts').textContent = data.total || data.posts.length;
                     document.getElementById('published-posts').textContent = data.posts.filter(p => p.published).length;
                     
@@ -535,6 +556,26 @@
                 console.error('Error loading posts:', error);
                 container.innerHTML = '<p style="text-align: center; padding: 20px; color: #f56565;">Error loading posts.</p>';
             }
+            // Also refresh summary stats
+            loadStats();
+        }
+
+        // Load dashboard summary stats
+        async function loadStats() {
+            try {
+                const resp = await fetch(`${API_URL}/meta/stats`);
+                if (!resp.ok) return;
+                const d = await resp.json();
+                if (!d.success) return;
+                const s = d.stats;
+                if (!s) return;
+                document.getElementById('total-posts').textContent = s.total_posts || document.getElementById('total-posts').textContent;
+                document.getElementById('published-posts').textContent = s.published_posts || document.getElementById('published-posts').textContent;
+                document.getElementById('total-views').textContent = s.total_views || document.getElementById('total-views').textContent;
+                document.getElementById('total-categories').textContent = s.unique_categories || document.getElementById('total-categories').textContent;
+            } catch (e) {
+                // ignore
+            }
         }
 
         // Show new post form
@@ -556,7 +597,7 @@
             document.getElementById('post-form').classList.remove('active');
         }
 
-        // Create/Update post form submit
+            // Create/Update post form submit
         function registerFormHandler() {
             const formEl = document.getElementById('create-post-form');
             if (!formEl) return console.warn('Create post form not found');
@@ -627,6 +668,18 @@
                             console.log('[ADMIN] Uploading image to Cloudinary...');
                             imageUrl = await uploadImageToCloudinary(file);
                             console.log('[ADMIN] Image uploaded:', imageUrl);
+                            // store and update preview to final URL when available
+                            lastUploadedImageUrl = imageUrl || null;
+                            try {
+                                const thumb = document.getElementById('post-image-thumb');
+                                const previewWrap = document.getElementById('post-image-preview');
+                                const copyBtn = document.getElementById('copy-image-url-btn');
+                                if (lastUploadedImageUrl && thumb) {
+                                    thumb.src = lastUploadedImageUrl;
+                                    if (previewWrap) previewWrap.style.display = 'block';
+                                    if (copyBtn) copyBtn.style.display = 'inline-block';
+                                }
+                            } catch (e) { /* ignore */ }
                         }
                     } catch (uErr) {
                         console.error('[ADMIN] Image upload failed:', uErr);
@@ -667,6 +720,8 @@
                         document.getElementById('post-content').value = '';
                         hidePostForm();
                         loadPosts();
+                        // Refresh dashboard stats after publish
+                        loadStats();
                     } else {
                         console.error('[ADMIN] Server rejected:', data);
                         showMessage((data && data.message) || '❌ Failed to save post', 'error');
@@ -767,6 +822,9 @@
                         reader.onload = function(ev) {
                             thumb.src = ev.target.result;
                             if (previewWrap) previewWrap.style.display = 'block';
+                            // clear any previous uploaded URL until upload completes
+                            lastUploadedImageUrl = null;
+                            const copyBtn = document.getElementById('copy-image-url-btn'); if (copyBtn) copyBtn.style.display = 'none';
                         };
                         reader.readAsDataURL(f);
                     } else if (previewWrap) {
@@ -798,6 +856,8 @@
                         const previewWrap = document.getElementById('post-image-preview');
                         if (post.image_url && thumb) {
                             thumb.src = post.image_url;
+                            lastUploadedImageUrl = post.image_url;
+                            const copyBtn = document.getElementById('copy-image-url-btn'); if (copyBtn) copyBtn.style.display = 'inline-block';
                             if (previewWrap) previewWrap.style.display = 'block';
                         } else if (previewWrap) {
                             previewWrap.style.display = 'none';
@@ -826,13 +886,20 @@
                     headers: { 'x-auth-token': tokenLocal }
                 });
 
-                const data = await response.json();
+                let data = null;
+                try { data = await response.json(); } catch (e) { data = null; }
 
-                if (data.success) {
+                if (response.status === 404) {
+                    showMessage('❌ Post not found (may have already been removed). Refreshing list...', 'error');
+                    loadPosts();
+                    return;
+                }
+
+                if (response.ok && data && data.success) {
                     showMessage('✅ Post deleted successfully!', 'success');
                     loadPosts();
                 } else {
-                    showMessage(data.message || '❌ Error deleting post', 'error');
+                    showMessage((data && data.message) || '❌ Error deleting post', 'error');
                 }
             } catch (error) {
                 console.error('Error deleting post:', error);
@@ -841,9 +908,25 @@
         }
 
         // Settings
-        function openSettings() {
+        async function openSettings() {
             if (currentUser) {
                 document.getElementById('settings-email').value = currentUser.email;
+            }
+            // Populate GA measurement ID from server (admin-only)
+            try {
+                const tokenLocal = localStorage.getItem('token') || localStorage.getItem('authToken');
+                const gaField = document.getElementById('ga-measurement-id');
+                if (gaField && tokenLocal) {
+                    const resp = await fetch(`${API_URL}/admin/ga`, {
+                        headers: { 'x-auth-token': tokenLocal }
+                    });
+                    if (resp.ok) {
+                        const d = await resp.json();
+                        if (d && d.success) gaField.value = d.measurementId || '';
+                    }
+                }
+            } catch (e) {
+                // ignore
             }
             document.getElementById('settings-modal').style.display = 'block';
         }
@@ -914,6 +997,23 @@
                     const uploadPreset = document.getElementById('cloud-upload-preset') ? document.getElementById('cloud-upload-preset').value : '';
                     if (cloudName) localStorage.setItem('cloudinary.cloudName', cloudName);
                     if (uploadPreset) localStorage.setItem('cloudinary.uploadPreset', uploadPreset);
+                    // Save Google Analytics Measurement ID (GA4) to server-side settings
+                    try {
+                        const gaId = document.getElementById('ga-measurement-id') ? document.getElementById('ga-measurement-id').value.trim() : '';
+                        const tokenLocal = localStorage.getItem('token') || localStorage.getItem('authToken');
+                        if (tokenLocal) {
+                            await fetch(`${API_URL}/admin/ga`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'x-auth-token': tokenLocal
+                                },
+                                body: JSON.stringify({ measurementId: gaId })
+                            });
+                        }
+                    } catch (e) {
+                        console.warn('Failed to save GA setting to server', e);
+                    }
 
                     setTimeout(() => {
                         closeSettings();
@@ -1010,6 +1110,23 @@
                 });
             }
         }
+
+            // Copy image URL button handler
+            const copyBtn = document.getElementById('copy-image-url-btn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', async () => {
+                    try {
+                        const thumb = document.getElementById('post-image-thumb');
+                        const status = document.getElementById('copy-image-url-status');
+                        const urlToCopy = lastUploadedImageUrl || (thumb && thumb.src) || '';
+                        if (!urlToCopy) return;
+                        await navigator.clipboard.writeText(urlToCopy);
+                        if (status) { status.style.display = 'inline'; setTimeout(() => { status.style.display = 'none'; }, 1600); }
+                    } catch (e) {
+                        console.warn('Copy failed', e);
+                    }
+                });
+            }
 
         // Initialize
         // Attach handlers before auth check so listeners remain even if checkAuth redirects

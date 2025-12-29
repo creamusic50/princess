@@ -279,12 +279,13 @@
                     }
                 };
 
-                // Attach image if available
-                if (post.featured_image) {
-                    articleJson.image = post.featured_image.startsWith('http') ? post.featured_image : siteOrigin + '/' + post.featured_image.replace(/^\//, '');
-                } else if (post.image) {
-                    articleJson.image = post.image.startsWith('http') ? post.image : siteOrigin + '/' + post.image.replace(/^\//, '');
-                }
+                // Attach image if available (support multiple field names)
+                (function(){
+                    const cand = post.featured_image || post.image || post.image_url || post.imageUrl || null;
+                    if (cand) {
+                        articleJson.image = cand.startsWith('http') ? cand : siteOrigin + '/' + String(cand).replace(/^\//, '');
+                    }
+                })();
 
                 if (schemaEl) {
                     schemaEl.textContent = JSON.stringify(articleJson);
