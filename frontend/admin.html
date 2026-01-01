@@ -251,6 +251,8 @@
             border-radius: 15px;
             width: 90%;
             max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
         .close {
@@ -269,6 +271,170 @@
             min-height: 500px;
             background: white;
         }
+
+        /* Analytics Styles */
+        .analytics-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .analytics-section h2 {
+            margin-bottom: 25px;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 22px;
+        }
+
+        .analytics-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .analytics-controls select,
+        .analytics-controls button {
+            padding: 10px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .analytics-controls select {
+            min-width: 150px;
+        }
+
+        .analytics-controls button {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .analytics-controls button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .analytics-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 12px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .analytics-card h3 {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .analytics-card .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .analytics-card .metric-detail {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        .analytics-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        .analytics-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .analytics-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .analytics-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .analytics-table tbody tr:hover {
+            background: #f7fafc;
+        }
+
+        .analytics-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .country-flag {
+            font-size: 16px;
+            margin-right: 8px;
+        }
+
+        .metric-bar {
+            display: inline-block;
+            height: 20px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            min-width: 30px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .analytics-loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .analytics-empty {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+
+        /* Mobile hamburger & nav styles */
+        .hamburger{display:none;flex-direction:column;cursor:pointer;padding:8px;background:transparent;border:none;z-index:10001}
+        .hamburger span{width:22px;height:3px;background:#fff;margin:3px 0;transition:all .25s;border-radius:3px}
+        .hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+        .hamburger.active span:nth-child(2){opacity:0}
+        .hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+        .nav-menu{display:flex;flex-direction:column;gap:14px;position:fixed;top:0;right:-100%;width:280px;height:100vh;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:80px 20px 20px;transition:right .28s ease;box-shadow:-6px 0 18px rgba(0,0,0,0.18);z-index:9999}
+        .nav-menu a{color:#fff;text-decoration:none;font-weight:600;padding:10px 8px;border-radius:8px}
+        .nav-menu a:hover{background:rgba(255,255,255,0.06)}
+        .nav-menu.active{right:0}
+
+        .mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);opacity:0;visibility:hidden;transition:opacity .2s;z-index:9998}
+        .mobile-overlay.active{opacity:1;visibility:visible}
         
         @media (max-width: 768px) {
             .admin-header .container {
@@ -292,6 +458,12 @@
  <div class="admin-header">
  <div class="container">
  <h1>️ Admin Dashboard</h1>
+ <!-- Mobile hamburger (appears on small screens) -->
+ <button class="hamburger" id="admin-hamburger" type="button" aria-label="Toggle menu" aria-expanded="false">
+     <span></span>
+     <span></span>
+     <span></span>
+ </button>
  <div class="user-info">
  <span id="user-email" style="font-weight: 500;">Loading...</span>
  <div id="debug-auth" style="margin-left:10px; font-size:12px; opacity:0.9;
@@ -299,11 +471,20 @@
  <div id="debug-token">Token: checking...</div>
  <div id="debug-status">Auth: pending...</div>
  </div>
- <button id="btn-settings" class="settings-btn">️ Settings</button>
- <button id="btn-logout" class="logout-btn"> Logout</button>
+ <button id="btn-settings" type="button" class="settings-btn">️ Settings</button>
+ <button id="btn-logout" type="button" class="logout-btn"> Logout</button>
  </div>
  </div>
  </div>
+
+<!-- Mobile nav (hidden on desktop) -->
+<nav id="admin-nav" class="nav-menu" aria-hidden="true">
+    <a href="#" id="nav-new-post">✍️ New Post</a>
+    <a href="#" id="nav-settings">⚙️ Settings</a>
+    <a href="index.html" target="_blank">️ View Website</a>
+    <a href="#" id="nav-logout">🚪 Logout</a>
+</nav>
+<div id="admin-overlay" class="mobile-overlay" aria-hidden="true"></div>
 
  <div class="admin-container">
  <div id="message" class="message"></div>
@@ -329,9 +510,119 @@
 
  <div class="actions-panel">
  <h2> Quick Actions</h2>
- <button id="btn-new-post" class="btn btn-success"> New Post</button>
- <button id="btn-refresh-posts" class="btn"> Refresh Posts</button>
+ <button id="btn-new-post" type="button" class="btn btn-success"> New Post</button>
+ <button id="btn-refresh-posts" type="button" class="btn"> Refresh Posts</button>
  <a href="index.html" class="btn" target="_blank">️ View Website</a>
+ <a href="analytics.html" class="btn" style="background: #9f7aea;">📊 Analytics Dashboard</a>
+ </div>
+
+ <!-- Analytics Section -->
+ <div class="analytics-section">
+ <h2>📊 Traffic Analytics</h2>
+ 
+ <div class="analytics-controls">
+ <select id="analytics-period" title="Select time period">
+ <option value="day">By Day</option>
+ <option value="week">By Week</option>
+ <option value="month">By Month</option>
+ </select>
+ <button id="load-analytics-btn" class="btn btn-success">⟳ Refresh Analytics</button>
+ </div>
+
+ <div class="analytics-grid">
+ <div class="analytics-card">
+ <h3>👥 Unique Visitors</h3>
+ <div class="metric-value" id="analytics-unique-visitors">0</div>
+ <div class="metric-detail">Last 30 days</div>
+ </div>
+ <div class="analytics-card">
+ <h3>📄 Total Pageviews</h3>
+ <div class="metric-value" id="analytics-total-pageviews">0</div>
+ <div class="metric-detail">Last 30 days</div>
+ </div>
+ <div class="analytics-card">
+ <h3>🌍 Countries</h3>
+ <div class="metric-value" id="analytics-countries">0</div>
+ <div class="metric-detail">Unique locations</div>
+ </div>
+ <div class="analytics-card">
+ <h3>🖱️ Avg Clicks/Session</h3>
+ <div class="metric-value" id="analytics-clicks-per-session">0</div>
+ <div class="metric-detail">Pages per visitor</div>
+ </div>
+ </div>
+
+ <h3 style="color: #2d3748; margin: 30px 0 20px 0; font-weight: 600;">📈 Traffic by Period</h3>
+ <div class="table-container">
+ <table class="analytics-table">
+ <thead>
+ <tr>
+ <th>Date</th>
+ <th>Visitors</th>
+ <th>Pageviews</th>
+ <th>Posts Viewed</th>
+ <th>Progress</th>
+ </tr>
+ </thead>
+ <tbody id="analytics-period-table">
+ <tr><td colspan="5" class="analytics-loading">Loading analytics...</td></tr>
+ </tbody>
+ </table>
+ </div>
+
+ <h3 style="color: #2d3748; margin: 30px 0 20px 0; font-weight: 600;">🌍 Traffic by Country</h3>
+ <div class="table-container">
+ <table class="analytics-table">
+ <thead>
+ <tr>
+ <th>Country</th>
+ <th>Visitors</th>
+ <th>Pageviews</th>
+ <th>% of Traffic</th>
+ <th>Progress</th>
+ </tr>
+ </thead>
+ <tbody id="analytics-country-table">
+ <tr><td colspan="5" class="analytics-loading">Loading country data...</td></tr>
+ </tbody>
+ </table>
+ </div>
+
+ <h3 style="color: #2d3748; margin: 30px 0 20px 0; font-weight: 600;">🔗 Top Traffic Sources</h3>
+ <div class="table-container">
+ <table class="analytics-table">
+ <thead>
+ <tr>
+ <th>Source</th>
+ <th>Visitors</th>
+ <th>Pageviews</th>
+ <th>Posts Viewed</th>
+ <th>% of Traffic</th>
+ </tr>
+ </thead>
+ <tbody id="analytics-source-table">
+ <tr><td colspan="5" class="analytics-loading">Loading source data...</td></tr>
+ </tbody>
+ </table>
+ </div>
+
+ <h3 style="color: #2d3748; margin: 30px 0 20px 0; font-weight: 600;">⭐ Top Posts</h3>
+ <div class="table-container">
+ <table class="analytics-table">
+ <thead>
+ <tr>
+ <th>Post Title</th>
+ <th>Visitors</th>
+ <th>Views</th>
+ <th>Countries</th>
+ <th>Avg Time (min)</th>
+ </tr>
+ </thead>
+ <tbody id="analytics-posts-table">
+ <tr><td colspan="5" class="analytics-loading">Loading top posts...</td></tr>
+ </tbody>
+ </table>
+ </div>
  </div>
 
  <div id="post-form" class="form-container">
@@ -442,8 +733,10 @@
  <input type="password" id="confirm-password" placeholder="Confirm new password">
  </div>
  
+ <div style="display: flex; gap: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
  <button type="submit" class="btn btn-success"> Save Changes</button>
- <button type="button" id="btn-settings-cancel" class="btn" style="background: #a0aec0;">Cancel</button>
+ <button type="button" id="btn-settings-cancel" class="btn" style="background: #a0aec0; color: white;">Cancel</button>
+ </div>
  </form>
  </div>
  </div>
@@ -492,6 +785,7 @@
                     token = localStorage.getItem('token') || localStorage.getItem('authToken');
                     if (dbgTokenEl) dbgTokenEl.textContent = token ? 'Token: present' : 'Token: absent';
                     loadPosts();
+                    loadAllAnalytics();
                 } else {
                     if (dbgStatusEl) dbgStatusEl.textContent = 'Auth: not authorized';
                     throw new Error('Not authorized');
@@ -718,10 +1012,14 @@
                         showMessage(postId ? '✅ Post updated!' : '✅ Post created!', 'success');
                         formEl.reset();
                         document.getElementById('post-content').value = '';
-                        hidePostForm();
-                        loadPosts();
-                        // Refresh dashboard stats after publish
-                        loadStats();
+                        
+                        // Delay hiding form and refreshing so success message stays visible
+                        setTimeout(() => {
+                            hidePostForm();
+                            loadPosts();
+                            // Refresh dashboard stats after publish
+                            loadStats();
+                        }, 2000);
                     } else {
                         console.error('[ADMIN] Server rejected:', data);
                         showMessage((data && data.message) || '❌ Failed to save post', 'error');
@@ -739,75 +1037,29 @@
                 }
             });
 
-            // Initialize cloudinary settings in modal
-            (function populateCloudinarySettings() {
-                const cloudName = localStorage.getItem('cloudinary.cloudName') || '';
-                const uploadPreset = localStorage.getItem('cloudinary.uploadPreset') || '';
-                const cloudEl = document.getElementById('cloud-name');
-                const presetEl = document.getElementById('cloud-upload-preset');
-                if (cloudEl) cloudEl.value = cloudName;
-                if (presetEl) presetEl.value = uploadPreset;
-            })();
-
-            // Cloudinary upload helper
-            async function uploadImageToCloudinary(file) {
-                // Try Cloudinary signed upload on server first
+            // Local upload helper (uploads directly to server disk storage)
+            async function uploadImageLocal(file) {
                 const tokenLocal = localStorage.getItem('token') || localStorage.getItem('authToken');
+                const fdLocal = new FormData();
+                // server expects field name 'image' for disk storage middleware
+                fdLocal.append('image', file);
+                const respLocal = await fetch(`${API_URL}/upload/image`, {
+                    method: 'POST',
+                    headers: tokenLocal ? { 'x-auth-token': tokenLocal } : {},
+                    body: fdLocal
+                });
 
-                // Helper to upload to local server storage (/api/upload/image)
-                async function uploadToLocal(file) {
-                    const fdLocal = new FormData();
-                    // server expects field name 'image' for disk storage middleware
-                    fdLocal.append('image', file);
-                    const respLocal = await fetch(`${API_URL}/upload/image`, {
-                        method: 'POST',
-                        headers: tokenLocal ? { 'x-auth-token': tokenLocal } : {},
-                        body: fdLocal
-                    });
-
-                    if (!respLocal.ok) {
-                        const txt = await respLocal.text();
-                        throw new Error('Local upload failed: ' + txt);
-                    }
-
-                    const d = await respLocal.json();
-                    if (!d.success) throw new Error(d.message || 'Local upload returned error');
-                    // returned url may be relative (/uploads/...), make absolute
-                    const url = d.file && d.file.url ? d.file.url : (d.url || d.secure_url);
-                    if (!url) throw new Error('Local upload did not return a file URL');
-                    return url.startsWith('http') ? url : (window.location.origin.replace(/:\d+$/, ':5000') + url);
+                if (!respLocal.ok) {
+                    const txt = await respLocal.text();
+                    throw new Error('Local upload failed: ' + txt);
                 }
 
-                try {
-                    const fd = new FormData();
-                    fd.append('file', file);
-
-                    const resp = await fetch(`${API_URL}/upload/cloudinary`, {
-                        method: 'POST',
-                        headers: tokenLocal ? { 'x-auth-token': tokenLocal } : {},
-                        body: fd
-                    });
-
-                    // If cloudinary route not configured on server, fallback to local upload
-                    if (!resp.ok) {
-                        let txt;
-                        try { txt = await resp.text(); } catch (e) { txt = ''; }
-                        const lowered = (txt || '').toLowerCase();
-                        if (resp.status === 500 && lowered.includes('cloudinary not configured')) {
-                            console.warn('Cloudinary not configured on server, falling back to local upload');
-                            return await uploadToLocal(file);
-                        }
-                        throw new Error('Server upload failed: ' + txt);
-                    }
-
-                    const data = await resp.json();
-                    if (!data.success) throw new Error(data.message || 'Unknown upload error');
-                    return data.url || data.secure_url || (data.raw && data.raw.secure_url) || null;
-                } catch (err) {
-                    // If cloudinary failed for any reason, attempt local upload as a final fallback
-                    console.warn('Primary upload failed, attempting local upload:', err.message || err);
-                    return await uploadToLocal(file);
-                }
+                const d = await respLocal.json();
+                if (!d.success) throw new Error(d.message || 'Local upload returned error');
+                // returned url may be relative (/uploads/...), make absolute
+                const url = d.file && d.file.url ? d.file.url : (d.url || d.secure_url);
+                if (!url) throw new Error('Local upload did not return a file URL');
+                return url.startsWith('http') ? url : (window.location.origin.replace(/:\d+$/, ':5000') + url);
             }
 
             // Image input preview handling
@@ -1048,6 +1300,203 @@
             }
         }
 
+        // Load Analytics Overview
+        async function loadAnalyticsOverview() {
+            try {
+                const response = await fetch(`${API_URL}/analytics/overview`, {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    const overview = data.data.overview || {};
+                    document.getElementById('analytics-unique-visitors').textContent = 
+                        (parseInt(overview.unique_visitors) || 0).toLocaleString();
+                    document.getElementById('analytics-total-pageviews').textContent = 
+                        (parseInt(overview.total_pageviews) || 0).toLocaleString();
+                    document.getElementById('analytics-clicks-per-session').textContent = 
+                        (parseFloat(overview.avg_pageviews_per_visitor) || 0).toFixed(2);
+                    
+                    // Get country count
+                    if (data.data.countryBreakdown) {
+                        document.getElementById('analytics-countries').textContent = 
+                            data.data.countryBreakdown.length;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading analytics overview:', error);
+            }
+        }
+
+        // Load Analytics by Period (Day/Week/Month)
+        async function loadAnalyticsByPeriod() {
+            const period = document.getElementById('analytics-period')?.value || 'day';
+            const tbody = document.getElementById('analytics-period-table');
+            tbody.innerHTML = '<tr><td colspan="5" class="analytics-loading">Loading...</td></tr>';
+
+            try {
+                const response = await fetch(`${API_URL}/analytics/by-date?period=${period}`, {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await response.json();
+
+                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                    const maxViews = Math.max(...data.data.map(d => d.pageviews || 0));
+                    const html = data.data.map(item => {
+                        const date = new Date(item.date);
+                        const dateStr = period === 'day' ? date.toLocaleDateString() : 
+                                      period === 'week' ? `Week of ${date.toLocaleDateString()}` :
+                                      date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                        const barWidth = maxViews > 0 ? ((item.pageviews || 0) / maxViews * 100) : 0;
+                        
+                        return `
+                            <tr>
+                                <td>${dateStr}</td>
+                                <td>${(item.visitors || 0).toLocaleString()}</td>
+                                <td>
+                                    <span class="metric-bar" style="width: ${barWidth}%"></span>
+                                    ${(item.pageviews || 0).toLocaleString()}
+                                </td>
+                                <td>${(item.posts_viewed || 0).toLocaleString()}</td>
+                                <td>${(parseFloat(item.bounce_rate) || 0).toFixed(1)}%</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    tbody.innerHTML = html;
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="analytics-empty">No data available</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading period analytics:', error);
+                tbody.innerHTML = '<tr><td colspan="5" class="analytics-empty">Error loading data</td></tr>';
+            }
+        }
+
+        // Load Analytics by Country
+        async function loadAnalyticsByCountry() {
+            const tbody = document.getElementById('analytics-country-table');
+            tbody.innerHTML = '<tr><td colspan="5" class="analytics-loading">Loading...</td></tr>';
+
+            try {
+                const response = await fetch(`${API_URL}/analytics/by-country?days=30`, {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await response.json();
+
+                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                    const maxPageviews = Math.max(...data.data.map(d => d.pageviews || 0));
+                    const html = data.data.slice(0, 20).map(item => {
+                        const barWidth = maxPageviews > 0 ? ((item.pageviews || 0) / maxPageviews * 100) : 0;
+                        const countryName = item.country || 'Unknown';
+                        
+                        return `
+                            <tr>
+                                <td>${countryName}</td>
+                                <td>${(item.visitors || 0).toLocaleString()}</td>
+                                <td>
+                                    <span class="metric-bar" style="width: ${barWidth}%"></span>
+                                    ${(item.pageviews || 0).toLocaleString()}
+                                </td>
+                                <td>${(parseFloat(item.percentage) || 0).toFixed(1)}%</td>
+                                <td>${(item.unique_posts_viewed || 0)} posts</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    tbody.innerHTML = html;
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="analytics-empty">No country data available</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading country analytics:', error);
+                tbody.innerHTML = '<tr><td colspan="5" class="analytics-empty">Error loading data</td></tr>';
+            }
+        }
+
+        // Load Top Traffic Sources
+        async function loadAnalyticsSources() {
+            const tbody = document.getElementById('analytics-source-table');
+            tbody.innerHTML = '<tr><td colspan="5" class="analytics-loading">Loading...</td></tr>';
+
+            try {
+                const response = await fetch(`${API_URL}/analytics/by-source?days=30`, {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await response.json();
+
+                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                    const html = data.data.slice(0, 15).map(item => {
+                        const source = item.traffic_source || 'Direct';
+                        const referrer = item.referrer ? item.referrer.substring(0, 40) : 'Direct';
+                        
+                        return `
+                            <tr>
+                                <td><strong>${source}</strong><br/><small style="color: #718096;">${referrer}</small></td>
+                                <td>${(item.unique_visitors || 0).toLocaleString()}</td>
+                                <td>${(item.pageviews || 0).toLocaleString()}</td>
+                                <td>${(item.posts_viewed || 0).toLocaleString()}</td>
+                                <td>${(parseFloat(item.percentage) || 0).toFixed(1)}%</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    tbody.innerHTML = html;
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="analytics-empty">No source data available</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading source analytics:', error);
+                tbody.innerHTML = '<tr><td colspan="5" class="analytics-empty">Error loading data</td></tr>';
+            }
+        }
+
+        // Load Top Posts Analytics
+        async function loadAnalyticsTopPosts() {
+            const tbody = document.getElementById('analytics-posts-table');
+            tbody.innerHTML = '<tr><td colspan="5" class="analytics-loading">Loading...</td></tr>';
+
+            try {
+                const response = await fetch(`${API_URL}/analytics/top-posts?days=30&limit=10`, {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await response.json();
+
+                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                    const html = data.data.map(item => {
+                        const title = item.post_title ? item.post_title.substring(0, 50) : 'Unknown';
+                        
+                        return `
+                            <tr>
+                                <td><strong>${title}</strong></td>
+                                <td>${(item.unique_visitors || 0).toLocaleString()}</td>
+                                <td>
+                                    <span class="metric-bar" style="width: ${Math.min((item.total_views || 0) / 100 * 100, 100)}%"></span>
+                                    ${(item.total_views || 0).toLocaleString()}
+                                </td>
+                                <td>${(item.countries || 0).toLocaleString()}</td>
+                                <td>${(parseFloat(item.avg_time_spent_minutes) || 0).toFixed(1)} min</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    tbody.innerHTML = html;
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="analytics-empty">No post data available</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading top posts:', error);
+                tbody.innerHTML = '<tr><td colspan="5" class="analytics-empty">Error loading data</td></tr>';
+            }
+        }
+
+        // Load all analytics
+        async function loadAllAnalytics() {
+            await Promise.all([
+                loadAnalyticsOverview(),
+                loadAnalyticsByPeriod(),
+                loadAnalyticsByCountry(),
+                loadAnalyticsSources(),
+                loadAnalyticsTopPosts()
+            ]);
+        }
+
         // Escape HTML
         function escapeHtml(text) {
             const div = document.createElement('div');
@@ -1111,28 +1560,87 @@
             }
         }
 
-            // Copy image URL button handler
-            const copyBtn = document.getElementById('copy-image-url-btn');
-            if (copyBtn) {
-                copyBtn.addEventListener('click', async () => {
-                    try {
-                        const thumb = document.getElementById('post-image-thumb');
-                        const status = document.getElementById('copy-image-url-status');
-                        const urlToCopy = lastUploadedImageUrl || (thumb && thumb.src) || '';
-                        if (!urlToCopy) return;
-                        await navigator.clipboard.writeText(urlToCopy);
-                        if (status) { status.style.display = 'inline'; setTimeout(() => { status.style.display = 'none'; }, 1600); }
-                    } catch (e) {
-                        console.warn('Copy failed', e);
-                    }
-                });
+        // Mobile admin menu setup
+        function setupAdminMobileMenu() {
+            const hamburger = document.getElementById('admin-hamburger');
+            const nav = document.getElementById('admin-nav');
+            const overlay = document.getElementById('admin-overlay');
+            if (!hamburger || !nav || !overlay) return;
+
+            function openMenu(){
+                hamburger.classList.add('active');
+                nav.classList.add('active');
+                overlay.classList.add('active');
+                hamburger.setAttribute('aria-expanded','true');
+                nav.setAttribute('aria-hidden','false');
+                document.body.style.overflow='hidden';
             }
+            function closeMenu(){
+                hamburger.classList.remove('active');
+                nav.classList.remove('active');
+                overlay.classList.remove('active');
+                hamburger.setAttribute('aria-expanded','false');
+                nav.setAttribute('aria-hidden','true');
+                document.body.style.overflow='';
+            }
+
+            hamburger.addEventListener('click', function(){
+                if (hamburger.classList.contains('active')) closeMenu(); else openMenu();
+            });
+            overlay.addEventListener('click', closeMenu);
+
+            // wire mobile nav links to same handlers used in header
+            const navNew = document.getElementById('nav-new-post');
+            const navSettings = document.getElementById('nav-settings');
+            const navLogout = document.getElementById('nav-logout');
+            if (navNew) navNew.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); showNewPostForm(); });
+            if (navSettings) navSettings.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); openSettings(); });
+            if (navLogout) navLogout.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); logout(); });
+
+            // close on Escape
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && hamburger.classList.contains('active')) closeMenu(); });
+            // ensure menu closes on resize to desktop
+            window.addEventListener('resize', () => { if (window.innerWidth > 768 && hamburger.classList.contains('active')) closeMenu(); });
+        }
+
+        // Copy image URL button handler
+        const copyBtn = document.getElementById('copy-image-url-btn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', async () => {
+                try {
+                    const thumb = document.getElementById('post-image-thumb');
+                    const status = document.getElementById('copy-image-url-status');
+                    const urlToCopy = lastUploadedImageUrl || (thumb && thumb.src) || '';
+                    if (!urlToCopy) return;
+                    await navigator.clipboard.writeText(urlToCopy);
+                    if (status) { status.style.display = 'inline'; setTimeout(() => { status.style.display = 'none'; }, 1600); }
+                } catch (e) {
+                    console.warn('Copy failed', e);
+                }
+            });
+        }
 
         // Initialize
         // Attach handlers before auth check so listeners remain even if checkAuth redirects
         registerFormHandler();
         attachUiListeners();
+        setupAdminMobileMenu();
+        
+        // Setup analytics event listeners
+        const analyticsPeriodSelect = document.getElementById('analytics-period');
+        if (analyticsPeriodSelect) {
+            analyticsPeriodSelect.addEventListener('change', loadAnalyticsByPeriod);
+        }
+        
+        const loadAnalyticsBtn = document.getElementById('load-analytics-btn');
+        if (loadAnalyticsBtn) {
+            loadAnalyticsBtn.addEventListener('click', loadAllAnalytics);
+        }
+        
         checkAuth();
+        
+        // Load analytics after authentication
+        // We'll load them inside checkAuth's success callback
     </script>
 </body>
 </html>

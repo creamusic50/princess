@@ -416,11 +416,11 @@ async function handleUpdatePost(e) {
 
         if (response.ok) {
             showMessage(messageEl, 'Post updated successfully!', 'success');
-            loadPosts();
-            loadStats();
             
             setTimeout(() => {
                 closeModal();
+                loadPosts();
+                loadStats();
             }, 1500);
         } else {
             showMessage(messageEl, data.message || 'Failed to update post', 'error');

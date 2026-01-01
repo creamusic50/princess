@@ -180,8 +180,22 @@ router.post('/cloudinary', protect, admin, memoryUpload.single('file'), async (r
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
 
-    if (!cloudinary || (!process.env.CLOUDINARY_URL && !(process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET && process.env.CLOUDINARY_CLOUD_NAME))) {
-      // Cloudinary not available — return a clear message that client can use to fallback
+    // Ensure Cloudinary is properly configured. cloudinary.config may have been
+    // called with an incomplete CLOUDINARY_URL or missing individual vars —
+    // check the effective config on the cloudinary object to avoid a runtime
+    // 500 from the Cloudinary SDK (e.g. "Must supply api_key").
+    const cfg = cloudinary && typeof cloudinary.config === 'function'
+      ? cloudinary.config() || {}
+      : {};
+
+    const hasApiKey = !!(cfg.api_key || process.env.CLOUDINARY_API_KEY);
+    const hasApiSecret = !!(cfg.api_secret || process.env.CLOUDINARY_API_SECRET);
+    const hasCloudName = !!(cfg.cloud_name || process.env.CLOUDINARY_CLOUD_NAME);
+
+    if (!cloudinary || !(hasApiKey && hasApiSecret && hasCloudName)) {
+      // Cloudinary not available or not fully configured — return a clear message
+      // so the client can fall back to local uploads instead of receiving a 500.
+      console.warn('[upload] cloudinary endpoint called but configuration is incomplete');
       return res.status(501).json({ success: false, message: 'Cloudinary not available on server' });
     }
 

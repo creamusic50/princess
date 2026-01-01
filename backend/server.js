@@ -32,20 +32,9 @@ app.use(compression({
   }
 }));
 
-// Security headers with full AdSense support (no CSP errors)
+// Security headers - CSP REMOVED for full flexibility
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://pagead2.googlesyndication.com", "https://cdn.jsdelivr.net", "https://www.youtube.com", "https://s.ytimg.com", "https://*.adtrafficquality.google"],
-      scriptSrcElem: ["'self'", "'unsafe-inline'", "https://pagead2.googlesyndication.com", "https://cdn.jsdelivr.net", "https://www.youtube.com", "https://s.ytimg.com", "https://*.adtrafficquality.google"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://pagead2.googlesyndication.com", "https://www.youtube.com", "https://s.ytimg.com", "https://www.google.com", "https://*.adtrafficquality.google", "https://googleads.g.doubleclick.net", "https://tpc.googlesyndication.com"],
-      frameSrc: ["https://pagead2.googlesyndication.com", "https://www.youtube.com", "https://www.youtube-nocookie.com", "https://www.google.com", "https://googleads.g.doubleclick.net", "https://tpc.googlesyndication.com", "https://*.adtrafficquality.google"]
-    }
-  },
+  contentSecurityPolicy: false,  // DISABLED - No more CSP restrictions!
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
 }));
 
@@ -68,7 +57,6 @@ app.use((req, res, next) => {
   // Critical resource hints with early hints for desktop
   if (req.path === '/' || req.path === '/index.html') {
     res.setHeader('Link', [
-      '</css/style.min.f5f26ea4.css>; rel=preload; as=style; nopush',
       '</js/config.min.f841bc00.js>; rel=preload; as=script; nopush',
       '</js/main.min.eb2549f5.js>; rel=preload; as=script; nopush',
       '<https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap>; rel=preload; as=style; nopush',
@@ -98,13 +86,14 @@ app.get('/api/health', (req, res) => {
 });
 
 // Mount API routes from repository root
-const postsRouter = require('../routes/posts');
-const categoriesRouter = require('../routes/categories');
-const authRouter = require('../routes/auth');
-const contactRouter = require('../routes/contact');
-const metaRouter = require('../routes/meta');
-const uploadRouter = require('../routes/upload');
-const adminRouter = require('../routes/admin');
+const postsRouter = require(path.join(__dirname, '..', 'routes', 'posts'));
+const categoriesRouter = require(path.join(__dirname, '..', 'routes', 'categories'));
+const authRouter = require(path.join(__dirname, '..', 'routes', 'auth'));
+const contactRouter = require(path.join(__dirname, '..', 'routes', 'contact'));
+const metaRouter = require(path.join(__dirname, '..', 'routes', 'meta'));
+const uploadRouter = require(path.join(__dirname, '..', 'routes', 'upload'));
+const adminRouter = require(path.join(__dirname, '..', 'routes', 'admin'));
+const analyticsRouter = require(path.join(__dirname, '..', 'routes', 'analytics'));
 
 app.use('/api/posts', postsRouter);
 app.use('/api/categories', categoriesRouter);
@@ -113,6 +102,7 @@ app.use('/api/contact', contactRouter);
 app.use('/api/meta', metaRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/analytics', analyticsRouter);
 
 // Serve static frontend from backend/frontend
 const staticDir = path.join(__dirname, 'frontend');

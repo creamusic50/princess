@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>NEW Admin Dashboard - Smart Money Guide</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header h1 {
+            background: linear-gradient(45deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 28px;
+        }
+        .btn { 
+            background: rgba(255,255,255,0.2); 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-right: 10px;
+            transition: all 0.3s;
+        }
+        .btn:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .nav-tabs {
+            background: white;
+            padding: 0 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        /* Mobile hamburger & nav styles */
+        .hamburger{display:none;flex-direction:column;cursor:pointer;padding:8px;background:transparent;border:none;z-index:10001}
+        .hamburger span{width:22px;height:3px;background:#fff;margin:3px 0;transition:all .25s;border-radius:3px}
+        .hamburger.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+        .hamburger.active span:nth-child(2){opacity:0}
+        .hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+        .nav-menu{display:flex;flex-direction:column;gap:14px;position:fixed;top:0;right:-100%;width:280px;height:100vh;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:80px 20px 20px;transition:right .28s ease;box-shadow:-6px 0 18px rgba(0,0,0,0.18);z-index:9999}
+        .nav-menu a{color:#fff;text-decoration:none;font-weight:600;padding:10px 8px;border-radius:8px}
+        .nav-menu a:hover{background:rgba(255,255,255,0.06)}
+        .nav-menu.active{right:0}
+
+        .mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);opacity:0;visibility:hidden;transition:opacity .2s;z-index:9998}
+        .mobile-overlay.active{opacity:1;visibility:visible}
+        .nav-tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        .nav-tab:hover { background: #f7fafc; }
+        .nav-tab.active { 
+            border-bottom-color: #667eea; 
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .alert.show { display: block; animation: slideIn 0.3s; }
+        .alert.error { background: #fed7d7; color: #742a2a; }
+        .alert.success { background: #c6f6d5; color: #22543d; }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .stat-card .sub { font-size: 14px; color:#718096; margin-top:8px }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        .stat-card h3 { font-size: 14px; color: #718096; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .number { font-size: 36px; font-weight: 700; color: #667eea; }
+        .stat-card .trend { font-size: 14px; color: #48bb78; margin-top: 8px; }
+        
+        .analytics-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        .analytics-section h2 { 
+            margin-bottom: 20px; 
+            color: #2d3748; 
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+        
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.2s;
+        }
+        .data-item:hover { background: #f7fafc; }
+        .data-item:last-child { border-bottom: none; }
+        
+        .data-label { 
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .data-count {
+            font-weight: 600;
+            color: #667eea;
+            background: #eef2ff;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        
+        .visitor-item {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .visitor-item:hover { background: #f7fafc; }
+        .visitor-time { color: #718096; font-size: 12px; margin-top: 5px; }
+        .visitor-ref { color: #667eea; font-weight: 600; }
+        .visitor-location {
+            display: inline-block;
+            background: #fef5e7;
+            color: #c05621;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+        }
+        
+        .new-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @media (max-width: 768px) {
+            .header .container { flex-direction: column; text-align: center; }
+            .stats { grid-template-columns: 1fr; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .nav-tabs { padding: 0 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>📊 Admin Dashboard <span class="new-badge">NEW!</span></h1>
+            <div>
+                <!-- Mobile hamburger -->
+                <button class="hamburger" id="admin-hamburger" type="button" aria-label="Toggle menu" aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <span id="user-email" style="margin-right: 20px;">Loading...</span>
+                <button id="btn-new-post" type="button" class="btn">✍️ New Post</button>
+                <button id="btn-refresh" type="button" class="btn">🔄 Refresh</button>
+                <button id="btn-settings" type="button" class="btn">⚙️ Settings</button>
+                <button id="btn-logout" type="button" class="btn">🚪 Logout</button>
+            </div>
+
+        <!-- Mobile nav -->
+        <nav id="admin-nav" class="nav-menu" aria-hidden="true">
+            <a href="#" id="nav-new-post">✍️ New Post</a>
+            <a href="#" id="nav-settings">⚙️ Settings</a>
+            <a href="create-post.html">Create post page</a>
+            <a href="#" id="nav-logout">🚪 Logout</a>
+        </nav>
+        <div id="admin-overlay" class="mobile-overlay" aria-hidden="true"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="alert" class="alert"></div>
+        
+        <div class="nav-tabs">
+            <div class="nav-tab active" data-tab="overview">📈 Overview</div>
+            <div class="nav-tab" data-tab="traffic">🌐 Traffic Sources</div>
+            <div class="nav-tab" data-tab="locations">🗺️ Visitor Locations</div>
+            <div class="nav-tab" data-tab="pages">📄 Popular Pages</div>
+            <div class="nav-tab" data-tab="visitors">👥 Recent Visitors</div>
+            <div class="nav-tab" data-tab="posts">✍️ Posts</div>
+        </div>
+
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="overview">
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Total Page Views</h3>
+                    <div class="number" id="total-views">0</div>
+                    <div class="trend">📊 All time</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Views (24h)</h3>
+                    <div class="number" id="views-24h">0</div>
+                    <div class="trend">📅 Last day</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Views (7 days)</h3>
+                    <div class="number" id="views-7days">0</div>
+                    <div class="trend">📆 Last week</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Views (30 days)</h3>
+                    <div class="number" id="views-30days">0</div>
+                    <div class="trend">🗓️ Last month</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Posts</h3>
+                    <div class="number" id="total-posts">0</div>
+                    <div class="trend">📝 Published</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Estimated Earnings</h3>
+                    <div class="number" id="est-earnings">$0.00</div>
+                    <div class="sub" id="est-clicks">0 clicks (est)</div>
+                </div>
+            </div>
+
+            <div class="analytics-section">
+                <h2>📈 Daily Views (Last 7 Days)</h2>
+                <div class="chart-container">
+                    <canvas id="daily-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Traffic Sources Tab -->
+        <div class="tab-content" id="traffic">
+            <div class="analytics-section">
+                <h2>🌐 Top Traffic Sources</h2>
+                <div id="referrers-list">
+                    <p style="text-align: center; padding: 20px; color: #718096;">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Locations Tab -->
+        <div class="tab-content" id="locations">
+            <div class="grid-2">
+                <div class="analytics-section">
+                    <h2>🌍 Top Countries</h2>
+                    <div id="countries-list">
+                        <p style="text-align: center; padding: 20px; color: #718096;">Loading...</p>
+                    </div>
+                </div>
+                <div class="analytics-section">
+                    <h2>🏙️ Top Cities</h2>
+                    <div id="cities-list">
+                        <p style="text-align: center; padding: 20px; color: #718096;">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pages Tab -->
+        <div class="tab-content" id="pages">
+            <div class="analytics-section">
+                <h2>📄 Most Visited Pages</h2>
+                <div id="pages-list">
+                    <p style="text-align: center; padding: 20px; color: #718096;">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visitors Tab -->
+        <div class="tab-content" id="visitors">
+            <div class="analytics-section">
+                <h2>👥 Recent Visitors (Last 30)</h2>
+                <div id="visitors-list">
+                    <p style="text-align: center; padding: 20px; color: #718096;">Loading...</p>
+                </div>
+            </div>
+        </div>
+        <!-- Posts Tab -->
+        <div class="tab-content" id="posts">
+            <div class="analytics-section">
+                <h2>✍️ Manage Posts</h2>
+                <div style="margin-bottom:16px;">
+                    <button id="posts-new-btn" type="button" class="btn btn-success">New Post</button>
+                    <button id="posts-refresh-btn" type="button" class="btn">Refresh</button>
+                </div>
+                <div id="posts-manager">
+                    <div id="posts-list" style="min-height:120px;">
+                        <p style="text-align:center;padding:20px;color:#718096;">Loading posts...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+        let token = localStorage.getItem('token') || localStorage.getItem('authToken');
+        let dailyChart = null;
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type} show`;
+            setTimeout(() => alert.classList.remove('show'), 5000);
+        }
+
+        // Tab switching
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        async function checkAuth() {
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/auth/me`, {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await response.json();
+                if (data.success && data.user.role === 'admin') {
+                    document.getElementById('user-email').textContent = data.user.email;
+                    loadAnalytics();
+                    loadPosts();
+                } else {
+                    throw new Error('Not authorized');
+                }
+            } catch (error) {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function loadAnalytics() {
+            try {
+                const response = await fetch(`${API_URL}/analytics/stats`, {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.stats;
+                    
+                    // Update stats
+                    document.getElementById('total-views').textContent = stats.totalPageViews || 0;
+                    document.getElementById('views-24h').textContent = stats.views24h || 0;
+                    document.getElementById('views-7days').textContent = stats.views7days || 0;
+                    document.getElementById('views-30days').textContent = stats.views30days || 0;
+
+                    // Daily chart
+                    renderDailyChart(stats.dailyViews || []);
+
+                    // Top Referrers
+                    const referrersList = document.getElementById('referrers-list');
+                    if (stats.topReferrers && stats.topReferrers.length > 0) {
+                        referrersList.innerHTML = stats.topReferrers.map(ref => `
+                            <div class="data-item">
+                                <span class="data-label">🔗 ${escapeHtml(ref.name)}</span>
+                                <span class="data-count">${ref.count} visits</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        referrersList.innerHTML = '<p style="text-align: center; padding: 20px;">No data yet</p>';
+                    }
+
+                    // Top Countries
+                    const countriesList = document.getElementById('countries-list');
+                    if (stats.topCountries && stats.topCountries.length > 0) {
+                        countriesList.innerHTML = stats.topCountries.map(country => `
+                            <div class="data-item">
+                                <span class="data-label">🌍 ${escapeHtml(country.name)}</span>
+                                <span class="data-count">${country.count} visits</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        countriesList.innerHTML = '<p style="text-align: center; padding: 20px;">No data yet</p>';
+                    }
+
+                    // Top Cities
+                    const citiesList = document.getElementById('cities-list');
+                    if (stats.topCities && stats.topCities.length > 0) {
+                        citiesList.innerHTML = stats.topCities.map(city => `
+                            <div class="data-item">
+                                <span class="data-label">🏙️ ${escapeHtml(city.name)}</span>
+                                <span class="data-count">${city.count} visits</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        citiesList.innerHTML = '<p style="text-align: center; padding: 20px;">No data yet</p>';
+                    }
+
+                    // Top Pages
+                    const pagesList = document.getElementById('pages-list');
+                    if (stats.topPages && stats.topPages.length > 0) {
+                        pagesList.innerHTML = stats.topPages.map(page => `
+                            <div class="data-item">
+                                <span class="data-label">📄 ${escapeHtml(page.page)}</span>
+                                <span class="data-count">${page.count} views</span>
+                            </div>
+                        `).join('');
+                    } else {
+                        pagesList.innerHTML = '<p style="text-align: center; padding: 20px;">No data yet</p>';
+                    }
+
+                    // Recent Visitors
+                    const visitorsList = document.getElementById('visitors-list');
+                    if (stats.recentVisitors && stats.recentVisitors.length > 0) {
+                        visitorsList.innerHTML = stats.recentVisitors.map(visitor => `
+                            <div class="visitor-item">
+                                <div><strong>📄 Page:</strong> ${escapeHtml(visitor.page)}</div>
+                                <div><strong>🔗 From:</strong> <span class="visitor-ref">${escapeHtml(visitor.referrer)}</span></div>
+                                <div><strong>🌍 Location:</strong> 
+                                    <span class="visitor-location">
+                                        ${escapeHtml(visitor.location.city)}, ${escapeHtml(visitor.location.country)}
+                                    </span>
+                                </div>
+                                <div><strong>💻 IP:</strong> ${visitor.ip}</div>
+                                <div class="visitor-time">🕐 ${new Date(visitor.timestamp).toLocaleString()}</div>
+                            </div>
+                        `).join('');
+                    } else {
+                        visitorsList.innerHTML = '<p style="text-align: center; padding: 20px;">No visitors yet</p>';
+                    }
+
+                    showAlert('✅ Analytics loaded successfully!', 'success');
+
+                    // Calculate estimated earnings using saved admin settings (localStorage)
+                    try {
+                        const saved = JSON.parse(localStorage.getItem('adminSettings') || '{}');
+                        const eCPM = parseFloat(saved.estEcpm) || 2.5; // default $2.50 per 1000 views
+                        const ctr = parseFloat(saved.estCtr) || 0.5; // default 0.5%
+                        const totalViews = stats.dailyViews.reduce((s,d)=>s+d.views, 0) + (stats.totalPageViews ? stats.totalPageViews : 0);
+                        // Prefer totalPageViews if provided
+                        const views = (stats.totalPageViews && stats.totalPageViews>0) ? stats.totalPageViews : totalViews;
+                        const estClicks = Math.round(views * (ctr/100));
+                        const estEarnings = (views / 1000) * eCPM;
+                        document.getElementById('est-clicks').textContent = `${estClicks} clicks (est)`;
+                        document.getElementById('est-earnings').textContent = `$${estEarnings.toFixed(2)}`;
+                    } catch (e) {
+                        console.warn('Estimate calc error', e);
+                    }
+                }
+            } catch (error) {
+                console.error('Analytics error:', error);
+                showAlert('❌ Error loading analytics', 'error');
+            }
+        }
+
+        function renderDailyChart(dailyViews) {
+            const ctx = document.getElementById('daily-chart');
+            if (dailyChart) {
+                dailyChart.destroy();
+            }
+            
+            dailyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dailyViews.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                    datasets: [{
+                        label: 'Page Views',
+                        data: dailyViews.map(d => d.views),
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        /* ---------------- Posts CRUD (modal + handlers) ---------------- */
+        // helper: render posts into #posts-list
+        async function renderPostsList(posts) {
+            const container = document.getElementById('posts-list');
+            if (!posts || posts.length === 0) {
+                container.innerHTML = '<p style="text-align:center;padding:20px;color:#718096;">No posts yet.</p>';
+                return;
+            }
+
+            container.innerHTML = posts.map(post => `
+                <div class="data-item" data-id="${post.id}">
+                    <div>
+                        <strong>${escapeHtml(post.title)}</strong>
+                        <div style="color:#718096;font-size:13px;margin-top:6px;">${escapeHtml(post.category || '')} • ${post.published ? 'Published' : 'Draft'} • ${new Date(post.created_at).toLocaleDateString()}</div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button class="btn btn-edit" data-id="${post.id}">✏️ Edit</button>
+                        <button class="btn btn-danger btn-delete" data-id="${post.id}" data-title="${escapeHtml(post.title).replace(/'/g, "\\'")}">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // attach listeners
+            container.querySelectorAll('.btn-edit').forEach(b => b.addEventListener('click', (e) => {
+                const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
+                openEditPost(id);
+            }));
+            container.querySelectorAll('.btn-delete').forEach(b => b.addEventListener('click', (e) => {
+                const id = parseInt(e.currentTarget.getAttribute('data-id'), 10);
+                const title = e.currentTarget.getAttribute('data-title') || '';
+                deletePost(id, title);
+            }));
+        }
+
+        async function loadAllPostsForManager() {
+            try {
+                const resp = await fetch(`${API_URL}/admin/posts?page=1&limit=500`, { headers: { 'x-auth-token': token } });
+                const d = await resp.json();
+                if (d.success && d.posts) await renderPostsList(d.posts);
+            } catch (e) { console.error('loadAllPostsForManager', e); }
+        }
+
+        // Modal form markup injection (once)
+        function ensurePostModal() {
+            if (document.getElementById('post-modal')) return;
+            const modalHtml = `
+                <div id="post-modal" class="modal">
+                    <div class="modal-content" style="max-width:800px;">
+                        <span id="post-modal-close" class="close">&times;</span>
+                        <h2 id="post-modal-title">Create Post</h2>
+                        <div id="post-modal-msg" class="message"></div>
+                        <form id="post-form">
+                            <input type="hidden" id="pm-post-id">
+                            <div class="form-group"><label>Title</label><input id="pm-title" required></div>
+                            <div class="form-group"><label>Category</label><input id="pm-category"></div>
+                            <div class="form-group"><label>Excerpt</label><textarea id="pm-excerpt" rows="3"></textarea></div>
+                            <div class="form-group"><label>Content (HTML)</label><textarea id="pm-content" rows="10"></textarea></div>
+                                            <div class="form-group"><label>Feature Image (optional)</label><input type="file" id="pm-image" accept="image/*"><div id="pm-image-preview" style="margin-top:10px;display:none;"><img id="pm-image-thumb" src="" style="max-width:220px;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,0.08);"/></div></div>
+                            <div style="display:flex;gap:8px;margin-top:12px;">
+                                <button type="submit" id="pm-save" class="btn btn-success">Save</button>
+                                <button type="button" id="pm-cancel" class="btn">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            const wrap = document.createElement('div'); wrap.innerHTML = modalHtml; document.body.appendChild(wrap.firstElementChild);
+
+            document.getElementById('post-modal-close').addEventListener('click', closePostModal);
+            document.getElementById('pm-cancel').addEventListener('click', closePostModal);
+            document.getElementById('post-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('pm-post-id').value;
+                const title = document.getElementById('pm-title').value.trim();
+                const category = document.getElementById('pm-category').value.trim();
+                const excerpt = document.getElementById('pm-excerpt').value.trim();
+                const content = document.getElementById('pm-content').value.trim();
+                if (!title || !content) { showPostModalMessage('Title and content required','error'); return; }
+                // Enforce 1000 word minimum (strip HTML)
+                const plain = content.replace(/<[^>]*>/g, ' ').trim();
+                const words = plain ? plain.split(/\s+/).length : 0;
+                if (words < 1000) { showPostModalMessage(`Content must be at least 1000 words (currently ${words})`, 'error'); return; }
+                // Handle optional image upload
+                let imageUrl = null;
+                try {
+                    const imgInput = document.getElementById('pm-image');
+                    const file = imgInput && imgInput.files && imgInput.files[0];
+                    if (file) {
+                        showPostModalMessage('Uploading image...', 'success');
+                        imageUrl = await uploadImageToCloudinary(file);
+                    }
+                } catch (imgErr) {
+                    console.error('Image upload failed', imgErr);
+                    showPostModalMessage('Image upload failed: ' + (imgErr.message || ''), 'error');
+                    return;
+                }
+                try {
+                    const method = id ? 'PUT' : 'POST';
+                    const url = id ? `${API_URL}/posts/${id}` : `${API_URL}/posts`;
+                    const resp = await fetch(url, {
+                        method,
+                        headers: { 'Content-Type':'application/json', 'x-auth-token': token },
+                        body: JSON.stringify({ title, category, excerpt, content, published: true, image_url: imageUrl })
+                    });
+                    const data = await resp.json();
+                    if (resp.ok && data.success) {
+                        showPostModalMessage(id ? 'Post updated' : 'Post created','success');
+                        setTimeout(() => { closePostModal(); loadAllPostsForManager(); loadPosts(); }, 900);
+                    } else {
+                        showPostModalMessage((data && data.message) || 'Save failed','error');
+                    }
+                } catch (err) { console.error(err); showPostModalMessage('Connection error','error'); }
+            });
+            // image preview handler
+            const pmImageInput = document.getElementById('pm-image');
+            if (pmImageInput) {
+                pmImageInput.addEventListener('change', (ev) => {
+                    const f = ev.target.files && ev.target.files[0];
+                    const preview = document.getElementById('pm-image-preview');
+                    const thumb = document.getElementById('pm-image-thumb');
+                    if (f && thumb) {
+                        const reader = new FileReader();
+                        reader.onload = function(ev2) { thumb.src = ev2.target.result; if (preview) preview.style.display = 'block'; };
+                        reader.readAsDataURL(f);
+                    } else if (preview) preview.style.display = 'none';
+                });
+            }
+        }
+
+        function showPostModalMessage(text, type) {
+            const el = document.getElementById('post-modal-msg'); el.textContent = text; el.className = `message ${type} show`;
+        }
+
+        function openNewPostModal() { ensurePostModal(); document.getElementById('post-modal').style.display='block'; document.getElementById('post-modal-title').textContent='Create Post'; document.getElementById('post-form').reset(); document.getElementById('pm-post-id').value=''; }
+        function openEditPost(id) {
+            ensurePostModal(); document.getElementById('post-modal-title').textContent='Edit Post';
+            // fetch post
+            fetch(`${API_URL}/posts?page=1&limit=200`).then(r=>r.json()).then(d=>{
+                const post = (d.posts||[]).find(p=>p.id===id);
+                if (!post) return showAlert('Post not found','error');
+                document.getElementById('pm-post-id').value = post.id;
+                document.getElementById('pm-title').value = post.title||'';
+                document.getElementById('pm-category').value = post.category||'';
+                document.getElementById('pm-excerpt').value = post.excerpt||'';
+                document.getElementById('pm-content').value = post.content||'';
+                document.getElementById('post-modal').style.display='block';
+            }).catch(e=>{console.error(e); showAlert('Error loading post','error');});
+        }
+
+        function closePostModal(){ const m = document.getElementById('post-modal'); if (m) m.style.display='none'; const msg=document.getElementById('post-modal-msg'); if (msg) { msg.className='message'; msg.style.display='none'; } }
+
+        async function deletePost(id, title) {
+            if (!confirm(`Delete "${title}"?`)) return;
+            try {
+                const resp = await fetch(`${API_URL}/posts/${id}`, { method:'DELETE', headers: { 'x-auth-token': token } });
+                const d = await resp.json();
+                if (resp.ok && d.success) { showAlert('Post deleted','success'); loadAllPostsForManager(); loadPosts(); }
+                else showAlert((d&&d.message)||'Delete failed','error');
+            } catch (e) { console.error(e); showAlert('Connection error','error'); }
+        }
+
+        // Cloudinary unsigned upload helper - falls back to server if not configured
+        async function uploadImageToCloudinary(file) {
+            // Read saved settings
+            const saved = JSON.parse(localStorage.getItem('adminSettings') || '{}');
+            const cloudName = saved.cloudName || saved.cloudinaryCloudName || localStorage.getItem('cloudinary.cloudName');
+            const preset = saved.uploadPreset || saved.cloudinaryUploadPreset || localStorage.getItem('cloudinary.uploadPreset');
+            if (cloudName && preset) {
+                const fd = new FormData();
+                fd.append('file', file);
+                fd.append('upload_preset', preset);
+                const resp = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, { method: 'POST', body: fd });
+                if (!resp.ok) throw new Error('Cloudinary upload failed');
+                const d = await resp.json();
+                return d.secure_url || d.url;
+            }
+            // Fallback: upload to server endpoint
+            const fd2 = new FormData(); fd2.append('image', file);
+            const tokenLocal = localStorage.getItem('token') || localStorage.getItem('authToken');
+            const resp2 = await fetch(`${API_URL}/upload/image`, { method: 'POST', headers: tokenLocal ? { 'x-auth-token': tokenLocal } : {}, body: fd2 });
+            if (!resp2.ok) throw new Error('Server image upload failed');
+            const d2 = await resp2.json();
+            return d2.file && d2.file.url ? (d2.file.url.startsWith('http') ? d2.file.url : (window.location.origin + d2.file.url)) : (d2.secure_url || d2.url);
+        }
+
+        // Wire posts tab buttons
+        document.addEventListener('DOMContentLoaded', () => {
+            const newBtn = document.getElementById('posts-new-btn'); if (newBtn) newBtn.addEventListener('click', openNewPostModal);
+            const refreshBtn = document.getElementById('posts-refresh-btn'); if (refreshBtn) refreshBtn.addEventListener('click', loadAllPostsForManager);
+            const headerNew = document.getElementById('btn-new-post'); if (headerNew) headerNew.addEventListener('click', () => { openNewPostModal(); document.querySelector('.nav-tab[data-tab="posts"]').click(); });
+            const headerRefresh = document.getElementById('btn-refresh'); if (headerRefresh) headerRefresh.addEventListener('click', () => { loadAnalytics(); loadAllPostsForManager(); });
+            const postsRefreshSmall = document.getElementById('posts-refresh-btn'); if (postsRefreshSmall) postsRefreshSmall.addEventListener('click', loadAllPostsForManager);
+        });
+
+        async function loadPosts() {
+            try {
+                const response = await fetch(`${API_URL}/admin/posts?page=1&limit=200`, {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await response.json();
+                if (data.success && data.posts) {
+                    document.getElementById('total-posts').textContent = data.total || data.posts.length;
+                }
+            } catch (error) {
+                console.error('Posts error:', error);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            if (confirm('Logout?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('authToken');
+                window.location.href = 'login.html';
+            }
+        });
+
+        // btn-refresh already wired to refresh analytics and posts via DOMContentLoaded wiring above
+        // Settings navigation
+        document.getElementById('btn-settings').addEventListener('click', () => {
+            window.location.href = 'admin-settings.html';
+        });
+
+        // Mobile nav wiring
+        function setupAdminMobileMenu() {
+            const hamburger = document.getElementById('admin-hamburger');
+            const nav = document.getElementById('admin-nav');
+            const overlay = document.getElementById('admin-overlay');
+            if (!hamburger || !nav || !overlay) return;
+
+            function openMenu(){ hamburger.classList.add('active'); nav.classList.add('active'); overlay.classList.add('active'); hamburger.setAttribute('aria-expanded','true'); nav.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+            function closeMenu(){ hamburger.classList.remove('active'); nav.classList.remove('active'); overlay.classList.remove('active'); hamburger.setAttribute('aria-expanded','false'); nav.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+
+            hamburger.addEventListener('click', () => { if (hamburger.classList.contains('active')) closeMenu(); else openMenu(); });
+            overlay.addEventListener('click', closeMenu);
+
+            const navNew = document.getElementById('nav-new-post'); if (navNew) navNew.addEventListener('click', (e)=>{ e.preventDefault(); closeMenu(); openNewPostModal(); document.querySelector('.nav-tab[data-tab="posts"]').click(); });
+            const navSettings = document.getElementById('nav-settings'); if (navSettings) navSettings.addEventListener('click', (e)=>{ e.preventDefault(); closeMenu(); window.location.href='admin-settings.html'; });
+            const navLogout = document.getElementById('nav-logout'); if (navLogout) navLogout.addEventListener('click', (e)=>{ e.preventDefault(); closeMenu(); if(confirm('Logout?')){ localStorage.removeItem('token'); localStorage.removeItem('authToken'); window.location.href='login.html'; } });
+
+            document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && hamburger.classList.contains('active')) closeMenu(); });
+            window.addEventListener('resize', ()=>{ if (window.innerWidth > 768 && hamburger.classList.contains('active')) closeMenu(); });
+        }
+
+        // initialize mobile menu setup now
+        setupAdminMobileMenu();
+
+        checkAuth();
+        setInterval(loadAnalytics, 60000); // Auto-refresh every minute
+    </script>
+</body>
+</html>

@@ -33,7 +33,9 @@ const pool = new Pool({
   ssl: sslConfig,
   max: 10, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection could not be established
+  connectionTimeoutMillis: 30000, // Increased to 30 seconds for Neon wake-up time
+  query_timeout: 20000, // Query timeout (20 seconds)
+  statement_timeout: 20000 // Statement timeout (20 seconds)
 });
 
 // Test connection on startup

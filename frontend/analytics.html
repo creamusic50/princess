@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics Dashboard | Smart Money Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      color: #333;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .time-selector, .period-selector {
+      padding: 10px 20px;
+      border: 2px solid #667eea;
+      border-radius: 5px;
+      background: white;
+      color: #333;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .time-selector:hover, .period-selector:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .logout-btn {
+      padding: 10px 20px;
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: #ff5252;
+      transform: translateY(-2px);
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .metric-card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border-left: 5px solid #667eea;
+      transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .metric-card h3 {
+      color: #999;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .metric-card .value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .metric-card .subtext {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .metric-card.secondary {
+      border-left-color: #764ba2;
+    }
+
+    .metric-card.secondary .value {
+      color: #764ba2;
+    }
+
+    .metric-card.success {
+      border-left-color: #26d07c;
+    }
+
+    .metric-card.success .value {
+      color: #26d07c;
+    }
+
+    .metric-card.warning {
+      border-left-color: #ffa502;
+    }
+
+    .metric-card.warning .value {
+      color: #ffa502;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .chart-container {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-container h2 {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .table-container {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      overflow-x: auto;
+    }
+
+    .table-container h2 {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #f8f9fa;
+      border-bottom: 2px solid #667eea;
+    }
+
+    th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      color: #666;
+    }
+
+    tr:hover {
+      background: #f8f9fa;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-primary {
+      background: #e3f2fd;
+      color: #667eea;
+    }
+
+    .badge-success {
+      background: #e8f5e9;
+      color: #26d07c;
+    }
+
+    .badge-warning {
+      background: #fff3e0;
+      color: #ffa502;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 50px 20px;
+      color: white;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      background: white;
+      padding: 60px 20px;
+      border-radius: 10px;
+      text-align: center;
+      color: #999;
+    }
+
+    .empty-state h2 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .error-message {
+      background: #ffebee;
+      color: #c62828;
+      padding: 15px 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      border-left: 5px solid #c62828;
+    }
+
+    @media (max-width: 768px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .overview-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .header h1 {
+        width: 100%;
+      }
+
+      .header-controls {
+        width: 100%;
+        justify-content: center;
+      }
+
+      table {
+        font-size: 12px;
+      }
+
+      th, td {
+        padding: 10px;
+      }
+    }
+
+    .nav-link {
+      display: inline-block;
+      margin-right: 20px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: #667eea;
+      transform: translateY(-2px);
+    }
+
+    .nav-section {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 15px 30px;
+      margin-bottom: 30px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav-section">
+      <a href="admin.html" class="nav-link">← Back to Dashboard</a>
+    </div>
+
+    <div class="header">
+      <h1>📊 Analytics Dashboard</h1>
+      <div class="header-controls">
+        <select class="time-selector" id="timeSelector">
+          <option value="7">Last 7 Days</option>
+          <option value="30" selected>Last 30 Days</option>
+          <option value="90">Last 90 Days</option>
+        </select>
+        <select class="period-selector" id="periodSelector">
+          <option value="day" selected>Day View</option>
+          <option value="week">Week View</option>
+          <option value="month">Month View</option>
+        </select>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div id="errorMessage"></div>
+
+    <div id="loadingState" class="loading">
+      <div class="loading-spinner"></div>
+      <p style="margin-top: 15px;">Loading analytics...</p>
+    </div>
+
+    <div id="analyticsContent" style="display: none;">
+      <!-- Overview Metrics -->
+      <div class="overview-grid">
+        <div class="metric-card">
+          <h3>Total Visitors</h3>
+          <div class="value" id="visitorCount">0</div>
+          <div class="subtext">Unique sessions in selected period</div>
+        </div>
+        <div class="metric-card secondary">
+          <h3>Total Pageviews</h3>
+          <div class="value" id="pageviewCount">0</div>
+          <div class="subtext">All page impressions</div>
+        </div>
+        <div class="metric-card success">
+          <h3>Avg Pages/Visitor</h3>
+          <div class="value" id="avgPages">0</div>
+          <div class="subtext">Engagement metric</div>
+        </div>
+        <div class="metric-card warning">
+          <h3>Bounce Rate</h3>
+          <div class="value" id="bounceRate">0%</div>
+          <div class="subtext">Single page sessions</div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-grid">
+        <!-- Traffic Over Time -->
+        <div class="chart-container full-width">
+          <h2>Traffic Over Time</h2>
+          <canvas id="trafficChart" height="80"></canvas>
+        </div>
+
+        <!-- Traffic by Country -->
+        <div class="chart-container">
+          <h2>Top Countries</h2>
+          <canvas id="countryChart" height="300"></canvas>
+        </div>
+
+        <!-- Traffic by Source -->
+        <div class="chart-container">
+          <h2>Traffic Sources</h2>
+          <canvas id="sourceChart" height="300"></canvas>
+        </div>
+      </div>
+
+      <!-- Top Posts Table -->
+      <div class="table-container">
+        <h2>Top Performing Posts</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Post Title</th>
+              <th>Views</th>
+              <th>Unique Visitors</th>
+              <th>Countries Reached</th>
+              <th>Engagement</th>
+            </tr>
+          </thead>
+          <tbody id="topPostsTable">
+            <tr>
+              <td colspan="5" style="text-align: center; color: #999;">Loading posts...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Country Breakdown Table -->
+      <div class="table-container">
+        <h2>Country Breakdown</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Country</th>
+              <th>Visitors</th>
+              <th>Pageviews</th>
+              <th>Percentage</th>
+              <th>Traffic Sources</th>
+            </tr>
+          </thead>
+          <tbody id="countryTable">
+            <tr>
+              <td colspan="5" style="text-align: center; color: #999;">Loading countries...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Traffic Sources Table -->
+      <div class="table-container">
+        <h2>Traffic Sources Detail</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Referrer</th>
+              <th>Unique Visitors</th>
+              <th>Pageviews</th>
+              <th>Percentage</th>
+            </tr>
+          </thead>
+          <tbody id="sourcesTable">
+            <tr>
+              <td colspan="5" style="text-align: center; color: #999;">Loading sources...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script>
+    let trafficChart, countryChart, sourceChart;
+
+    // Check authentication
+    async function checkAuth() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/index.html';
+        return false;
+      }
+      return true;
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/index.html';
+    }
+
+    // Format currency
+    function formatCurrency(num) {
+      return new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(num);
+    }
+
+    // Show error message
+    function showError(message) {
+      document.getElementById('errorMessage').innerHTML = `<div class="error-message">${message}</div>`;
+    }
+
+    // Fetch analytics data
+    async function fetchAnalytics() {
+      try {
+        const days = document.getElementById('timeSelector').value;
+        const period = document.getElementById('periodSelector').value;
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+          window.location.href = '/index.html';
+          return;
+        }
+
+        // Fetch overview data
+        const overviewRes = await fetch(`${CONFIG.API_BASE_URL}/analytics/overview`, {
+          headers: { 'x-auth-token': token }
+        });
+        
+        if (!overviewRes.ok) throw new Error('Failed to fetch overview');
+        const overview = await overviewRes.json();
+
+        // Fetch by-date data
+        const dateRes = await fetch(`${CONFIG.API_BASE_URL}/analytics/by-date?period=${period}`, {
+          headers: { 'x-auth-token': token }
+        });
+        
+        if (!dateRes.ok) throw new Error('Failed to fetch date data');
+        const dateData = await dateRes.json();
+
+        // Fetch by-country data
+        const countryRes = await fetch(`${CONFIG.API_BASE_URL}/analytics/by-country?days=${days}`, {
+          headers: { 'x-auth-token': token }
+        });
+        
+        if (!countryRes.ok) throw new Error('Failed to fetch country data');
+        const countryData = await countryRes.json();
+
+        // Fetch by-source data
+        const sourceRes = await fetch(`${CONFIG.API_BASE_URL}/analytics/by-source?days=${days}`, {
+          headers: { 'x-auth-token': token }
+        });
+        
+        if (!sourceRes.ok) throw new Error('Failed to fetch source data');
+        const sourceData = await sourceRes.json();
+
+        // Fetch engagement metrics
+        const engagementRes = await fetch(`${CONFIG.API_BASE_URL}/analytics/engagement?days=${days}`, {
+          headers: { 'x-auth-token': token }
+        });
+        
+        if (!engagementRes.ok) throw new Error('Failed to fetch engagement data');
+        const engagement = await engagementRes.json();
+
+        // Fetch top posts
+        const topPostsRes = await fetch(`${CONFIG.API_BASE_URL}/analytics/top-posts?days=${days}&limit=10`, {
+          headers: { 'x-auth-token': token }
+        });
+        
+        if (!topPostsRes.ok) throw new Error('Failed to fetch top posts');
+        const topPosts = await topPostsRes.json();
+
+        // Update metrics
+        updateMetrics(overview, engagement);
+
+        // Update charts
+        updateCharts(dateData, countryData, sourceData);
+
+        // Update tables
+        updateTables(topPosts, countryData, sourceData);
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('analyticsContent').style.display = 'block';
+
+      } catch (error) {
+        console.error('Error fetching analytics:', error);
+        showError('Failed to load analytics data. Please try again.');
+        document.getElementById('loadingState').style.display = 'none';
+      }
+    }
+
+    // Update metric cards
+    function updateMetrics(overview, engagement) {
+      const data = overview.data;
+      const eng = engagement.data;
+
+      document.getElementById('visitorCount').textContent = formatCurrency(data.overview.unique_visitors || 0);
+      document.getElementById('pageviewCount').textContent = formatCurrency(data.overview.total_pageviews || 0);
+      document.getElementById('avgPages').textContent = (data.overview.avg_pageviews_per_visitor || 0).toFixed(1);
+      document.getElementById('bounceRate').textContent = (eng.bounce_rate_percentage || 0).toFixed(1) + '%';
+    }
+
+    // Update charts
+    function updateCharts(dateData, countryData, sourceData) {
+      const chartColor = {
+        primary: '#667eea',
+        secondary: '#764ba2',
+        success: '#26d07c',
+        warning: '#ffa502'
+      };
+
+      // Traffic over time
+      const dateChartCtx = document.getElementById('trafficChart').getContext('2d');
+      const dates = dateData.data.map(d => {
+        const date = new Date(d.date);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }).slice(0, 30);
+      const visitors = dateData.data.map(d => d.visitors).slice(0, 30);
+
+      if (trafficChart) trafficChart.destroy();
+      trafficChart = new Chart(dateChartCtx, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [{
+            label: 'Visitors',
+            data: visitors,
+            borderColor: chartColor.primary,
+            backgroundColor: chartColor.primary + '20',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 5,
+            pointBackgroundColor: chartColor.primary,
+            pointBorderColor: 'white',
+            pointBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: '#999'
+              },
+              grid: {
+                color: '#eee'
+              }
+            },
+            x: {
+              ticks: {
+                color: '#999'
+              },
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+
+      // Country breakdown pie chart
+      const countryChartCtx = document.getElementById('countryChart').getContext('2d');
+      const topCountries = countryData.data.slice(0, 8);
+      const countryLabels = topCountries.map(c => c.country);
+      const countryValues = topCountries.map(c => c.pageviews);
+      const countryColors = [
+        '#667eea', '#764ba2', '#26d07c', '#ffa502',
+        '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24'
+      ];
+
+      if (countryChart) countryChart.destroy();
+      countryChart = new Chart(countryChartCtx, {
+        type: 'doughnut',
+        data: {
+          labels: countryLabels,
+          datasets: [{
+            data: countryValues,
+            backgroundColor: countryColors,
+            borderColor: 'white',
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: '#666',
+                font: {
+                  size: 12,
+                  weight: '600'
+                },
+                padding: 20
+              }
+            }
+          }
+        }
+      });
+
+      // Traffic source pie chart
+      const sourceChartCtx = document.getElementById('sourceChart').getContext('2d');
+      const topSources = sourceData.data.slice(0, 8);
+      const sourceLabels = topSources.map(s => s.traffic_source || 'direct');
+      const sourceValues = topSources.map(s => s.pageviews);
+
+      if (sourceChart) sourceChart.destroy();
+      sourceChart = new Chart(sourceChartCtx, {
+        type: 'doughnut',
+        data: {
+          labels: sourceLabels,
+          datasets: [{
+            data: sourceValues,
+            backgroundColor: countryColors,
+            borderColor: 'white',
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: '#666',
+                font: {
+                  size: 12,
+                  weight: '600'
+                },
+                padding: 20
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Update tables
+    function updateTables(topPosts, countryData, sourceData) {
+      // Top posts table
+      let postsHTML = '';
+      topPosts.data.forEach(post => {
+        postsHTML += `
+          <tr>
+            <td>${post.post_title || 'Unknown Post'}</td>
+            <td><strong>${post.total_views}</strong></td>
+            <td>${post.unique_visitors}</td>
+            <td><span class="badge badge-primary">${post.countries}</span></td>
+            <td><span class="badge badge-success">${(post.unique_visitors / (post.total_views || 1) * 100).toFixed(0)}% Engagement</span></td>
+          </tr>
+        `;
+      });
+      document.getElementById('topPostsTable').innerHTML = postsHTML || '<tr><td colspan="5" style="text-align: center; color: #999;">No post data yet</td></tr>';
+
+      // Country table
+      let countryHTML = '';
+      countryData.data.slice(0, 20).forEach(country => {
+        countryHTML += `
+          <tr>
+            <td><strong>${country.country}</strong></td>
+            <td>${country.visitors}</td>
+            <td>${country.pageviews}</td>
+            <td><span class="badge badge-primary">${country.percentage}%</span></td>
+            <td>${country.traffic_sources || 'Direct'}</td>
+          </tr>
+        `;
+      });
+      document.getElementById('countryTable').innerHTML = countryHTML || '<tr><td colspan="5" style="text-align: center; color: #999;">No country data yet</td></tr>';
+
+      // Sources table
+      let sourcesHTML = '';
+      sourceData.data.slice(0, 15).forEach(source => {
+        sourcesHTML += `
+          <tr>
+            <td><span class="badge badge-success">${source.traffic_source || 'Direct'}</span></td>
+            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${source.referrer || 'Direct'}</td>
+            <td>${source.unique_visitors}</td>
+            <td>${source.pageviews}</td>
+            <td><span class="badge badge-warning">${source.percentage}%</span></td>
+          </tr>
+        `;
+      });
+      document.getElementById('sourcesTable').innerHTML = sourcesHTML || '<tr><td colspan="5" style="text-align: center; color: #999;">No traffic source data yet</td></tr>';
+    }
+
+    // Event listeners
+    document.getElementById('timeSelector').addEventListener('change', fetchAnalytics);
+    document.getElementById('periodSelector').addEventListener('change', fetchAnalytics);
+
+    // Initialize
+    window.addEventListener('load', async () => {
+      if (await checkAuth()) {
+        fetchAnalytics();
+      }
+    });
+  </script>
+</body>
+</html>

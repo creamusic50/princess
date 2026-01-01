@@ -2,6 +2,7 @@ require('dotenv').config();
 const { query, pool } = require('../config/database');
 const User = require('../models/User');
 const Post = require('../models/Post');
+const Analytics = require('../backend/models/Analytics');
 
 async function migrate() {
   console.log('🔄 Starting database migration...');
@@ -16,6 +17,7 @@ async function migrate() {
     console.log('\n📋 Creating tables...');
     await User.createTable();
     await Post.createTable();
+    await Analytics.createTable();
     
     // Create admin user
     console.log('\n👤 Setting up admin user...');
@@ -105,6 +107,7 @@ async function migrate() {
     console.log('\n📊 Migration Summary:');
     console.log('   ✅ Users table created');
     console.log('   ✅ Posts table created');
+    console.log('   ✅ Analytics tables created');
     console.log('   ✅ Admin user created');
     console.log('   ✅ Sample posts added');
     console.log('\n🔐 Admin Login:');

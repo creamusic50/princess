@@ -532,5 +532,21 @@
             });
         });
     </script>
+    <!-- Analytics Tracking -->
+    <script>
+        (function(){
+            const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            try {
+                fetch(API_URL + '/analytics/track', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        page: window.location.pathname,
+                        referrer: document.referrer || 'Direct'
+                    })
+                }).catch(e => console.log('Analytics error:', e));
+            } catch(e) { }
+        })();
+    </script>
 </body>
 </html>

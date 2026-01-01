@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
-const Post = require('../models/Post');
-const { protect, admin } = require('../middleware/auth');
+const Post = require('../../models/Post');
+const { protect, admin } = require('../../middleware/auth');
 const Cache = require('../utils/cache');
 
 // Initialize cache with 5 minute TTL for list queries, 10 minutes for detail
