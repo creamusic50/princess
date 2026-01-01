@@ -35,7 +35,8 @@ app.use(compression({
 // Security headers - CSP REMOVED for full flexibility
 app.use(helmet({
   contentSecurityPolicy: false,  // DISABLED - No more CSP restrictions!
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }
 }));
 
 // Enhanced performance headers for Core Web Vitals (100/100 Desktop Optimized)
@@ -51,26 +52,42 @@ app.use((req, res, next) => {
   // Add timing headers for performance monitoring
   res.setHeader('Server-Timing', 'db;dur=10, cache;dur=20');
   
-  // Desktop performance optimization - aggressive caching
-  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  
-  // Critical resource hints with early hints for desktop
-  if (req.path === '/' || req.path === '/index.html') {
-    res.setHeader('Link', [
-      '</js/config.min.f841bc00.js>; rel=preload; as=script; nopush',
-      '</js/main.min.eb2549f5.js>; rel=preload; as=script; nopush',
-      '<https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap>; rel=preload; as=style; nopush',
-      '<https://fonts.gstatic.com>; rel=preconnect; crossorigin',
-      '<https://pagead2.googlesyndication.com>; rel=preconnect; nopush'
-    ].join(', '));
-    
-    // Desktop-specific: early hints for faster rendering
-    res.setHeader('X-UA-Compatible', 'IE=edge');
-  }
-  
-  // Enable request compression for faster delivery
+  // Enable compression headers
   if (req.headers['accept-encoding']?.includes('gzip')) {
     res.setHeader('Vary', 'Accept-Encoding');
+  }
+  
+  // Set cache control based on content type
+  if (req.path === '/' || req.path === '/index.html') {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  } else if (/\.(js|css|woff2|woff|ttf|otf|eot)$/.test(req.path)) {
+    // Immutable static assets - cache for 1 year
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  } else if (/\.(jpg|jpeg|png|gif|svg|webp|ico)$/.test(req.path)) {
+    // Images - cache for 30 days
+    res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+  } else {
+    // Default cache for 1 day
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+  }
+  
+  // Critical resource hints for improved performance
+  if (req.path === '/' || req.path === '/index.html') {
+    res.setHeader('Link', [
+      '</js/config.min.f841bc00.js>; rel=preload; as=script; nopush; fetchpriority=high',
+      '</js/main.min.eb2549f5.js>; rel=preload; as=script; nopush; fetchpriority=high',
+      '</css/responsive.min.c014bbda.css>; rel=preload; as=style; nopush; fetchpriority=high',
+      '<https://fonts.googleapis.com>; rel=dns-prefetch',
+      '<https://fonts.gstatic.com>; rel=dns-prefetch; crossorigin',
+      '<https://pagead2.googlesyndication.com>; rel=dns-prefetch'
+    ].join(', '));
+  }
+  
+  // Enable CORS preflight caching for better performance
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Max-Age', '86400');
   }
   
   next();
@@ -107,18 +124,31 @@ app.use('/api/analytics', analyticsRouter);
 // Serve static frontend from backend/frontend
 const staticDir = path.join(__dirname, 'frontend');
 
-// Serve static files with explicit file type handling
-// Serve pre-compressed assets (Brotli/gzip) when available, fallback to express.static
+// Serve pre-compressed assets (Brotli/gzip) when available
 app.use('/', expressStaticGzip(staticDir, {
   enableBrotli: true,
   orderPreference: ['br', 'gz'],
-  setHeaders: (res, path) => {
-    // Reuse same caching logic as below
-    if (path.endsWith('.html')) {
+  maxAge: '1d',
+  setHeaders: (res, filePath) => {
+    // No-cache for HTML files
+    if (filePath.endsWith('.html')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       return;
     }
-    if (/\.(js|css|png|jpg|jpeg|webp|svg|woff2|woff|ttf)$/.test(path)) {
+    // Immutable cache for hashed assets
+    if (/\.(js|css)$/.test(filePath) && /[a-f0-9]{8,}/.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      return;
+    }
+    // Images - 30 days
+    if (/\.(png|jpg|jpeg|gif|webp|svg|ico)$/.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+      return;
+    }
+    // Fonts - 1 year
+    if (/\.(woff2|woff|ttf|otf|eot)$/.test(filePath)) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
       return;
     }
@@ -126,16 +156,27 @@ app.use('/', expressStaticGzip(staticDir, {
   }
 }));
 
-// Fallback static serve (if no precompressed version found)
+// Fallback static serve
 app.use(express.static(staticDir, {
-  index: false,  // Don't automatically serve index.html for directories
-  extensions: ['html', 'htm'], // Allow .html extension to be optional
+  index: false,
+  extensions: ['html', 'htm'],
+  maxAge: '1d',
+  etag: true,
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
       return;
     }
-    if (/\.(js|css|png|jpg|jpeg|webp|svg|woff2|woff|ttf)$/.test(filePath)) {
+    if (/\.(js|css)$/.test(filePath) && /[a-f0-9]{8,}/.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      return;
+    }
+    if (/\.(png|jpg|jpeg|gif|webp|svg|ico)$/.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+      return;
+    }
+    if (/\.(woff2|woff|ttf|otf|eot)$/.test(filePath)) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
       return;
     }

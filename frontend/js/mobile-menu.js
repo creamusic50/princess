@@ -31,7 +31,7 @@
         overlay.classList.add('active');
         body.style.overflow = 'hidden';
         hamburger.setAttribute('aria-expanded', 'true');
-        console.log('📱 Menu OPENED');
+        console.log('📱 Menu OPENED - VISIBLE NOW');
     }
     
     function closeMenu() {

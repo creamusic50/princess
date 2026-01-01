@@ -62,16 +62,14 @@
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
  <link rel="preconnect" href="https://pagead2.googlesyndication.com">
  
- <!-- Preload critical resources -->
- <link rel="preload" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" as="style">
- <link rel="preload" href="css/responsive.min.c014bbda.css" as="style">
- <link rel="preload" href="js/config.min.f841bc00.js" as="script">
- <link rel="preload" href="js/main.min.eb2549f5.js" as="script">
+ <!-- Preconnect to critical resources (faster than preload for 3rd party) -->
+ <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin fetchpriority="high">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin fetchpriority="high">
  
  <!-- Critical CSS inlined for zero render-blocking -->
- <style>*{margin:0;padding:0;box-sizing:border-box}html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-behavior:smooth}body{font-family:Lato,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f9fa;color:#333;line-height:1.6;overflow-x:hidden}header{background:linear-gradient(135deg,#1a252f 0%,#2c3e50 100%);box-shadow:0 2px 8px rgba(0,0,0,.1);position:sticky;top:0;z-index:1000;border-bottom:2px solid #3498db;will-change:transform;contain:layout style paint}.navbar{padding:12px 0}.container{max-width:1200px;margin:0 auto;padding:0 20px}.nav-wrapper{display:flex;justify-content:space-between;align-items:center}.logo{font-size:22px;font-weight:700;text-decoration:none;color:#3498db;transition:color .2s ease;will-change:color}.logo:hover{color:#2980b9}.nav-menu{display:flex;list-style:none;gap:25px;margin:0;padding:0}.nav-menu a{text-decoration:none;color:#ecf0f1;font-weight:500;font-size:15px;transition:color .2s ease;position:relative}.nav-menu a::after{content:'';position:absolute;width:0;height:2px;bottom:-5px;left:50%;background:#3498db;transition:all .3s;transform:translateX(-50%)}.nav-menu a:hover{color:#3498db}.nav-menu a:hover::after{width:100%}.hamburger{display:none}.hero{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:60px 20px;text-align:center;position:relative;overflow:hidden;contain:layout style paint}.hero h1{font-size:42px;margin-bottom:16px;font-weight:700;line-height:1.2;position:relative;z-index:1;text-shadow:2px 2px 4px rgba(0,0,0,.2)}.hero p{font-size:18px;max-width:600px;margin:0 auto;line-height:1.5;opacity:.95;position:relative;z-index:1}.categories{padding:30px 0;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.05)}.category-grid{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}.category-btn{background:#fff;border:2px solid #e0e0e0;padding:10px 20px;border-radius:25px;cursor:pointer;transition:all .3s;font-weight:600;font-size:14px;color:#666;white-space:nowrap}.category-btn:hover{border-color:#3498db;color:#3498db;transform:translateY(-2px);box-shadow:0 4px 8px rgba(52,152,219,.2)}.category-btn.active{background:#3498db;color:#fff;border-color:#3498db;box-shadow:0 4px 8px rgba(52,152,219,.3)}.blog-section{padding:40px 0;min-height:400px}.blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;padding:30px 0}.blog-card{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.08);transition:transform .2s,box-shadow .2s;will-change:transform;contain:layout style paint}.blog-card:hover{transform:translateY(-4px);box-shadow:0 4px 12px rgba(0,0,0,.12)}.blog-card-content{padding:20px}.category-badge{display:inline-block;background:#e8f4f8;color:#3498db;padding:4px 10px;border-radius:20px;font-size:11px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}.blog-card h3{font-size:19px;margin:12px 0;line-height:1.3;color:#2c3e50}.blog-card a{color:#2c3e50;text-decoration:none}.blog-card a:hover{color:#3498db}.excerpt{color:#666;font-size:14px;margin:10px 0;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.blog-card-meta{display:flex;gap:12px;font-size:12px;color:#999;margin-top:12px;align-items:center}.read-more{display:inline-block;color:#3498db;text-decoration:none;font-weight:600;margin-top:8px;transition:all .2s;position:relative}.pagination{display:flex;justify-content:center;gap:10px;margin:40px 0;flex-wrap:wrap}.pagination button{background:#fff;border:2px solid #e0e0e0;padding:10px 16px;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:600;min-width:44px}.pagination button:hover:not(:disabled){border-color:#3498db;color:#3498db;transform:translateY(-2px)}.pagination button.active{background:#3498db;color:#fff;border-color:#3498db}.pagination button:disabled{opacity:.5;cursor:not-allowed}.site-footer{background:#1a252f;color:#ecf0f1;padding:50px 0 20px;margin-top:60px}.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:40px;margin-bottom:30px}.footer-title{color:#3498db;font-size:20px;margin-bottom:15px;font-weight:700}.footer-desc{color:#bdc3c7;font-size:14px;line-height:1.6;margin-bottom:20px}.footer-heading{color:#fff;font-size:16px;margin-bottom:15px;font-weight:600}.footer-links{list-style:none;padding:0}.footer-links li{margin-bottom:10px}.footer-links a{color:#bdc3c7;text-decoration:none;transition:color .2s;font-size:14px}.footer-links a:hover{color:#3498db}.social-links{display:flex;gap:15px}.social-link{color:#bdc3c7;text-decoration:none;transition:color .2s;font-size:14px;padding:8px 16px;background:rgba(52,152,219,.1);border-radius:6px}.social-link:hover{color:#3498db;background:rgba(52,152,219,.2)}.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:20px;text-align:center;color:#7f8c8d;font-size:14px}.footer-bottom a{color:#3498db;text-decoration:none}.footer-bottom a:hover{text-decoration:underline}.loading{text-align:center;padding:50px 20px;color:#3498db;font-size:16px}.spinner{display:inline-block;width:36px;height:36px;border:3px solid #f3f3f3;border-top:3px solid #3498db;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}@media(max-width:768px){.hero h1{font-size:30px}.hero p{font-size:16px}.nav-menu{gap:15px;font-size:14px}.blog-grid{grid-template-columns:1fr;gap:20px}.category-grid{gap:8px}.category-btn{padding:8px 16px;font-size:13px}.footer-grid{grid-template-columns:1fr;gap:30px}}.footer{text-align:center;padding:20px;font-size:14px;color:#777}.footer a{color:#1a73e8;text-decoration:none;margin:0 6px}.footer a:hover{text-decoration:underline}@media (prefers-color-scheme:dark){.footer{color:#bbb}.footer a{color:#84a9ff}}</style>
+ <style>*{margin:0;padding:0;box-sizing:border-box}html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;scroll-behavior:smooth}body{font-family:Lato,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f9fa;color:#333;line-height:1.6;overflow-x:hidden}header{background:linear-gradient(135deg,#1a252f 0%,#2c3e50 100%);box-shadow:0 2px 8px rgba(0,0,0,.1);position:sticky;top:0;z-index:998;border-bottom:2px solid #3498db;will-change:transform;contain:layout style paint}.navbar{padding:12px 0;overflow:visible!important}.container{max-width:1200px;margin:0 auto;padding:0 20px}.nav-wrapper{display:flex;justify-content:space-between;align-items:center}.logo{font-size:22px;font-weight:700;text-decoration:none;color:#3498db;transition:color .2s ease;will-change:color}.logo:hover{color:#2980b9}.hamburger{display:none;flex-direction:column;cursor:pointer;padding:8px;background:transparent;border:none;z-index:10001;position:relative}.hamburger span{width:25px;height:3px;background:#ecf0f1;margin:3px 0;transition:all .3s;border-radius:3px}.hamburger.active span:nth-child(1){transform:rotate(45deg) translate(8px,8px)}.hamburger.active span:nth-child(2){opacity:0}.hamburger.active span:nth-child(3){transform:rotate(-45deg) translate(7px,-7px)}.nav-menu{display:flex;list-style:none;gap:25px;margin:0;padding:0}.nav-menu a{text-decoration:none;color:#ecf0f1;font-weight:500;font-size:15px;transition:color .2s ease;position:relative}.nav-menu a::after{content:'';position:absolute;width:0;height:2px;bottom:-5px;left:50%;background:#3498db;transition:all .3s;transform:translateX(-50%)}.nav-menu a:hover{color:#3498db}.nav-menu a:hover::after{width:100%}.mobile-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;opacity:0;transition:opacity .3s}.mobile-overlay.active{display:block;opacity:1}.hero{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:60px 20px;text-align:center;position:relative;overflow:hidden;contain:layout style paint}.hero h1{font-size:42px;margin-bottom:16px;font-weight:700;line-height:1.2;position:relative;z-index:1;text-shadow:2px 2px 4px rgba(0,0,0,.2)}.hero p{font-size:18px;max-width:600px;margin:0 auto;line-height:1.5;opacity:.95;position:relative;z-index:1}.categories{padding:30px 0;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.05)}.category-grid{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}.category-btn{background:#fff;border:2px solid #e0e0e0;padding:10px 20px;border-radius:25px;cursor:pointer;transition:all .3s;font-weight:600;font-size:14px;color:#666;white-space:nowrap}.category-btn:hover{border-color:#3498db;color:#3498db;transform:translateY(-2px);box-shadow:0 4px 8px rgba(52,152,219,.2)}.category-btn.active{background:#3498db;color:#fff;border-color:#3498db;box-shadow:0 4px 8px rgba(52,152,219,.3)}.blog-section{padding:40px 0;min-height:400px}.blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px;padding:30px 0}.blog-card{background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.08);transition:transform .2s,box-shadow .2s;will-change:transform;contain:layout style paint}.blog-card:hover{transform:translateY(-4px);box-shadow:0 4px 12px rgba(0,0,0,.12)}.blog-card-content{padding:20px}.category-badge{display:inline-block;background:#e8f4f8;color:#3498db;padding:4px 10px;border-radius:20px;font-size:11px;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}.blog-card h3{font-size:19px;margin:12px 0;line-height:1.3;color:#2c3e50}.blog-card a{color:#2c3e50;text-decoration:none}.blog-card a:hover{color:#3498db}.excerpt{color:#666;font-size:14px;margin:10px 0;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.blog-card-meta{display:flex;gap:12px;font-size:12px;color:#999;margin-top:12px;align-items:center}.read-more{display:inline-block;color:#3498db;text-decoration:none;font-weight:600;margin-top:8px;transition:all .2s;position:relative}.pagination{display:flex;justify-content:center;gap:10px;margin:40px 0;flex-wrap:wrap}.pagination button{background:#fff;border:2px solid #e0e0e0;padding:10px 16px;border-radius:6px;cursor:pointer;transition:all .2s;font-weight:600;min-width:44px}.pagination button:hover:not(:disabled){border-color:#3498db;color:#3498db;transform:translateY(-2px)}.pagination button.active{background:#3498db;color:#fff;border-color:#3498db}.pagination button:disabled{opacity:.5;cursor:not-allowed}.site-footer{background:#1a252f;color:#ecf0f1;padding:50px 0 20px;margin-top:60px}.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:40px;margin-bottom:30px}.footer-title{color:#3498db;font-size:20px;margin-bottom:15px;font-weight:700}.footer-desc{color:#bdc3c7;font-size:14px;line-height:1.6;margin-bottom:20px}.footer-heading{color:#fff;font-size:16px;margin-bottom:15px;font-weight:600}.footer-links{list-style:none;padding:0}.footer-links li{margin-bottom:10px}.footer-links a{color:#bdc3c7;text-decoration:none;transition:color .2s;font-size:14px}.footer-links a:hover{color:#3498db}.social-links{display:flex;gap:15px}.social-link{color:#bdc3c7;text-decoration:none;transition:color .2s;font-size:14px;padding:8px 16px;background:rgba(52,152,219,.1);border-radius:6px}.social-link:hover{color:#3498db;background:rgba(52,152,219,.2)}.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:20px;text-align:center;color:#7f8c8d;font-size:14px}.footer-bottom a{color:#3498db;text-decoration:none}.footer-bottom a:hover{text-decoration:underline}.loading{text-align:center;padding:50px 20px;color:#3498db;font-size:16px}.spinner{display:inline-block;width:36px;height:36px;border:3px solid #f3f3f3;border-top:3px solid #3498db;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}@media(max-width:768px){.nav-menu{flex-direction:row!important;flex-wrap:wrap!important;gap:8px!important;padding:0!important}.nav-menu li{width:auto;text-align:left}.nav-menu a{display:inline-block!important;padding:8px 12px!important;font-size:13px!important;color:#fff!important;text-decoration:none!important}.nav-menu a::after{display:none}.hero h1{font-size:30px}.hero p{font-size:16px}.blog-grid{grid-template-columns:1fr;gap:20px}.category-grid{gap:8px}.category-btn{padding:8px 16px;font-size:13px}.footer-grid{grid-template-columns:1fr;gap:30px}}.footer{text-align:center;padding:20px;font-size:14px;color:#777}.footer a{color:#1a73e8;text-decoration:none;margin:0 6px}.footer a:hover{text-decoration:underline}@media (prefers-color-scheme:dark){.footer{color:#bbb}.footer a{color:#84a9ff}}</style>
  
- <!-- Load stylesheets immediately -->
+ <!-- Load stylesheets with optimal strategy (no preload warnings) -->
  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
  <link rel="stylesheet" href="css/responsive.min.c014bbda.css">
  <link rel="stylesheet" href="css/mobile-menu.css">
@@ -83,8 +81,13 @@
  <!-- Structured data for SEO -->
  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Smart Money Guide","url":"https://tilana.online/","description":"Expert advice on personal finance, investing, saving, and building wealth","publisher":{"@type":"Organization","name":"Smart Money Guide","logo":{"@type":"ImageObject","url":"https://tilana.online/images/logo.png"}},"potentialAction":{"@type":"SearchAction","target":"https://tilana.online/search?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
  <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
- <script src="js/config.js"></script>
- <script src="js/tracker.js"></script>
+ 
+ <!-- Force mobile menu visibility override -->
+ <style>
+ @media(max-width:768px){
+   .nav-menu{flex-direction:column!important;gap:15px!important;position:static!important;width:auto!important;height:auto!important;background:transparent!important;padding:0!important;transform:none!important;visibility:visible!important;opacity:1!important;z-index:auto!important;box-shadow:none!important}.nav-menu li{width:100%;text-align:left}.nav-menu a{display:block!important;padding:10px 0!important;font-size:14px!important;color:#fff!important;text-decoration:none!important}.nav-menu a::after{display:none}
+ }
+ </style>
 </head>
 <body>
  <header role="banner">
@@ -92,11 +95,6 @@
  <div class="container">
  <div class="nav-wrapper">
  <a href="/" class="logo" aria-label="Smart Money Guide home">💰 Smart Money Guide</a>
- <button class="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
- <span></span>
- <span></span>
- <span></span>
- </button>
  <ul class="nav-menu" role="menubar">
  <li role="none"><a href="/" role="menuitem">Home</a></li>
  <li role="none"><a href="https://afflat3c2.com/trk/lnk/0918CA2E-1041-40FA-B56E-CCC29C4EAAEA/?o=25745&c=918277&a=781059&k=BF053" role="menuitem" target="_blank" rel="nofollow sponsored noopener">📱 Phone Lookup Guide</a></li>
@@ -134,21 +132,6 @@
  <div class="container">
  <h2 id="posts-heading" class="sr-only">Latest Blog Posts</h2>
  <div class="blog-grid" id="blog-content" role="tabpanel" aria-live="polite"></div>
-
-<!-- Ad unit: Smart Money Guide - In-page ad -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695"
-  crossorigin="anonymous"></script>
-<!-- tilana -->
-<ins class="adsbygoogle"
-  style="display:block"
-  data-ad-client="ca-pub-4861288278202695"
-  data-ad-slot="6159268487"
-  data-ad-format="auto"
-  data-full-width-responsive="true"></ins>
-<script>
-  (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-
  <nav class="pagination" aria-label="Blog post pagination"></nav>
  </div>
  </section>
@@ -207,50 +190,62 @@
  </div>
  </footer>
  
- <!-- Load scripts with proper attributes -->
- <script src="js/config.min.f841bc00.js" defer></script>
- <script src="js/main.min.eb2549f5.js" defer></script>
- <script src="js/mobile-menu.js" defer></script>
- 
- <!-- Delayed AdSense loading -->
- <script>
-    document.addEventListener('DOMContentLoaded',function(){
+ <!-- Load scripts with proper attributes for optimal Core Web Vitals -->
+ <script src="js/config.min.f841bc00.js" defer fetchpriority="high"></script>
+ <script src="js/main.min.eb2549f5.js" defer fetchpriority="high"></script>
+
+ <!-- Deferred AdSense loading (loads after interactive) -->
+ <script defer>
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', loadAdSense);
+    } else {
+        loadAdSense();
+    }
+    function loadAdSense(){
         setTimeout(function(){
-            var a=document.createElement('script');
-            a.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695';
-            a.async=true;a.crossOrigin='anonymous';a.fetchPriority='low';
-            document.head.appendChild(a);
-        },5000)
-    })
- </script>
- 
- <!-- Service Worker registration -->
- <script>
-    if('serviceWorker' in navigator){
-        window.addEventListener('load',function(){
-            navigator.serviceWorker.register('/sw.js').then(function(r){
-                console.log('SW registered:',r.scope)
-            }).catch(function(e){
-                console.log('SW registration failed:',e)
-            })
-        })
+            const s = document.createElement('script');
+            s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695';
+            s.async = true;
+            s.crossOrigin = 'anonymous';
+            s.setAttribute('fetchpriority', 'low');
+            document.head.appendChild(s);
+        }, 3000);
     }
  </script>
  
- <!-- Analytics Tracking -->
- <script>
+ <!-- Service Worker registration (non-blocking) -->
+ <script defer>
+    if('serviceWorker' in navigator){
+        window.addEventListener('load', function(){
+            navigator.serviceWorker.register('/sw.js?v=' + Date.now()).then(function(r){
+                console.log('SW registered:', r.scope);
+            }).catch(function(e){
+                console.log('SW registration failed:', e);
+            });
+        });
+    }
+ </script>
+ 
+ <!-- Analytics Tracking (non-blocking, deferred) -->
+ <script defer>
     (function(){
         const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
-        try {
+        if(navigator.sendBeacon){
+            navigator.sendBeacon(API_URL + '/analytics/track', JSON.stringify({
+                page: window.location.pathname,
+                referrer: document.referrer || 'Direct'
+            }));
+        } else {
             fetch(API_URL + '/analytics/track', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     page: window.location.pathname,
                     referrer: document.referrer || 'Direct'
-                })
-            }).catch(e => console.log('Analytics error:', e));
-        } catch(e) { }
+                }),
+                keepalive: true
+            }).catch(e => null);
+        }
     })();
  </script>
 </body>

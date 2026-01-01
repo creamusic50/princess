@@ -15,7 +15,9 @@ const STATIC_ASSETS = [
   '/css/style.min.f5f26ea4.css',
   '/css/responsive.min.c014bbda.css',
   '/js/config.min.f841bc00.js',
-  '/js/main.min.eb2549f5.js'
+  '/js/main.min.eb2549f5.js',
+  '/js/config.js',
+  '/js/tracker.js'
 ];
 
 // Install event - cache critical static assets aggressively
@@ -99,7 +101,10 @@ self.addEventListener('fetch', (event) => {
             })
             .catch(() => {
               // Return cached version if network fails
-              return caches.match(request);
+              return caches.match(request)
+                .then((cachedResponse) => {
+                  return cachedResponse || new Response('Offline', { status: 503 });
+                });
             });
         })
         .catch(() => {
