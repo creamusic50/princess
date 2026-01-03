@@ -35,8 +35,7 @@ app.use(compression({
 // Security headers - CSP REMOVED for full flexibility
 app.use(helmet({
   contentSecurityPolicy: false,  // DISABLED - No more CSP restrictions!
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
 }));
 
 // Enhanced performance headers for Core Web Vitals (100/100 Desktop Optimized)
@@ -52,42 +51,23 @@ app.use((req, res, next) => {
   // Add timing headers for performance monitoring
   res.setHeader('Server-Timing', 'db;dur=10, cache;dur=20');
   
-  // Enable compression headers
-  if (req.headers['accept-encoding']?.includes('gzip')) {
-    res.setHeader('Vary', 'Accept-Encoding');
-  }
-  
-  // Set cache control based on content type
-  if (req.path === '/' || req.path === '/index.html') {
+  // Desktop performance optimization - aggressive caching
+  // But do NOT apply aggressive caching to the service worker or HTML files so clients pick up updates quickly
+  if (req.path === '/sw.js' || req.path.endsWith('.html')) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
-  } else if (/\.(js|css|woff2|woff|ttf|otf|eot)$/.test(req.path)) {
-    // Immutable static assets - cache for 1 year
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  } else if (/\.(jpg|jpeg|png|gif|svg|webp|ico)$/.test(req.path)) {
-    // Images - cache for 30 days
-    res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
   } else {
-    // Default cache for 1 day
-    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   }
   
-  // Critical resource hints for improved performance
-  if (req.path === '/' || req.path === '/index.html') {
-    res.setHeader('Link', [
-      '</js/config.min.f841bc00.js>; rel=preload; as=script; nopush; fetchpriority=high',
-      '</js/main.min.eb2549f5.js>; rel=preload; as=script; nopush; fetchpriority=high',
-      '</css/responsive.min.c014bbda.css>; rel=preload; as=style; nopush; fetchpriority=high',
-      '<https://fonts.googleapis.com>; rel=dns-prefetch',
-      '<https://fonts.gstatic.com>; rel=dns-prefetch; crossorigin',
-      '<https://pagead2.googlesyndication.com>; rel=dns-prefetch'
-    ].join(', '));
-  }
+  // Critical resource hints with early hints for desktop
+  // Do not send Link preload headers here to avoid preload warnings in browsers.
+  // Preloads are handled inline in HTML where appropriate.
   
-  // Enable CORS preflight caching for better performance
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Max-Age', '86400');
+  // Enable request compression for faster delivery
+  if (req.headers['accept-encoding']?.includes('gzip')) {
+    res.setHeader('Vary', 'Accept-Encoding');
   }
   
   next();
@@ -103,14 +83,14 @@ app.get('/api/health', (req, res) => {
 });
 
 // Mount API routes from repository root
-const postsRouter = require(path.join(__dirname, '..', 'routes', 'posts'));
-const categoriesRouter = require(path.join(__dirname, '..', 'routes', 'categories'));
-const authRouter = require(path.join(__dirname, '..', 'routes', 'auth'));
-const contactRouter = require(path.join(__dirname, '..', 'routes', 'contact'));
-const metaRouter = require(path.join(__dirname, '..', 'routes', 'meta'));
-const uploadRouter = require(path.join(__dirname, '..', 'routes', 'upload'));
-const adminRouter = require(path.join(__dirname, '..', 'routes', 'admin'));
-const analyticsRouter = require(path.join(__dirname, '..', 'routes', 'analytics'));
+const postsRouter = require('./routes/posts');
+const categoriesRouter = require('./routes/categories');
+const authRouter = require('./routes/auth');
+const contactRouter = require('./routes/contact');
+const metaRouter = require('./routes/meta');
+const uploadRouter = require('./routes/upload');
+const adminRouter = require('./routes/admin');
+const analyticsRouter = require('./routes/analytics');
 
 app.use('/api/posts', postsRouter);
 app.use('/api/categories', categoriesRouter);
@@ -124,63 +104,35 @@ app.use('/api/analytics', analyticsRouter);
 // Serve static frontend from backend/frontend
 const staticDir = path.join(__dirname, 'frontend');
 
-// Serve pre-compressed assets (Brotli/gzip) when available
-app.use('/', expressStaticGzip(staticDir, {
-  enableBrotli: true,
-  orderPreference: ['br', 'gz'],
-  maxAge: '1d',
+// Serve static files with explicit MIME type and caching headers
+app.use(express.static(staticDir, {
+  index: ['index.html'],
   setHeaders: (res, filePath) => {
-    // No-cache for HTML files
+    // Set proper MIME type for CSS files
+    if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css; charset=utf-8');
+    }
+    
+    // HTML files: no cache
     if (filePath.endsWith('.html')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
       return;
     }
-    // Immutable cache for hashed assets
-    if (/\.(js|css)$/.test(filePath) && /[a-f0-9]{8,}/.test(filePath)) {
+    
+    // Versioned assets: long-term caching
+    // Detect common versioned patterns (.min. or -<hash>.) in filenames to apply immutable caching
+    const isAsset = /\.(js|css|png|jpg|jpeg|webp|svg|woff2|woff|ttf|eot)$/.test(filePath);
+    const hasMin = filePath.includes('.min.');
+    const hasHash = /-[a-f0-9]{6,}\./i.test(path.basename(filePath));
+    if (isAsset && (hasMin || hasHash)) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
       return;
     }
-    // Images - 30 days
-    if (/\.(png|jpg|jpeg|gif|webp|svg|ico)$/.test(filePath)) {
-      res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
-      return;
-    }
-    // Fonts - 1 year
-    if (/\.(woff2|woff|ttf|otf|eot)$/.test(filePath)) {
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-      return;
-    }
-    res.setHeader('Cache-Control', 'public, max-age=86400');
-  }
-}));
-
-// Fallback static serve
-app.use(express.static(staticDir, {
-  index: false,
-  extensions: ['html', 'htm'],
-  maxAge: '1d',
-  etag: true,
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.setHeader('Pragma', 'no-cache');
-      return;
-    }
-    if (/\.(js|css)$/.test(filePath) && /[a-f0-9]{8,}/.test(filePath)) {
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-      return;
-    }
-    if (/\.(png|jpg|jpeg|gif|webp|svg|ico)$/.test(filePath)) {
-      res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
-      return;
-    }
-    if (/\.(woff2|woff|ttf|otf|eot)$/.test(filePath)) {
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-      return;
-    }
-    res.setHeader('Cache-Control', 'public, max-age=86400');
+    
+    // Default: moderate caching
+    res.setHeader('Cache-Control', 'public, max-age=3600');
   }
 }));
 
@@ -193,6 +145,12 @@ app.get('/admin.html', (req, res) => {
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ success: false, message: 'API route not found' });
+  }
+
+  // Don't serve index.html for static assets
+  const staticExtensions = /\.(js|css|png|jpg|jpeg|webp|svg|gif|ico|woff2|woff|ttf|eot)$/i;
+  if (staticExtensions.test(req.path)) {
+    return res.status(404).send('Not found');
   }
 
   // Check if the requested file exists

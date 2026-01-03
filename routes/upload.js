@@ -2,26 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { uploadPostImage, uploadPostImages, deleteFile, getFileUrl } = require('../middleware/upload');
 const { protect, admin } = require('../middleware/auth');
-const multer = require('multer');
-
-// Cloudinary is optional. Try to require and configure it, but don't crash the server
-let cloudinary;
-try {
-  // lazy-require cloudinary so missing module doesn't crash startup
-  cloudinary = require('cloudinary').v2;
-
-  // Configure cloudinary from environment (CLOUDINARY_URL or individual vars)
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
-  });
-} catch (err) {
-  console.warn('[upload] cloudinary module not available or failed to configure — cloudinary endpoints will be disabled.');
-  cloudinary = null;
-}
-
-const memoryUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 // @route   POST /api/upload/image
 // @desc    Upload single image
@@ -168,47 +148,6 @@ router.get('/list', protect, admin, (req, res) => {
       success: false,
       message: 'Error listing files'
     });
-  }
-});
-
-// @route   POST /api/upload/cloudinary
-// @desc    Upload single image to Cloudinary (server-side, signed)
-// @access  Private/Admin
-router.post('/cloudinary', protect, admin, memoryUpload.single('file'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No file uploaded' });
-    }
-
-    // Ensure Cloudinary is properly configured. cloudinary.config may have been
-    // called with an incomplete CLOUDINARY_URL or missing individual vars —
-    // check the effective config on the cloudinary object to avoid a runtime
-    // 500 from the Cloudinary SDK (e.g. "Must supply api_key").
-    const cfg = cloudinary && typeof cloudinary.config === 'function'
-      ? cloudinary.config() || {}
-      : {};
-
-    const hasApiKey = !!(cfg.api_key || process.env.CLOUDINARY_API_KEY);
-    const hasApiSecret = !!(cfg.api_secret || process.env.CLOUDINARY_API_SECRET);
-    const hasCloudName = !!(cfg.cloud_name || process.env.CLOUDINARY_CLOUD_NAME);
-
-    if (!cloudinary || !(hasApiKey && hasApiSecret && hasCloudName)) {
-      // Cloudinary not available or not fully configured — return a clear message
-      // so the client can fall back to local uploads instead of receiving a 500.
-      console.warn('[upload] cloudinary endpoint called but configuration is incomplete');
-      return res.status(501).json({ success: false, message: 'Cloudinary not available on server' });
-    }
-
-    const file = req.file;
-    // Convert buffer to data URI
-    const dataUri = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
-
-    const result = await cloudinary.uploader.upload(dataUri, { folder: 'posts' });
-
-    res.json({ success: true, url: result.secure_url, public_id: result.public_id, raw: result });
-  } catch (error) {
-    console.error('Cloudinary upload error:', error);
-    res.status(500).json({ success: false, message: 'Error uploading to Cloudinary', error: error.message });
   }
 });
 

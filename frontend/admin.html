@@ -451,17 +451,18 @@
             }
         }
     </style>
+    <!-- Force desktop-style navigation: hide admin hamburger and always show full menu -->
+    <style>
+    .hamburger, .mobile-overlay { display: none !important; }
+    .nav-menu { position: static !important; right: auto !important; display: flex !important; flex-direction: row !important; align-items: center !important; gap: 16px !important; width: auto !important; height: auto !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; transition: none !important; }
+    .nav-menu a{padding:8px 10px}
+    </style>
 </head>
 <body>
  <div class="admin-header">
  <div class="container">
  <h1>️ Admin Dashboard</h1>
- <!-- Mobile hamburger (appears on small screens) -->
- <button class="hamburger" id="admin-hamburger" type="button" aria-label="Toggle menu" aria-expanded="false">
-     <span></span>
-     <span></span>
-     <span></span>
- </button>
+ <!-- Admin mobile hamburger removed to force desktop nav -->
  <div class="user-info">
  <span id="user-email" style="font-weight: 500;">Loading...</span>
  <div id="debug-auth" style="margin-left:10px; font-size:12px; opacity:0.9;
@@ -482,7 +483,7 @@
     <a href="index.html" target="_blank">️ View Website</a>
     <a href="#" id="nav-logout">🚪 Logout</a>
 </nav>
-<div id="admin-overlay" class="mobile-overlay" aria-hidden="true"></div>
+ <!-- admin-overlay removed (desktop nav forced) -->
 
  <div class="admin-container">
  <div id="message" class="message"></div>
@@ -1558,48 +1559,8 @@
             }
         }
 
-        // Mobile admin menu setup
-        function setupAdminMobileMenu() {
-            const hamburger = document.getElementById('admin-hamburger');
-            const nav = document.getElementById('admin-nav');
-            const overlay = document.getElementById('admin-overlay');
-            if (!hamburger || !nav || !overlay) return;
-
-            function openMenu(){
-                hamburger.classList.add('active');
-                nav.classList.add('active');
-                overlay.classList.add('active');
-                hamburger.setAttribute('aria-expanded','true');
-                nav.setAttribute('aria-hidden','false');
-                document.body.style.overflow='hidden';
-            }
-            function closeMenu(){
-                hamburger.classList.remove('active');
-                nav.classList.remove('active');
-                overlay.classList.remove('active');
-                hamburger.setAttribute('aria-expanded','false');
-                nav.setAttribute('aria-hidden','true');
-                document.body.style.overflow='';
-            }
-
-            hamburger.addEventListener('click', function(){
-                if (hamburger.classList.contains('active')) closeMenu(); else openMenu();
-            });
-            overlay.addEventListener('click', closeMenu);
-
-            // wire mobile nav links to same handlers used in header
-            const navNew = document.getElementById('nav-new-post');
-            const navSettings = document.getElementById('nav-settings');
-            const navLogout = document.getElementById('nav-logout');
-            if (navNew) navNew.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); showNewPostForm(); });
-            if (navSettings) navSettings.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); openSettings(); });
-            if (navLogout) navLogout.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); logout(); });
-
-            // close on Escape
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && hamburger.classList.contains('active')) closeMenu(); });
-            // ensure menu closes on resize to desktop
-            window.addEventListener('resize', () => { if (window.innerWidth > 768 && hamburger.classList.contains('active')) closeMenu(); });
-        }
+        // Mobile admin menu disabled (desktop nav enforced)
+        function setupAdminMobileMenu() { return; }
 
         // Copy image URL button handler
         const copyBtn = document.getElementById('copy-image-url-btn');

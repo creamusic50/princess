@@ -4,9 +4,9 @@
   "description": "Finance blog with unified backend and frontend",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "init-db": "node scripts/init-db.js",
+    "start": "cd backend && node server.js",
+    "dev": "cd backend && nodemon server.js",
+    "init-db": "cd backend && node scripts/init-db.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -21,7 +21,6 @@
     "axios": "^1.13.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
-    "cloudinary": "^2.1.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",

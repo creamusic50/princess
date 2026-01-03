@@ -1,8 +1,8 @@
 // Service Worker for Smart Money Guide - Ultra-Optimized for 100/100 Lighthouse
-// Version 3.0.0 - Maximum Performance & AdSense Optimized
-// Updated: 2025-12-20
+// Version 3.2.0 - Maximum Performance & AdSense Optimized  
+// Updated: 2025-12-31 14:00
 
-const CACHE_VERSION = 'v3.0.0';
+const CACHE_VERSION = 'v3.2.0-' + Date.now();
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`;
 const IMAGE_CACHE = `images-${CACHE_VERSION}`;
@@ -14,6 +14,7 @@ const STATIC_ASSETS = [
   '/index.html',
   '/css/style.min.f5f26ea4.css',
   '/css/responsive.min.c014bbda.css',
+  '/css/mobile-menu.css',
   '/js/config.min.f841bc00.js',
   '/js/main.min.eb2549f5.js',
   '/js/config.js',
@@ -22,40 +23,47 @@ const STATIC_ASSETS = [
 
 // Install event - cache critical static assets aggressively
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker v3...');
+  console.log('[SW] Installing service worker v3.2...');
   event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => {
+    // First delete ALL caches
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(cacheNames.map(function(cacheName) {
+        console.log('[SW] Deleting cache on install:', cacheName);
+        return caches.delete(cacheName);
+      }));
+    }).then(function() {
+      // Then create fresh cache
+      return caches.open(STATIC_CACHE).then((cache) => {
         console.log('[SW] Caching static assets');
         return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => {
-        console.log('[SW] Static assets cached');
-        return self.skipWaiting();
-      })
-      .catch((err) => {
-        console.error('[SW] Install error:', err);
-      })
+      });
+    })
+    .then(() => {
+      console.log('[SW] Static assets cached, skipping waiting');
+      return self.skipWaiting();
+    })
+    .catch((err) => {
+      console.error('[SW] Install error:', err);
+    })
   );
 });
 
 // Activate event - cleanup old caches aggressively
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...');
+  console.log('[SW] Activating service worker v3.2...');
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
+        console.log('[SW] Found caches:', cacheNames);
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (!cacheName.includes(CACHE_VERSION)) {
-              console.log('[SW] Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            }
+            console.log('[SW] Deleting cache:', cacheName);
+            return caches.delete(cacheName);
           })
         );
       })
       .then(() => {
-        console.log('[SW] Service worker activated');
+        console.log('[SW] All old caches deleted, claiming clients');
         return self.clients.claim();
       })
       .catch((err) => {
@@ -79,174 +87,38 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Strategy 1: Cache first for static assets (JS, CSS, fonts)
-  if (/\.(js|css|woff2|ttf|otf|woff)$/.test(request.url)) {
-    event.respondWith(
-      caches.match(request)
-        .then((response) => {
-          if (response) {
-            console.log('[SW] Cache hit (static):', request.url);
-            return response;
-          }
-          return fetch(request)
-            .then((response) => {
-              if (!response || response.status !== 200) {
-                return response;
-              }
-              const responseClone = response.clone();
-              caches.open(STATIC_CACHE).then((cache) => {
-                cache.put(request, responseClone);
-              });
-              return response;
-            })
-            .catch(() => {
-              // Return cached version if network fails
-              return caches.match(request)
-                .then((cachedResponse) => {
-                  return cachedResponse || new Response('Offline', { status: 503 });
-                });
-            });
-        })
-        .catch(() => {
-          return new Response('Offline', { status: 503 });
-        })
-    );
-    return;
-  }
-
-  // Strategy 2: Cache for images with stale-while-revalidate
-  if (/\.(png|jpg|jpeg|gif|svg|webp)$/i.test(request.url)) {
-    event.respondWith(
-      caches.match(request)
-        .then((response) => {
-          if (response) {
-            console.log('[SW] Cache hit (image):', request.url);
-            // Revalidate in background
-            fetch(request)
-              .then((freshResponse) => {
-                if (freshResponse && freshResponse.status === 200) {
-                  caches.open(IMAGE_CACHE).then((cache) => {
-                    cache.put(request, freshResponse);
-                  });
-                }
-              })
-              .catch(() => {});
-            return response;
-          }
-          // No cache, fetch fresh
-          return fetch(request)
-            .then((response) => {
-              if (!response || response.status !== 200) {
-                return response;
-              }
-              const responseClone = response.clone();
-              caches.open(IMAGE_CACHE).then((cache) => {
-                cache.put(request, responseClone);
-              });
-              return response;
-            })
-            .catch(() => {
-              return new Response('', { status: 404 });
-            });
-        })
-    );
-    return;
-  }
-
-  // Strategy 3: Network first for HTML and dynamic content
-  if (request.headers.get('accept')?.includes('text/html') || /\.html$/.test(request.url)) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (!response || response.status !== 200) {
-            return response;
-          }
-          const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => {
-          return caches.match(request)
-            .then((cachedResponse) => {
-              if (cachedResponse) {
-                return cachedResponse;
-              }
-              return new Response('Offline', { status: 503 });
-            });
-        })
-    );
-    return;
-  }
-
-  // Strategy 4: Network first for API calls
-  if (request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (!response || response.status !== 200) {
-            return response;
-          }
-          const responseClone = response.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => {
-          return caches.match(request)
-            .then((response) => {
-              return response || new Response(JSON.stringify({ offline: true }), {
-                headers: { 'Content-Type': 'application/json' }
-              });
-            });
-        })
-    );
-    return;
-  }
-
-  // Default: Cache first with network fallback
+  // Network first strategy - always try fresh first
   event.respondWith(
-    caches.match(request)
+    fetch(request)
       .then((response) => {
-        if (response) {
+        // Log successful network fetch
+        if (response && response.status === 200) {
+          console.log('[SW] Network hit (fresh):', request.url);
+          // Cache successful response for offline fallback
+          const responseClone = response.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseClone);
+          });
           return response;
         }
-        return fetch(request)
-          .then((response) => {
-            if (!response || response.status !== 200) {
-              return response;
-            }
-            const responseClone = response.clone();
-            caches.open(DYNAMIC_CACHE).then((cache) => {
-              cache.put(request, responseClone);
-            });
-            return response;
-          })
-          .catch(() => {
-            return new Response('Offline', { status: 503 });
-          });
+        return response;
       })
       .catch(() => {
-        return new Response('Offline', { status: 503 });
+        // Network failed, try cache as fallback
+        return caches.match(request)
+          .then((cachedResponse) => {
+            if (cachedResponse) {
+              console.log('[SW] Network failed, using cache:', request.url);
+              return cachedResponse;
+            }
+            // No cache either, return offline page or error
+            return new Response('Offline', { 
+              status: 503,
+              statusText: 'Service Unavailable'
+            });
+          });
       })
   );
-});
-
-// Message event handler for cache management
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-  if (event.data && event.data.type === 'CLEAR_CACHE') {
-    event.waitUntil(
-      caches.keys()
-        .then((cacheNames) => {
-          return Promise.all(cacheNames.map((name) => caches.delete(name)));
-        })
-    );
-  }
 });
 
 console.log('[SW] Service Worker loaded - Version:', CACHE_VERSION);

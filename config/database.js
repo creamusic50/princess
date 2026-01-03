@@ -9,11 +9,6 @@ if (!connectionString) {
   connectionString = 'postgresql://user:password@localhost/finance_blog';
 }
 
-// Neon and most hosted PostgreSQL require SSL
-// Remove any existing query string (sslmode, channel_binding, etc.) and let us control SSL
-// e.g. remove everything from the first '?' onward
-connectionString = connectionString.replace(/\?.*$/, '');
-
 // Determine if we need SSL based on the connection string
 const isProduction = process.env.NODE_ENV === 'production';
 const isNeon = connectionString.includes('neon.tech');

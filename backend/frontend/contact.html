@@ -38,23 +38,31 @@
  <meta name="google-adsense-account" content="ca-pub-4861288278202695">
  <title>Contact Us - Smart Money Guide</title>
  <link rel="stylesheet" href="css/style.6205c462.css">
+ <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
+ <!-- Force desktop-style navigation -->
+ <style>
+ .hamburger, .mobile-overlay { display: none !important; }
+ .nav-menu { position: static !important; right: auto !important; display: flex !important; flex-direction: row !important; align-items: center !important; gap: 25px !important; width: auto !important; height: auto !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; transition: none !important; }
+ .nav-menu li { width: auto !important; }
+ .nav-menu li a { padding: 0 !important; }
+ </style>
 
  <!-- Resource hints: fonts -->
  <link rel="preconnect" href="https://fonts.googleapis.com">
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="canonical" href="https://tilana.online/contact.html">
+ <link rel="stylesheet" href="css/mobile-menu.css">
 </head>
 <body>
- <header>
- <nav class="navbar">
+ <header role="banner">
+ <nav class="navbar" aria-label="Main navigation">
  <div class="container">
  <div class="nav-wrapper">
- <a href="index.html" class="logo"> Smart Money Guide</a>
- <ul class="nav-menu">
- <li><a href="index.html">Home</a></li>
- <li><a href="index.html#categories">Categories</a></li>
- <li><a href="about.html">About</a></li>
- <li><a href="contact.html">Contact</a></li>
+ <a href="index.html" class="logo">Smart Money Guide</a>
+ <ul class="nav-menu" id="nav-menu" role="menubar">
+ <li role="none"><a href="index.html" role="menuitem">Home</a></li>
+ <li role="none"><a href="index.html#categories" role="menuitem">Categories</a></li>
+ <li role="none"><a href="about.html" role="menuitem">About</a></li>
+ <li role="none"><a href="contact.html" role="menuitem">Contact</a></li>
  </ul>
  </div>
  </div>
@@ -218,5 +226,42 @@
  </footer>
 
  <script src="js/contact.js" defer></script>
+ <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.getElementById('nav-menu');
+    const overlay = document.querySelector('.mobile-overlay');
+    const body = document.body;
+    const navLinks = document.querySelectorAll('.nav-menu a');
+    
+    if (!hamburger) return; // mobile nav not present on desktop-first builds
+    
+    function toggleMenu() {
+      hamburger.classList.toggle('active');
+      navMenu && navMenu.classList.toggle('active');
+      overlay && overlay.classList.toggle('active');
+      hamburger.setAttribute('aria-expanded', hamburger.classList.contains('active') ? 'true' : 'false');
+      
+      if (navMenu && navMenu.classList.contains('active')) {
+        body.style.overflow = 'hidden';
+      } else {
+        body.style.overflow = '';
+      }
+    }
+    
+    hamburger.addEventListener('click', toggleMenu);
+    overlay && overlay.addEventListener('click', toggleMenu);
+    
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navMenu.classList.remove('active');
+        overlay.classList.remove('active');
+        body.style.overflow = '';
+        hamburger.setAttribute('aria-expanded', 'false');
+      });
+    });
+  });
+ </script>
 </body>
 </html>

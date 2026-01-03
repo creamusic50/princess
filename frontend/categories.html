@@ -31,6 +31,13 @@
  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap">
  <link rel="stylesheet" href="css/style.6205c462.css">
+ <!-- Force desktop-style navigation: hide hamburger and always show full menu -->
+ <style>
+ .hamburger, .mobile-overlay { display: none !important; }
+ .nav-menu { position: static !important; right: auto !important; display: flex !important; flex-direction: row !important; align-items: center !important; gap: 25px !important; width: auto !important; height: auto !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; transition: none !important; }
+ .nav-menu li { width: auto !important; }
+ .nav-menu li a { padding: 0 !important; }
+ </style>
  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
  
  <style>
@@ -55,12 +62,14 @@
  <div class="container">
  <div class="nav-wrapper">
  <a href="index.html" class="logo" aria-label="Smart Money Guide home"> Smart Money Guide</a>
- <ul class="nav-menu">
+ <!-- Hamburger removed to force desktop nav -->
+ <ul class="nav-menu" id="nav-menu">
  <li><a href="index.html">Home</a></li>
  <li><a href="categories.html" class="active">Categories</a></li>
  <li><a href="about.html">About</a></li>
  <li><a href="contact.html">Contact</a></li>
  </ul>
+ <!-- mobile-overlay removed (desktop nav forced) -->
  </div>
  </div>
  </nav>
@@ -191,6 +200,22 @@
     document.getElementById('categories-container').innerHTML = '<p style="text-align:center; color:#f56565;">Error loading categories</p>';
    }
   });
+ </script>
+
+ <!-- Mobile menu removed; desktop nav enforced site-wide -->
+
+ <!-- Service Worker registration with cache busting -->
+ <script defer>
+    if('serviceWorker' in navigator){
+        window.addEventListener('load', function(){
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+
+        });
+    }
  </script>
 </body>
 </html>

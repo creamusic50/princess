@@ -128,19 +128,7 @@
         Header set Cache-Control "public, max-age=31536000, immutable"
         Header set Access-Control-Allow-Origin "*"
     </FilesMatch>
-    
-    # CONTENT SECURITY POLICY FOR ADSENSE - FIXED!
-    Header always set Content-Security-Policy "\
-        default-src 'self'; \
-        script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://adservice.google.com https://googleads.g.doubleclick.net https://www.googletagservices.com https://tpc.googlesyndication.com https://www.google.com https://cdn.jsdelivr.net https://www.google-analytics.com https://www.googletagmanager.com https://fonts.googleapis.com; \
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.googletagservices.com; \
-        font-src 'self' https://fonts.gstatic.com data:; \
-        img-src 'self' data: https: http: https://pagead2.googlesyndication.com https://www.google.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; \
-        connect-src 'self' https://pagead2.googlesyndication.com https://www.google-analytics.com https://www.googletagmanager.com https://googleads.g.doubleclick.net https://adservice.google.com https://ep1.adtrafficquality.google https://www.google.com; \
-        frame-src https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://www.youtube.com https://www.youtube-nocookie.com; \
-        worker-src 'self' blob:; \
-        child-src 'self' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net;\
-    "
+
     
     # Security Headers
     Header set X-Content-Type-Options "nosniff"

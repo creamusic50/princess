@@ -1,1 +1,0 @@
-﻿// Ad placeholders removed
