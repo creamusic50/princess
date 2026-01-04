@@ -459,7 +459,35 @@
     </style>
 </head>
 <body>
- <div class="admin-header">
+ <!-- Admin Login Modal (shown when not authenticated) -->
+ <div id="admin-login-modal" class="modal" style="position: fixed; top: 0; left: 0; z-index: 10000; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: white; padding: 50px; border-radius: 15px; width: 90%; max-width: 500px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);">
+        <h2 style="margin-bottom: 30px; color: #2d3748; font-weight: 600; text-align: center;">🔐 Admin Login</h2>
+        
+        <div id="admin-login-message" class="message" style="padding: 15px; border-radius: 8px; margin-bottom: 20px; display: none; font-weight: 500;"></div>
+        
+        <form id="admin-login-form" style="display: flex; flex-direction: column; gap: 15px;">
+            <div>
+                <label for="admin-email" style="display: block; margin-bottom: 8px; color: #2d3748; font-weight: 600;">Email</label>
+                <input type="email" id="admin-email" required autocomplete="username" placeholder="tilana@blog.com" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box;"/>
+            </div>
+            
+            <div>
+                <label for="admin-password" style="display: block; margin-bottom: 8px; color: #2d3748; font-weight: 600;">Password</label>
+                <input type="password" id="admin-password" required autocomplete="current-password" placeholder="Enter your password" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box;"/>
+            </div>
+            
+            <button type="submit" style="padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: all 0.3s; margin-top: 10px;">Login to Admin</button>
+        </form>
+        
+        <p style="text-align: center; color: #718096; margin-top: 20px; font-size: 14px;">
+            <a href="index.html" style="color: #667eea; text-decoration: none; font-weight: 600;">← Back to Homepage</a>
+        </p>
+    </div>
+ </div>
+
+ <div class="admin-header" id="admin-header" style="display: none;">
+ <div class="container">
  <div class="container">
  <h1>️ Admin Dashboard</h1>
  <!-- Admin mobile hamburger removed to force desktop nav -->
@@ -697,7 +725,7 @@
  <form id="settings-form">
  <div class="form-group">
  <label for="settings-email"> Email</label>
- <input type="email" id="settings-email" placeholder="your@email.com">
+ <input type="email" id="settings-email" autocomplete="username" placeholder="your@email.com">
  </div>
  
  <div class="form-group">
@@ -719,17 +747,17 @@
  
  <div class="form-group">
  <label for="current-password"> Current Password (required to change)</label>
- <input type="password" id="current-password" placeholder="Enter current password">
+ <input type="password" id="current-password" autocomplete="current-password" placeholder="Enter current password">
  </div>
  
  <div class="form-group">
  <label for="new-password"> New Password</label>
- <input type="password" id="new-password" placeholder="Enter new password (min 6 chars)">
+ <input type="password" id="new-password" autocomplete="new-password" placeholder="Enter new password (min 6 chars)">
  </div>
  
  <div class="form-group">
  <label for="confirm-password"> Confirm New Password</label>
- <input type="password" id="confirm-password" placeholder="Confirm new password">
+ <input type="password" id="confirm-password" autocomplete="new-password" placeholder="Confirm new password">
  </div>
  
  <div style="display: flex; gap: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
@@ -751,7 +779,7 @@
         // lastUploadedImageUrl holds the final URL returned by the server for the uploaded image
         let lastUploadedImageUrl = null;
 
-        // Check authentication
+        // Check authentication - simplified version that just checks localStorage
         async function checkAuth() {
             // Update debug UI
             const dbgTokenEl = document.getElementById('debug-token');
@@ -760,41 +788,38 @@
 
             if (!token) {
                 if (dbgStatusEl) dbgStatusEl.textContent = 'Auth: no token';
-                window.location.href = 'login.html';
+                // Show login modal instead of redirecting
+                const loginModal = document.getElementById('admin-login-modal');
+                const adminHeader = document.getElementById('admin-header');
+                const adminContainer = document.querySelector('.admin-container');
+                if (loginModal) loginModal.style.display = 'flex';
+                if (adminHeader) adminHeader.style.display = 'none';
+                if (adminContainer) adminContainer.style.display = 'none';
                 return;
             }
 
-            try {
-                if (dbgStatusEl) dbgStatusEl.textContent = 'Auth: checking...';
-                const response = await fetch(`${API_URL}/auth/me`, {
-                    headers: { 'x-auth-token': token }
-                });
-
-                if (!response.ok) {
-                    if (dbgStatusEl) dbgStatusEl.textContent = `Auth: failed (${response.status})`;
-                    throw new Error('Authentication failed');
-                }
-
-                const data = await response.json();
-                if (data.success && data.user.role === 'admin') {
-                    if (dbgStatusEl) dbgStatusEl.textContent = 'Auth: OK (admin)';
-                    currentUser = data.user;
-                    document.getElementById('user-email').textContent = data.user.email;
-                    // Refresh module-level token variable (in case login happened elsewhere)
-                    token = localStorage.getItem('token') || localStorage.getItem('authToken');
-                    if (dbgTokenEl) dbgTokenEl.textContent = token ? 'Token: present' : 'Token: absent';
-                    loadPosts();
-                    loadAllAnalytics();
-                } else {
-                    if (dbgStatusEl) dbgStatusEl.textContent = 'Auth: not authorized';
-                    throw new Error('Not authorized');
-                }
-            } catch (error) {
-                console.error('Auth error:', error);
-                localStorage.removeItem('token');
-                localStorage.removeItem('authToken');
-                if (dbgStatusEl) dbgStatusEl.textContent = 'Auth: error';
-                window.location.href = 'login.html';
+            // Token exists, show dashboard
+            if (dbgStatusEl) dbgStatusEl.textContent = 'Auth: OK';
+            const loginModal = document.getElementById('admin-login-modal');
+            const adminHeader = document.getElementById('admin-header');
+            const adminContainer = document.querySelector('.admin-container');
+            
+            if (loginModal) loginModal.style.display = 'none';
+            if (adminHeader) adminHeader.style.display = 'block';
+            if (adminContainer) adminContainer.style.display = 'block';
+            
+            // Load dashboard content if user data exists
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (user) {
+                currentUser = user;
+                const userEmailEl = document.getElementById('user-email');
+                if (userEmailEl) userEmailEl.textContent = user.email;
+                
+                // Load dashboard data
+                console.log('[AUTH] Showing dashboard for:', user.email);
+                loadPosts();
+                loadStats();
+                loadAllAnalytics();
             }
         }
 
@@ -948,7 +973,7 @@
                     if (!tokenLocal) {
                         console.error('[ADMIN] No token in localStorage');
                         showMessage('❌ You are not authenticated. Please login again.', 'error');
-                        setTimeout(() => { window.location.href = 'login.html'; }, 800);
+                        setTimeout(() => { window.location.href = 'index.html'; }, 800);
                         return;
                     }
 
@@ -1295,7 +1320,7 @@
             if (confirm('Are you sure you want to logout?')) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             }
         }
 
@@ -1596,10 +1621,175 @@
             loadAnalyticsBtn.addEventListener('click', loadAllAnalytics);
         }
         
-        checkAuth();
-        
         // Load analytics after authentication
         // We'll load them inside checkAuth's success callback
+        
+        // Handle admin login form
+        const adminLoginForm = document.getElementById('admin-login-form');
+        if (adminLoginForm) {
+            adminLoginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('admin-email').value;
+                const password = document.getElementById('admin-password').value;
+                const loginMessage = document.getElementById('admin-login-message');
+                const submitBtn = adminLoginForm.querySelector('button[type="submit"]');
+                
+                console.log('=== LOGIN ATTEMPT ===');
+                console.log('Email:', email);
+                console.log('API_URL:', API_URL);
+                
+                try {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '⏳ Logging in...';
+                    loginMessage.style.display = 'none';
+                    
+                    const loginUrl = `${API_URL}/auth/login`;
+                    console.log('Calling:', loginUrl);
+                    
+                    const response = await fetch(loginUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    console.log('Response status:', response.status);
+                    console.log('Response ok:', response.ok);
+                    
+                    const data = await response.json();
+                    console.log('Response data:', data);
+                    
+                    if (response.ok && data.success && data.token) {
+                        console.log('✅ Login successful');
+                        
+                        // Store token and user
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('authToken', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        token = data.token;
+                        currentUser = data.user;
+                        
+                        console.log('Token stored:', token ? 'Yes' : 'No');
+                        console.log('User:', currentUser);
+                        
+                        // Show success message
+                        loginMessage.textContent = '✅ Login successful! Showing dashboard...';
+                        loginMessage.style.background = '#c6f6d5';
+                        loginMessage.style.color = '#22543d';
+                        loginMessage.style.display = 'block';
+                        
+                        // Hide modal and show dashboard immediately
+                        setTimeout(function() {
+                            const loginModal = document.getElementById('admin-login-modal');
+                            const adminHeader = document.getElementById('admin-header');
+                            const adminContainer = document.querySelector('.admin-container');
+                            
+                            console.log('Showing dashboard...');
+                            if (loginModal) {
+                                loginModal.style.display = 'none';
+                                console.log('Login modal hidden');
+                            }
+                            if (adminHeader) {
+                                adminHeader.style.display = 'block';
+                                console.log('Admin header shown');
+                            }
+                            if (adminContainer) {
+                                adminContainer.style.display = 'block';
+                                console.log('Admin container shown');
+                            }
+                            
+                            // Update UI with user info
+                            const userEmailEl = document.getElementById('user-email');
+                            if (userEmailEl) {
+                                userEmailEl.textContent = data.user.email;
+                                console.log('User email updated to:', data.user.email);
+                            }
+                            
+                            // Reset form
+                            adminLoginForm.reset();
+                            loginMessage.style.display = 'none';
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Login to Admin';
+                            
+                            // Load dashboard content (these functions handle token internally)
+                            console.log('Loading dashboard content...');
+                            try {
+                                // Check if functions exist before calling
+                                if (typeof loadPosts === 'function') loadPosts();
+                                if (typeof loadStats === 'function') loadStats();
+                                if (typeof loadAllAnalytics === 'function') loadAllAnalytics();
+                                if (typeof registerFormHandler === 'function') registerFormHandler();
+                                if (typeof attachUiListeners === 'function') attachUiListeners();
+                                console.log('✅ Dashboard fully loaded');
+                            } catch (err) {
+                                console.error('Error loading dashboard:', err);
+                            }
+                        }, 500);
+                    } else {
+                        console.error('❌ Login failed');
+                        console.log('Response status:', response.status);
+                        console.log('Data:', data);
+                        
+                        const errorMsg = data.message || 'Login failed - check credentials';
+                        loginMessage.textContent = '❌ ' + errorMsg;
+                        loginMessage.style.background = '#fed7d7';
+                        loginMessage.style.color = '#742a2a';
+                        loginMessage.style.display = 'block';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Login to Admin';
+                    }
+                } catch (error) {
+                    console.error('❌ Login exception:', error);
+                    console.error('Error message:', error.message);
+                    console.error('Error stack:', error.stack);
+                    
+                    loginMessage.textContent = '❌ Error: ' + error.message;
+                    loginMessage.style.background = '#fed7d7';
+                    loginMessage.style.color = '#742a2a';
+                    loginMessage.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Login to Admin';
+                }
+            });
+        }
+        
+        // Initialize auth AFTER all functions are defined
+        // Check if functions are available, retry if not
+        function initAuth() {
+            if (typeof loadPosts !== 'function' || typeof loadStats !== 'function' || typeof loadAllAnalytics !== 'function') {
+                setTimeout(initAuth, 50);
+                return;
+            }
+            
+            const hasToken = token || localStorage.getItem('token') || localStorage.getItem('authToken');
+            const loginModal = document.getElementById('admin-login-modal');
+            const adminHeader = document.getElementById('admin-header');
+            const adminContainer = document.querySelector('.admin-container');
+            
+            if (!hasToken) {
+                if (loginModal) loginModal.style.display = 'flex';
+                if (adminHeader) adminHeader.style.display = 'none';
+                if (adminContainer) adminContainer.style.display = 'none';
+                console.log('[AUTH] No token - showing login modal');
+            } else {
+                token = hasToken;
+                if (loginModal) loginModal.style.display = 'none';
+                if (adminHeader) adminHeader.style.display = 'block';
+                if (adminContainer) adminContainer.style.display = 'block';
+                
+                const user = JSON.parse(localStorage.getItem('user') || 'null');
+                if (user) {
+                    currentUser = user;
+                    const userEmailEl = document.getElementById('user-email');
+                    if (userEmailEl) userEmailEl.textContent = user.email;
+                    console.log('[AUTH] Token found - showing dashboard for:', user.email);
+                    loadPosts();
+                    loadStats();
+                    loadAllAnalytics();
+                }
+            }
+        }
+        setTimeout(initAuth, 100);
     </script>
 </body>
 </html>

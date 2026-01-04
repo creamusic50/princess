@@ -88,6 +88,7 @@
  <li role="none"><a href="categories.html" role="menuitem">Categories</a></li>
  <li role="none"><a href="about.html" role="menuitem">About</a></li>
  <li role="none"><a href="contact.html" role="menuitem">Contact</a></li>
+ <li role="none"><a id="nav-admin-login" href="#" role="menuitem" style="color: #3498db; font-weight: 600;">🔐 Admin</a></li>
  </ul>
  
  </div>
@@ -177,9 +178,141 @@
  </div>
  </footer>
  
+ <!-- Login Modal -->
+ <div id="login-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; z-index: 10000; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: white; padding: 40px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+        <span id="login-modal-close" class="close" style="color: #999; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        <h2 style="margin-bottom: 25px; color: #2d3748; font-weight: 600;">🔐 Admin Login</h2>
+        
+        <div id="login-message" class="message" style="padding: 15px; border-radius: 8px; margin-bottom: 20px; display: none; font-weight: 500;"></div>
+        
+        <form id="login-form" style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; flex-direction: column;">
+                <label for="login-email" style="margin-bottom: 8px; color: #2d3748; font-weight: 600;">Email</label>
+                <input type="email" id="login-email" required placeholder="your@email.com" style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px;"/>
+            </div>
+            
+            <div style="display: flex; flex-direction: column;">
+                <label for="login-password" style="margin-bottom: 8px; color: #2d3748; font-weight: 600;">Password</label>
+                <input type="password" id="login-password" required placeholder="Enter password" style="padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px;"/>
+            </div>
+            
+            <button type="submit" style="padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: all 0.3s;">Login</button>
+        </form>
+    </div>
+ </div>
+ 
  <!-- Load scripts with proper attributes for optimal Core Web Vitals -->
  <script src="js/config.js" defer fetchpriority="high"></script>
+ <script src="js/auth.js" defer></script>
  <script src="js/main.js" defer fetchpriority="high"></script>
+ 
+ <!-- Login Modal Handler -->
+ <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginModal = document.getElementById('login-modal');
+        const loginForm = document.getElementById('login-form');
+        const loginModalClose = document.getElementById('login-modal-close');
+        const loginMessage = document.getElementById('login-message');
+        const adminLoginBtn = document.getElementById('nav-admin-login');
+        
+        // Check if user already has token
+        const hasToken = localStorage.getItem('token') || localStorage.getItem('authToken');
+        
+        // If user has token, redirect to admin
+        if (hasToken) {
+            if (adminLoginBtn) adminLoginBtn.textContent = '📊 Dashboard';
+            if (adminLoginBtn) adminLoginBtn.href = 'admin.html';
+        }
+        
+        // Admin button click - show login or go to admin
+        if (adminLoginBtn) {
+            adminLoginBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (hasToken) {
+                    window.location.href = 'admin.html';
+                } else {
+                    loginModal.style.display = 'flex';
+                }
+            });
+        }
+        
+        // Check if user redirected from admin page (no token)
+        const fromAdmin = window.location.pathname.includes('admin') || window.location.hash.includes('admin');
+        
+        if (!hasToken && window.location.hash === '#login') {
+            // Show login modal if requested
+            loginModal.style.display = 'flex';
+        }
+        
+        // Close modal
+        if (loginModalClose) {
+            loginModalClose.addEventListener('click', function() {
+                loginModal.style.display = 'none';
+                window.location.hash = '';
+            });
+        }
+        
+        // Close modal on outside click
+        loginModal.addEventListener('click', function(e) {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+                window.location.hash = '';
+            }
+        });
+        
+        // Handle login form submission
+        if (loginForm) {
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+                
+                try {
+                    loginMessage.style.display = 'none';
+                    
+                    const response = await fetch(API_URL + '/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Store token and user
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('authToken', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        
+                        // Show success and redirect
+                        loginMessage.textContent = '✅ Login successful! Redirecting...';
+                        loginMessage.style.background = '#c6f6d5';
+                        loginMessage.style.color = '#22543d';
+                        loginMessage.style.display = 'block';
+                        
+                        setTimeout(function() {
+                            window.location.href = 'admin.html';
+                        }, 1500);
+                    } else {
+                        loginMessage.textContent = '❌ ' + (data.message || 'Login failed');
+                        loginMessage.style.background = '#fed7d7';
+                        loginMessage.style.color = '#742a2a';
+                        loginMessage.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    loginMessage.textContent = '❌ Connection error. Please try again.';
+                    loginMessage.style.background = '#fed7d7';
+                    loginMessage.style.color = '#742a2a';
+                    loginMessage.style.display = 'block';
+                }
+            });
+        }
+    });
+ </script>
 
  <!-- Deferred AdSense loading (loads after interactive) -->
  <script defer>
