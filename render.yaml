@@ -11,7 +11,7 @@ services:
     # Keep the site alive by pinging health endpoint
     healthCheckPath: /api/health
     # Use paid tier for always-on (if upgrading from free tier)
-    plan: starter
+    plan: standard
     envVars:
       - key: NODE_ENV
         value: production

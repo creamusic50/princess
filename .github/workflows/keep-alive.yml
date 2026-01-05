@@ -1,0 +1,15 @@
+name: Keep Website Awake
+
+on:
+  schedule:
+    # Run every 10 minutes to keep site awake during Google AdSense review
+    # This ensures crawlers always find an active site
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: curl -f https://www.tilana.online/api/health || exit 1
