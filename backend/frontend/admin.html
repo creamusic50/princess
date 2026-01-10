@@ -1478,6 +1478,14 @@
             const settingsBtn = document.getElementById('btn-settings');
             if (settingsBtn) settingsBtn.addEventListener('click', openSettings);
 
+            const navSettingsLink = document.getElementById('nav-settings');
+            if (navSettingsLink) {
+                navSettingsLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openSettings();
+                });
+            }
+
             const logoutBtn = document.getElementById('btn-logout');
             if (logoutBtn) logoutBtn.addEventListener('click', logout);
 

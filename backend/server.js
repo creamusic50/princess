@@ -136,9 +136,13 @@ app.use(express.static(staticDir, {
   }
 }));
 
-// Explicit route for admin.html to ensure it's always served
+// Explicit routes for auth pages to ensure they're always served
 app.get('/admin.html', (req, res) => {
   res.sendFile(path.join(staticDir, 'admin.html'));
+});
+
+app.get('/login.html', (req, res) => {
+  res.sendFile(path.join(staticDir, 'login.html'));
 });
 
 // SPA fallback for routes not starting with /api

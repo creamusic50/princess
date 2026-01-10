@@ -7,4 +7,4 @@ Disallow: /admin-fixed.html
 Disallow: /admin.htm
 Disallow: /admin-OLD-BACKUP.html
 
-Sitemap: https://smartmoneyguide.com/sitemap.xml
+Sitemap: https://tilana.online/sitemap.xml
