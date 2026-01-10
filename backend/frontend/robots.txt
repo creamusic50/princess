@@ -1,3 +1,4 @@
+# Allow all crawlers to access public pages
 User-agent: *
 Allow: /
 Disallow: /admin/
@@ -6,5 +7,16 @@ Disallow: /admin.html
 Disallow: /admin-fixed.html
 Disallow: /admin.htm
 Disallow: /admin-OLD-BACKUP.html
+Disallow: /create-post.html
+Disallow: /profile-settings.html
+
+# Specifically allow Googlebot
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+
+# Allow Googlebot Images
+User-agent: Googlebot-Image
+Allow: /
 
 Sitemap: https://tilana.online/sitemap.xml

@@ -1,3 +1,4 @@
+# Allow all crawlers to access public pages
 User-agent: *
 Allow: /
 Disallow: /admin/
@@ -9,7 +10,7 @@ Disallow: /admin-OLD-BACKUP.html
 Disallow: /create-post.html
 Disallow: /profile-settings.html
 
-# Allow Googlebot to crawl everything except admin
+# Specifically allow Googlebot
 User-agent: Googlebot
 Allow: /
 Disallow: /admin/
@@ -18,6 +19,7 @@ Disallow: /admin/
 User-agent: Googlebot-Image
 Allow: /
 
+Sitemap: https://tilana.online/sitemap.xml
 # Crawl delay for all bots
 Crawl-delay: 1
 
