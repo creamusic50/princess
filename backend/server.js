@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Enable compression with optimal settings for 100/100 performance
 app.use(compression({
-  level: 6,  // Balanced compression (9 = max CPU, 6 = good balance)
+  level: 9,  // Maximum compression for best performance
   threshold: 0,  // Compress all responses, even small ones
   filter: (req, res) => {
     // Don't compress responses with this request header
