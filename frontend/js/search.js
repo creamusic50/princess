@@ -101,8 +101,8 @@ class Search {
                     <h5>${this.escapeHtml(post.title)}</h5>
                     <p class="search-result-excerpt">${this.escapeHtml(this.truncateText(post.excerpt || '', 100))}</p>
                     <div class="search-result-meta">
-                        <span>📅 ${new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                        <span>👁️ ${post.views || 0} views</span>
+                        <span>${new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span>${post.views || 0} views</span>
                     </div>
                 </a>
             `).join('')}

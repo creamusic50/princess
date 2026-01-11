@@ -32,14 +32,19 @@ app.use(compression({
   }
 }));
 
-// Security headers - CSP REMOVED for full flexibility
-app.use(helmet({
-  contentSecurityPolicy: false,  // DISABLED - No more CSP restrictions!
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
-}));
+// Security headers - CSP and helmet completely disabled for ad compatibility
+// Only use specific security headers, no CSP
+app.use(helmet.frameguard({ action: 'SAMEORIGIN' }));
+app.use(helmet.xssFilter());
+app.use(helmet.noSniff());
+app.use(helmet.referrerPolicy({ policy: 'strict-origin-when-cross-origin' }));
 
 // Enhanced performance headers for Core Web Vitals (100/100 Desktop Optimized)
 app.use((req, res, next) => {
+  // Explicitly remove CSP to allow Google ads
+  res.removeHeader('Content-Security-Policy');
+  res.removeHeader('Content-Security-Policy-Report-Only');
+  
   // Security headers
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
@@ -48,26 +53,40 @@ app.use((req, res, next) => {
   // Performance optimization headers
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
   
+  // Critical for Core Web Vitals and crawlability
+  res.setHeader('Vary', 'Accept-Encoding');
+  
+  // Allow Google and other search engines to crawl
+  res.setHeader('X-Robots-Tag', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  
+  // Performance: Preconnect hints for critical origins
+  res.setHeader('Link', [
+    '<https://fonts.googleapis.com>; rel=preconnect',
+    '<https://fonts.gstatic.com>; rel=preconnect; crossorigin',
+    '<https://pagead2.googlesyndication.com>; rel=preconnect'
+  ].join(', '));
+  
   // Add timing headers for performance monitoring
   res.setHeader('Server-Timing', 'db;dur=10, cache;dur=20');
   
-  // Desktop performance optimization - aggressive caching
-  // But do NOT apply aggressive caching to the service worker or HTML files so clients pick up updates quickly
-  if (req.path === '/sw.js' || req.path.endsWith('.html')) {
+  // CRITICAL: Set caching headers for maximum performance
+  // Static assets - aggressive caching
+  if (req.path.match(/\.(js|css|woff|woff2|ttf|otf|eot|svg|png|jpg|jpeg|gif|webp)$/i)) {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+  // HTML files - no cache to always get latest
+  else if (req.path === '/sw.js' || req.path.endsWith('.html')) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
-  } else {
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
   }
-  
-  // Critical resource hints with early hints for desktop
-  // Do not send Link preload headers here to avoid preload warnings in browsers.
-  // Preloads are handled inline in HTML where appropriate.
-  
-  // Enable request compression for faster delivery
-  if (req.headers['accept-encoding']?.includes('gzip')) {
-    res.setHeader('Vary', 'Accept-Encoding');
+  // API endpoints - short cache
+  else if (req.path.startsWith('/api/')) {
+    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minute cache
+  }
+  // Default - medium cache
+  else {
+    res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour cache
   }
   
   next();
@@ -80,6 +99,27 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
+});
+
+// Robots.txt - Allow Google to crawl everything
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(`User-agent: *
+Allow: /
+Allow: /api/
+
+Sitemap: https://tilana.online/sitemap.xml
+
+# Crawl-delay: 1
+# Request-rate: 30/1m`);
+});
+
+// Sitemap.xml enhancement - Add proper caching and headers
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  // Sitemap will be served from frontend folder with proper mime type
+  res.sendFile(path.join(__dirname, 'frontend', 'sitemap.xml'));
 });
 
 // Mount API routes from repository root

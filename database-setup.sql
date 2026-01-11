@@ -59,12 +59,12 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 -- Insert default categories
 INSERT INTO categories (name, slug, description, icon) 
 VALUES 
-    ('Saving Tips', 'saving-tips', 'Learn effective strategies to save money', '💰'),
-    ('Investing', 'investing', 'Investment strategies and tips', '📈'),
-    ('Budgeting', 'budgeting', 'Budget planning and management', '📊'),
-    ('Retirement', 'retirement', 'Retirement planning and advice', '🏖️'),
-    ('Credit Cards', 'credit-cards', 'Credit card tips and reviews', '💳'),
-    ('Money Management', 'money-management', 'Overall money management strategies', '💵')
+    ('Saving Tips', 'saving-tips', 'Learn effective strategies to save money', ''),
+    ('Investing', 'investing', 'Investment strategies and tips', ''),
+    ('Budgeting', 'budgeting', 'Budget planning and management', ''),
+    ('Retirement', 'retirement', 'Retirement planning and advice', ''),
+    ('Credit Cards', 'credit-cards', 'Credit card tips and reviews', ''),
+    ('Money Management', 'money-management', 'Overall money management strategies', '')
 ON CONFLICT (slug) DO NOTHING;
 
 -- Create a default admin user (password: admin123)

@@ -119,25 +119,22 @@ router.get('/engagement', protect, admin, async (req, res) => {
 // Public endpoint to record page views (used by frontend tracker)
 router.post('/track', async (req, res) => {
   try {
-    const { postId, postTitle, country, countryCode, referrer, trafficSource, userAgent, ipAddress, sessionId } = req.body;
+    const { postId, postTitle, country, countryCode, referrer, trafficSource, userAgent, ipAddress, sessionId, page } = req.body;
 
-    if (!sessionId) {
-      return res.status(400).json({
-        success: false,
-        message: 'Session ID required'
-      });
-    }
+    // SessionId is optional - will be generated if missing
+    const finalSessionId = sessionId || `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
+    // Allow tracking without all fields (page tracking only)
     await Analytics.recordPageView({
-      postId,
-      postTitle,
-      country,
-      countryCode,
+      postId: postId || null,
+      postTitle: postTitle || page || '/',
+      country: country || null,
+      countryCode: countryCode || null,
       referrer: referrer || 'direct',
-      trafficSource,
-      userAgent,
-      ipAddress,
-      sessionId
+      trafficSource: trafficSource || 'direct',
+      userAgent: userAgent || null,
+      ipAddress: ipAddress || null,
+      sessionId: finalSessionId
     });
 
     res.json({

@@ -1,5 +1,5 @@
 // Global Configuration for Finance Blog Frontend
-const CONFIG = {
+var CONFIG = {
     // API Configuration
     API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:5000/api'
@@ -13,12 +13,12 @@ const CONFIG = {
     
     // Categories
     CATEGORIES: [
-        { name: 'Saving Tips', icon: '💰', slug: 'saving-tips' },
-        { name: 'Investing', icon: '📈', slug: 'investing' },
-        { name: 'Budgeting', icon: '📊', slug: 'budgeting' },
-        { name: 'Retirement', icon: '🏖️', slug: 'retirement' },
-        { name: 'Credit Cards', icon: '💳', slug: 'credit-cards' },
-        { name: 'Money Management', icon: '💵', slug: 'money-management' }
+        { name: 'Saving Tips', icon: '', slug: 'saving-tips' },
+        { name: 'Investing', icon: '', slug: 'investing' },
+        { name: 'Budgeting', icon: '', slug: 'budgeting' },
+        { name: 'Retirement', icon: '', slug: 'retirement' },
+        { name: 'Credit Cards', icon: '', slug: 'credit-cards' },
+        { name: 'Money Management', icon: '', slug: 'money-management' }
     ],
     
     // Authentication
@@ -114,6 +114,9 @@ async function authFetch(url, options = {}) {
         throw error;
     }
 }
+
+// Ensure CONFIG is globally accessible
+window.CONFIG = CONFIG;
 
 // Export for use in modules
 if (typeof module !== 'undefined' && module.exports) {

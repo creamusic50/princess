@@ -35,14 +35,7 @@
  
  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap">
- <link rel="stylesheet" href="css/style.6205c462.css">
- <!-- Force desktop-style navigation: hide hamburger and always show full menu -->
- <style>
- .hamburger, .mobile-overlay { display: none !important; }
- .nav-menu { position: static !important; right: auto !important; display: flex !important; flex-direction: row !important; align-items: center !important; gap: 25px !important; width: auto !important; height: auto !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; transition: none !important; }
- .nav-menu li { width: auto !important; }
- .nav-menu li a { padding: 0 !important; }
- </style>
+ <link rel="stylesheet" href="css/main.css">
  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
  
  <style>
@@ -62,19 +55,24 @@
  </style>
 </head>
 <body>
+ <div class="mobile-overlay" id="mobile-overlay"></div>
  <header role="banner">
  <nav class="navbar" aria-label="Main navigation">
  <div class="container">
  <div class="nav-wrapper">
- <a href="index.html" class="logo" aria-label="Smart Money Guide home"> Smart Money Guide</a>
- <!-- Hamburger removed to force desktop nav -->
- <ul class="nav-menu" id="nav-menu">
- <li><a href="index.html">Home</a></li>
- <li><a href="categories.html" class="active">Categories</a></li>
- <li><a href="about.html">About</a></li>
- <li><a href="contact.html">Contact</a></li>
+ <a href="index.html" class="logo" aria-label="Smart Money Guide home">Smart Money Guide</a>
+ <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+ <span></span>
+ <span></span>
+ <span></span>
+ </button>
+ <ul class="nav-menu" id="nav-menu" role="menubar">
+ <li role="none"><a href="index.html" role="menuitem">Home</a></li>
+ <li role="none"><a href="categories.html" role="menuitem" class="active">Categories</a></li>
+ <li role="none"><a href="about.html" role="menuitem">About</a></li>
+ <li role="none"><a href="contact.html" role="menuitem">Contact</a></li>
  </ul>
- <!-- mobile-overlay removed (desktop nav forced) -->
+ 
  </div>
  </div>
  </nav>
@@ -83,7 +81,7 @@
  <main role="main">
  <section class="categories-page">
  <div class="container">
- <h1 style="font-size:42px; margin-bottom:40px; color:#2d3748;">📚 Browse by Category</h1>
+ <h1 style="font-size:42px; margin-bottom:40px; color:#2d3748;">Browse by Category</h1>
  
  <div id="categories-container" role="region" aria-live="polite">
  <p style="text-align:center; color:#999;">Loading categories...</p>
@@ -131,10 +129,10 @@
  <div class="footer-column">
  <h4 class="footer-heading">Categories</h4>
  <ul class="footer-links">
- <li><a href="categories.html?category=Saving Tips">💰 Saving Tips</a></li>
- <li><a href="categories.html?category=Investing">📈 Investing</a></li>
- <li><a href="categories.html?category=Budgeting">📊 Budgeting</a></li>
- <li><a href="categories.html?category=Retirement">🏖️ Retirement</a></li>
+ <li><a href="categories.html?category=Saving Tips">Saving Tips</a></li>
+ <li><a href="categories.html?category=Investing">Investing</a></li>
+ <li><a href="categories.html?category=Budgeting">Budgeting</a></li>
+ <li><a href="categories.html?category=Retirement">Retirement</a></li>
  </ul>
  </div>
  <div class="footer-column">
@@ -154,7 +152,7 @@
  </div>
  </footer>
 
- <script src="js/config.min.f841bc00.js" defer></script>
+ <script src="js/config.js" defer></script>
  <script>
   document.addEventListener('DOMContentLoaded', async () => {
    try {
@@ -187,12 +185,12 @@
            <div class="post-card-meta">
             By ${post.author_name || 'Smart Money Guide'} • ${new Date(post.created_at).toLocaleDateString()}
            </div>
-           <a href="post.html?slug=${encodeURIComponent(post.slug)}" class="post-card-link">Read More →</a>
+           <a href="post.html?slug=${encodeURIComponent(post.slug)}" class="post-card-link">Read More</a>
           </div>
          </div>
         `).join('')}
        </div>
-       ${posts.length > 12 ? `<p style="text-align:center; margin-top:20px; color:#3498db;"><a href="index.html#categories" style="color:#3498db; text-decoration:none;">View all ${posts.length} articles in ${category} →</a></p>` : ''}
+       ${posts.length > 12 ? `<p style="text-align:center; margin-top:20px; color:#3498db;"><a href="index.html#categories" style="color:#3498db; text-decoration:none;">View all ${posts.length} articles in ${category}</a></p>` : ''}
       </div>`;
      });
      
@@ -207,9 +205,12 @@
   });
  </script>
 
- <!-- Mobile menu removed; desktop nav enforced site-wide -->
+ <!-- Mobile menu fixed with JavaScript handler -->
+ <script src="js/mobile-menu.js" defer></script>
 
  <!-- Service Worker registration with cache busting -->
+ <script src="js/config.js?v=3"></script>
+ <script src="js/mobile-menu.js" defer></script>
  <script defer>
     if('serviceWorker' in navigator){
         window.addEventListener('load', function(){

@@ -234,7 +234,7 @@ function displayDashboard(stats) {
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">👁️</div>
+            <div class=\"stat-icon\">Views</div>
             <div class="stat-info">
                 <h3>Total Views</h3>
                 <p class="stat-number">${formatNumber(stats.posts?.total_views || 0)}</p>

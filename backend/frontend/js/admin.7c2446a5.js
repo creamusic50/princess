@@ -217,10 +217,10 @@ function displayAdminPosts(posts) {
             <div class="post-info">
                 <h3>${post.title}</h3>
                 <div class="post-stats">
-                    <span>📁 ${post.category}</span>
-                    <span>📊 ${post.status}</span>
-                    <span>👁️ ${post.views} views</span>
-                    <span>📅 ${new Date(post.createdAt).toLocaleDateString()}</span>
+                    <span>${post.category}</span>
+                    <span>${post.status}</span>
+                    <span>${post.views} views</span>
+                    <span>${new Date(post.createdAt).toLocaleDateString()}</span>
                 </div>
             </div>
             <div class="post-actions">

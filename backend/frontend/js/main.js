@@ -149,10 +149,10 @@ function displayPosts(posts) {
                 <p class="excerpt">${escapeHtml(post.excerpt || '')}</p>
                 <div class="blog-card-meta">
                     <span class="date">${formatDate(post.created_at)}</span>
-                    <span class="views">👁️ ${post.views || 0} views</span>
+                    <span class="views">${post.views || 0} views</span>
                     ${post.author_name ? `<span class="author">By ${escapeHtml(post.author_name)}</span>` : ''}
                 </div>
-                <a href="post.html?slug=${post.slug}" class="read-more">Read More →</a>
+                <a href="post.html?slug=${post.slug}" class="read-more">Read More</a>
             </div>
         </article>
     `).join('');
@@ -290,6 +290,7 @@ function buildPaginationHtml(currentPage, totalPages) {
     }
     
     return html;
+}
 
 // ============================================================
 // PAGE NAVIGATION
@@ -330,7 +331,7 @@ function showError(message) {
     if (container) {
         container.innerHTML = `
             <div class="error-message">
-                <p>⚠️ ${escapeHtml(message)}</p>
+                <p>Error: ${escapeHtml(message)}</p>
                 <button onclick="location.reload()">Retry</button>
             </div>
         `;
@@ -358,8 +359,6 @@ function escapeHtml(text) {
 // ============================================================
 // READING PROGRESS TRACKER
 // ============================================================
-// READING PROGRESS TRACKER
-// ============================================================
 
 // Track user's reading progress on post detail pages
 function trackReadingProgress() {
@@ -370,10 +369,17 @@ function trackReadingProgress() {
     const progressBar = createProgressBar();
     document.body.appendChild(progressBar);
     
-    // Update progress bar as user scrolls
+    // Throttled scroll listener to prevent excessive reflow
+    let isThrottled = false;
     window.addEventListener('scroll', () => {
-        updateProgressBar(progressBar);
-    });
+        if (!isThrottled) {
+            updateProgressBar(progressBar);
+            isThrottled = true;
+            requestAnimationFrame(() => {
+                isThrottled = false;
+            });
+        }
+    }, { passive: true });
 }
 
 // Helper: Create progress bar DOM element
@@ -395,13 +401,15 @@ function createProgressBar() {
 
 // Helper: Update progress bar based on scroll position
 function updateProgressBar(progressBar) {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const windowHeight = window.innerHeight;
     const documentHeight = document.documentElement.scrollHeight;
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    
     const scrollableHeight = documentHeight - windowHeight;
-    const scrollPercent = (scrollTop / scrollableHeight) * 100;
     
+    if (scrollableHeight <= 0) return;
+    
+    const scrollPercent = (scrollTop / scrollableHeight) * 100;
+    // Only update if percentage changed to avoid unnecessary DOM writes
     progressBar.style.width = `${Math.min(scrollPercent, 100)}%`;
 }
 

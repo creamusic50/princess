@@ -134,7 +134,7 @@
  <div class="post-meta" id="post-meta" role="doc-info">
  <span class="author">By <span id="post-author">...</span></span>
  <span class="date"><time id="post-date" datetime="">...</time></span>
- <span class="views">️ <span id="post-views">0</span> views</span>
+ <span class="views"><span id="post-views">0</span> views</span>
  </div>
  </div>
 
@@ -215,7 +215,7 @@
  <li><a href="index.html#categories"> Saving Tips</a></li>
  <li><a href="index.html#categories"> Investing</a></li>
  <li><a href="index.html#categories"> Budgeting</a></li>
- <li><a href="index.html#categories">️ Retirement</a></li>
+ <li><a href="index.html#categories">Retirement</a></li>
  </ul>
  </div>
  <div class="footer-column">
@@ -505,7 +505,7 @@
                                 <span class="category-badge">${post.category}</span>
                                 <h3><a href="post.html?slug=${post.slug}">${post.title}</a></h3>
                                 <p class="excerpt">${post.excerpt || ''}</p>
-                                <a href="post.html?slug=${post.slug}" class="read-more">Read More →</a>
+                                <a href="post.html?slug=${post.slug}" class="read-more">Read More</a>
                             </div>
                         </article>
                     `).join('');
@@ -521,7 +521,7 @@
             const wrap = document.createElement('div');
             wrap.className = 'error';
             const p = document.createElement('p');
-            p.textContent = '⚠️ ' + message;
+            p.textContent = 'Error: ' + message;
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'btn-primary';

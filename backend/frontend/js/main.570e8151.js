@@ -118,7 +118,7 @@ function displayPosts(posts) {
                     <span class="views">👁️ ${post.views || 0} views</span>
                     ${post.author_name ? `<span class="author">By ${escapeHtml(post.author_name)}</span>` : ''}
                 </div>
-                <a href="post.html?slug=${post.slug}" class="read-more">Read More →</a>
+                <a href="post.html?slug=${post.slug}" class="read-more">Read More</a>
             </div>
         </article>
     `).join('');

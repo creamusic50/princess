@@ -64,15 +64,62 @@
 {
   "@context": "https://schema.org",
   "@type": "Article",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://tilana.online/"
+  },
+  "headline": "Finance Article",
+  "description": "Personal Finance Guidance",
+  "author": {
+    "@type": "Organization",
+    "name": "Smart Money Guide"
+  },
   "datePublished": "2025-12-26",
+  "dateModified": "2025-12-26",
   "publisher": {
     "@type": "Organization",
     "name": "Smart Money Guide",
     "logo": {
       "@type": "ImageObject",
-      "url": "https://tilana.online/images/logo.png"
+      "url": "https://tilana.online/images/logo.png",
+      "width": 200,
+      "height": 200
     }
+  },
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://tilana.online/images/default-post-image.jpg",
+    "width": 1200,
+    "height": 630
   }
+}
+</script>
+
+<!-- Breadcrumb Schema -->
+<script type="application/ld+json" id="breadcrumb-schema">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "@id": "https://tilana.online/",
+      "name": "Home"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "@id": "https://tilana.online/categories.html",
+      "name": "Categories"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "@id": "#",
+      "name": "Article"
+    }
+  ]
 }
 </script>
 </head>
@@ -104,7 +151,7 @@
  <div class="post-meta" id="post-meta" role="doc-info">
  <span class="author">By <span id="post-author">...</span></span>
  <span class="date"><time id="post-date" datetime="">...</time></span>
- <span class="views">️ <span id="post-views">0</span> views</span>
+ <span class="views"><span id="post-views">0</span> views</span>
  </div>
  </div>
 
@@ -185,7 +232,7 @@
  <li><a href="index.html#categories"> Saving Tips</a></li>
  <li><a href="index.html#categories"> Investing</a></li>
  <li><a href="index.html#categories"> Budgeting</a></li>
- <li><a href="index.html#categories">️ Retirement</a></li>
+ <li><a href="index.html#categories">Retirement</a></li>
  </ul>
  </div>
  <div class="footer-column">
@@ -206,7 +253,7 @@
  </footer>
 
  <!-- Load scripts with defer -->
- <script src="js/config.min.f841bc00.js" defer></script>
+ <script src="js/config.js" defer></script>
  <script>
         // Post page specific JavaScript (inline for faster execution)
         document.addEventListener('DOMContentLoaded', async () => {
@@ -279,7 +326,10 @@
                     "mainEntityOfPage": {"@type":"WebPage","@id": pageUrl},
                     "headline": titleText || post.title,
                     "description": post.excerpt || titleText || post.title,
-                    "author": {"@type":"Person","name": post.author_name || 'Smart Money Guide'},
+                    "author": {
+                        "@type": "Organization",
+                        "name": "Smart Money Guide"
+                    },
                     "datePublished": post.created_at,
                     "dateModified": post.updated_at || post.created_at,
                     "publisher": {
@@ -287,7 +337,9 @@
                         "name": "Smart Money Guide",
                         "logo": {
                             "@type": "ImageObject",
-                            "url": siteOrigin + '/images/logo.png'
+                            "url": siteOrigin + '/images/logo.png',
+                            "width": 200,
+                            "height": 200
                         }
                     }
                 };
@@ -296,9 +348,43 @@
                 (function(){
                     const cand = post.featured_image || post.image || post.image_url || post.imageUrl || null;
                     if (cand) {
-                        articleJson.image = cand.startsWith('http') ? cand : siteOrigin + '/' + String(cand).replace(/^\//, '');
+                        articleJson.image = {
+                            "@type": "ImageObject",
+                            "url": cand.startsWith('http') ? cand : siteOrigin + '/' + String(cand).replace(/^\//, ''),
+                            "width": 1200,
+                            "height": 630
+                        };
+                    } else {
+                        articleJson.image = {
+                            "@type": "ImageObject",
+                            "url": siteOrigin + '/images/default-post-image.jpg',
+                            "width": 1200,
+                            "height": 630
+                        };
                     }
                 })();
+
+                // Add article body text (critical for Google to understand content quality)
+                const bodyEl = document.getElementById('post-content');
+                if (bodyEl) {
+                    const bodyText = bodyEl.innerText || '';
+                    articleJson.articleBody = bodyText.substring(0, 5000); // First 5000 chars
+                }
+
+                // Update breadcrumb schema
+                const bcSchema = document.getElementById('breadcrumb-schema');
+                if (bcSchema) {
+                    const breadcrumbs = {
+                        "@context": "https://schema.org",
+                        "@type": "BreadcrumbList",
+                        "itemListElement": [
+                            {"@type":"ListItem","position":1,"@id":siteOrigin + "/","name":"Home"},
+                            {"@type":"ListItem","position":2,"@id":siteOrigin + "/categories.html","name":"Categories"},
+                            {"@type":"ListItem","position":3,"@id":pageUrl,"name":titleText}
+                        ]
+                    };
+                    bcSchema.textContent = JSON.stringify(breadcrumbs);
+                }
 
                 if (schemaEl) {
                     schemaEl.textContent = JSON.stringify(articleJson);
@@ -490,7 +576,7 @@
                                 <span class="category-badge">${post.category}</span>
                                 <h3><a href="post.html?slug=${post.slug}">${post.title}</a></h3>
                                 <p class="excerpt">${post.excerpt || ''}</p>
-                                <a href="post.html?slug=${post.slug}" class="read-more">Read More →</a>
+                                <a href="post.html?slug=${post.slug}" class="read-more">Read More</a>
                             </div>
                         </article>
                     `).join('');
@@ -506,7 +592,7 @@
             const wrap = document.createElement('div');
             wrap.className = 'error';
             const p = document.createElement('p');
-            p.textContent = '⚠️ ' + message;
+            p.textContent = 'Error: ' + message;
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'btn-primary';
@@ -549,13 +635,19 @@
     <script>
         (function(){
             const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+            let sessionId = localStorage.getItem('sessionId');
+            if (!sessionId) {
+                sessionId = Math.random().toString(36).substring(2);
+                localStorage.setItem('sessionId', sessionId);
+            }
             try {
                 fetch(API_URL + '/analytics/track', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         page: window.location.pathname,
-                        referrer: document.referrer || 'Direct'
+                        referrer: document.referrer || 'Direct',
+                        sessionId: sessionId
                     })
                 }).catch(e => console.log('Analytics error:', e));
             } catch(e) { }
