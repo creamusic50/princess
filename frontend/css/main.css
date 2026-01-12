@@ -416,7 +416,7 @@ header {
     transition: all 0.3s;
     font-weight: 600;
     font-size: 14px;
-    color: #666;
+    color: #333;
     white-space: nowrap;
 }
 
@@ -471,8 +471,8 @@ header {
 
 .category-badge {
     display: inline-block;
-    background: #e8f4f8;
-    color: #3498db;
+    background: #2c5aa0;
+    color: #fff;
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 11px;
