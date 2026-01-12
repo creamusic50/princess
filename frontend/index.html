@@ -70,6 +70,8 @@
    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
    .nav-wrapper { display: flex; justify-content: space-between; align-items: center; }
    .logo { font-size: 22px; font-weight: 700; color: #3498db; }
+   .nav-menu { display: none !important; }
+   .nav-menu.active { display: flex !important; }
    /* Critical hero styles */
    .hero { padding: 40px 20px; text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #ecf0f1 100%); }
    .hero h1 { font-size: clamp(24px, 6vw, 42px); font-weight: 700; margin: 20px 0 10px; line-height: 1.2; }
@@ -81,8 +83,8 @@
  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
  
- <!-- Main Consolidated Stylesheet (deferred for non-critical) -->
- <link rel="stylesheet" href="css/main.css" media="print" onload="this.media='all'; this.onload=null;">
+ <!-- Main Consolidated Stylesheet -->
+ <link rel="stylesheet" href="css/main.css">
  <noscript><link rel="stylesheet" href="css/main.css"></noscript>
 </head>
 <body>
@@ -93,18 +95,20 @@
  <div class="nav-wrapper">
  <a href="/" class="logo" aria-label="Smart Money Guide home">Smart Money Guide</a>
  
- <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
-  <span></span>
-  <span></span>
-  <span></span>
- </button>
- 
- <ul class="nav-menu" id="nav-menu" role="menubar">
- <li role="none"><a href="/" role="menuitem">Home</a></li>
- <li role="none"><a href="categories.html" role="menuitem">Categories</a></li>
- <li role="none"><a href="about.html" role="menuitem">About</a></li>
- <li role="none"><a href="contact.html" role="menuitem">Contact</a></li>
- </ul>
+ <div class="hamburger-wrapper">
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+   <span></span>
+   <span></span>
+   <span></span>
+  </button>
+  
+  <ul class="nav-menu" id="nav-menu" role="menubar">
+   <li role="none"><a href="/" role="menuitem">Home</a></li>
+   <li role="none"><a href="categories.html" role="menuitem">Categories</a></li>
+   <li role="none"><a href="about.html" role="menuitem">About</a></li>
+   <li role="none"><a href="contact.html" role="menuitem">Contact</a></li>
+  </ul>
+ </div>
  
  </div>
  </div>

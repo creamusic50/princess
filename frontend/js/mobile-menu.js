@@ -1,5 +1,5 @@
 // Mobile Menu Handler with Hamburger Toggle
-// Works on ALL mobile breakpoints: 375px, 425px, 554px, 768px and below
+// Dropdown menu inside hamburger for mobile, horizontal menu for desktop
 (function() {
     'use strict';
 
@@ -30,12 +30,8 @@
             
             hamburger.classList.toggle('active');
             navMenu.classList.toggle('active');
-            if (mobileOverlay) {
-                mobileOverlay.classList.toggle('active');
-            }
             
             const isOpen = navMenu.classList.contains('active');
-            document.body.style.overflow = isOpen ? 'hidden' : 'visible';
             hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         });
 
@@ -44,13 +40,14 @@
             link.addEventListener('click', closeMenu);
         });
 
-        // Close menu when overlay is clicked
-        if (mobileOverlay) {
-            mobileOverlay.addEventListener('click', function(e) {
-                e.stopPropagation();
+        // Close menu when clicking outside (anywhere on document)
+        document.addEventListener('click', function(e) {
+            if (navMenu.classList.contains('active') && 
+                !hamburger.contains(e.target) && 
+                !navMenu.contains(e.target)) {
                 closeMenu();
-            });
-        }
+            }
+        });
 
         // Close menu on ESC key
         document.addEventListener('keydown', function(e) {

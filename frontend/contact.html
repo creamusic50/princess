@@ -38,6 +38,10 @@
  <meta name="google-adsense-account" content="ca-pub-4861288278202695">
  <title>Contact Us - Smart Money Guide</title>
  <link rel="stylesheet" href="css/main.css">
+ <style>
+  .nav-menu { display: none !important; }
+  .nav-menu.active { display: flex !important; }
+ </style>
 </head>
 <body>
  <div class="mobile-overlay" id="mobile-overlay"></div>
@@ -46,18 +50,20 @@
  <div class="container">
  <div class="nav-wrapper">
  <a href="index.html" class="logo" aria-label="Smart Money Guide home">Smart Money Guide</a>
- <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
- <span></span>
- <span></span>
- <span></span>
- </button>
- <ul class="nav-menu" id="nav-menu" role="menubar">
- <li role="none"><a href="index.html" role="menuitem">Home</a></li>
- <li role="none"><a href="categories.html" role="menuitem">Categories</a></li>
- <li role="none"><a href="about.html" role="menuitem">About</a></li>
- <li role="none"><a href="contact.html" role="menuitem">Contact</a></li>
+ <div class="hamburger-wrapper">
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+   <span></span>
+   <span></span>
+   <span></span>
+  </button>
+  <ul class="nav-menu" id="nav-menu" role="menubar">
+   <li role="none"><a href="index.html" role="menuitem">Home</a></li>
+   <li role="none"><a href="categories.html" role="menuitem">Categories</a></li>
+   <li role="none"><a href="about.html" role="menuitem">About</a></li>
+   <li role="none"><a href="contact.html" role="menuitem">Contact</a></li>
 
- </ul>
+  </ul>
+ </div>
  
  </div>
  </div>

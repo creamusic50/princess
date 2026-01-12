@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Test</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        header { background: #2c3e50; padding: 15px; margin-bottom: 20px; }
+        .nav-wrapper { display: flex; justify-content: space-between; align-items: center; }
+        .logo { color: white; font-size: 20px; }
+        
+        .hamburger-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .hamburger {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            position: relative;
+        }
+
+        .hamburger span {
+            width: 30px;
+            height: 3px;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(7px, 7px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        /* KEY RULE: Hidden by default */
+        .nav-menu {
+            display: none !important;
+            position: absolute;
+            top: calc(100% + 5px);
+            right: 0;
+            width: 200px;
+            background: #1a252f;
+            list-style: none;
+            margin: 0;
+            padding: 10px 0;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* KEY RULE: Show when active */
+        .nav-menu.active {
+            display: flex !important;
+            flex-direction: column;
+        }
+
+        .nav-menu li { margin: 0; }
+        .nav-menu a { display: block; padding: 12px 20px; color: white; text-decoration: none; }
+        .nav-menu a:hover { background: rgba(52,152,219,0.2); }
+
+        /* Desktop - show menu horizontally */
+        @media (min-width: 769px) {
+            .hamburger { display: none; }
+            .nav-menu {
+                display: flex !important;
+                position: static;
+                width: auto;
+                background: transparent;
+                gap: 20px;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-wrapper">
+            <div class="logo">Logo</div>
+            <div class="hamburger-wrapper">
+                <button class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <ul class="nav-menu" id="nav-menu">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <h1>Menu Test</h1>
+    <p>Menu should be <strong>hidden by default</strong>. Click hamburger to show it.</p>
+    <p>Width: <span id="width"></span>px</p>
+
+    <script>
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('nav-menu');
+
+        // Toggle menu on hamburger click
+        hamburger.addEventListener('click', function() {
+            hamburger.classList.toggle('active');
+            navMenu.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (navMenu.classList.contains('active') && 
+                !hamburger.contains(e.target) && 
+                !navMenu.contains(e.target)) {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+            }
+        });
+
+        // Display width
+        document.getElementById('width').textContent = window.innerWidth;
+        window.addEventListener('resize', function() {
+            document.getElementById('width').textContent = window.innerWidth;
+        });
+    </script>
+</body>
+</html>

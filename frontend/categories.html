@@ -39,6 +39,8 @@
  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=">
  
  <style>
+  .nav-menu { display: none !important; }
+  .nav-menu.active { display: flex !important; }
   .categories-page { padding: 60px 20px; }
   .category-section { margin-bottom: 50px; }
   .category-title { font-size: 32px; color: #2d3748; margin-bottom: 30px; border-bottom: 3px solid #3498db; padding-bottom: 15px; }
@@ -61,17 +63,19 @@
  <div class="container">
  <div class="nav-wrapper">
  <a href="index.html" class="logo" aria-label="Smart Money Guide home">Smart Money Guide</a>
- <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
- <span></span>
- <span></span>
- <span></span>
- </button>
- <ul class="nav-menu" id="nav-menu" role="menubar">
- <li role="none"><a href="index.html" role="menuitem">Home</a></li>
- <li role="none"><a href="categories.html" role="menuitem" class="active">Categories</a></li>
- <li role="none"><a href="about.html" role="menuitem">About</a></li>
- <li role="none"><a href="contact.html" role="menuitem">Contact</a></li>
- </ul>
+ <div class="hamburger-wrapper">
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">
+   <span></span>
+   <span></span>
+   <span></span>
+  </button>
+  <ul class="nav-menu" id="nav-menu" role="menubar">
+   <li role="none"><a href="index.html" role="menuitem">Home</a></li>
+   <li role="none"><a href="categories.html" role="menuitem" class="active">Categories</a></li>
+   <li role="none"><a href="about.html" role="menuitem">About</a></li>
+   <li role="none"><a href="contact.html" role="menuitem">Contact</a></li>
+  </ul>
+ </div>
  
  </div>
  </div>

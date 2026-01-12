@@ -131,7 +131,7 @@ header {
 
 /* Default: Hide menu, will be shown in media query */
 .nav-menu {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     position: fixed;
     top: 50px;
@@ -148,8 +148,8 @@ header {
 }
 
 .nav-menu.active {
-    display: flex;
-    right: 0;
+    display: flex !important;
+    right: 0 !important;
 }
 
 .nav-menu li {
