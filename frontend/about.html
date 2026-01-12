@@ -120,18 +120,27 @@
  </ul>
  <p>See our <a href="privacy.html">Privacy Policy</a>, <a href="terms.html">Terms of Service</a>, <a href="disclaimer.html">Disclaimer</a>, <a href="dmca.html">DMCA Policy</a>, and <a href="cookie-policy.html">Cookie Policy</a> for complete legal information.</p>
 
-<!-- Ad unit: Smart Money Guide - In-page ad -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695"
-  crossorigin="anonymous"></script>
-<!-- tilana -->
-<ins class="adsbygoogle"
-  style="display:block"
-  data-ad-client="ca-pub-4861288278202695"
-  data-ad-slot="6159268487"
-  data-ad-format="auto"
-  data-full-width-responsive="true"></ins>
-<script>
-  (adsbygoogle = window.adsbygoogle || []).push({});
+<!-- Ad unit: Smart Money Guide - In-page ad (deferred) -->
+<div id="ad-unit-1" style="text-align:center; margin: 20px 0;"></div>
+<script defer>
+  // Load ad only after page interactive
+  window.addEventListener('load', function() {
+    const adUnit = document.getElementById('ad-unit-1');
+    if (adUnit) {
+      const ins = document.createElement('ins');
+      ins.className = 'adsbygoogle';
+      ins.style.display = 'block';
+      ins.setAttribute('data-ad-client', 'ca-pub-4861288278202695');
+      ins.setAttribute('data-ad-slot', '6159268487');
+      ins.setAttribute('data-ad-format', 'auto');
+      ins.setAttribute('data-full-width-responsive', 'true');
+      adUnit.appendChild(ins);
+      
+      if (window.adsbygoogle) {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
+    }
+  });
 </script>
 
  <h2>What We Do</h2>
@@ -245,8 +254,7 @@
  <script src="js/mobile-menu.js" defer></script>
 
  <!-- Service Worker registration with cache busting -->
- <script src="js/config.js?v=2"></script>
- <script src="js/mobile-menu.js" defer></script>
+ <script src="js/config.js?v=2" defer></script>
  <script src="js/auth.js?v=2" defer></script>
 </body>
 </html>

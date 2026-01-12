@@ -1,5 +1,13 @@
 // Contact Form Handler with proper API URL handling
-document.addEventListener('DOMContentLoaded', function() {
+// Defer initialization to avoid blocking requestIdleCallback
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeContactForm);
+} else {
+    // Already loaded
+    setTimeout(initializeContactForm, 0);
+}
+
+function initializeContactForm() {
     const contactForm = document.getElementById('contactForm');
     const formMessage = document.getElementById('formMessage');
 
@@ -47,9 +55,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     ? 'http://localhost:5000'  // Local development
                     : '';  // Production (same origin)
 
-                console.log('Submitting to:', `${API_BASE_URL}/api/contact`);
-                console.log('Form data:', formData);
-
                 const response = await fetch(`${API_BASE_URL}/api/contact`, {
                     method: 'POST',
                     headers: {
@@ -58,9 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify(formData)
                 });
 
-                console.log('Response status:', response.status);
                 const data = await response.json();
-                console.log('Response data:', data);
 
                 if (response.ok && data.success) {
                     formMessage.className = 'form-message success';
@@ -90,14 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
-// ============================================================
-// CONTACT FORM HANDLER
-// ============================================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    initializeContactForm();
-});
+}
 
 // Initialize contact form with event listener
 function initializeContactForm() {
@@ -222,14 +218,25 @@ function handleContactResponse(response, formMessage, contactForm) {
 
 // Show form message with appropriate styling
 function showFormMessage(element, message, type) {
-    element.textContent = message;
-    element.className = `form-message ${type}`;
+    // Batch DOM updates to prevent double reflow
+    // Use dataset to store state before modifying DOM
+    element.dataset.message = message;
+    element.dataset.type = type;
+    
+    // Single DOM write - update both at once with requestAnimationFrame
+    requestAnimationFrame(() => {
+        element.textContent = element.dataset.message;
+        element.className = `form-message ${element.dataset.type}`;
+    });
 }
 
 // Clear form message
 function clearFormMessage(element) {
-    element.textContent = '';
-    element.className = 'form-message';
+    // Use requestAnimationFrame to defer DOM write
+    requestAnimationFrame(() => {
+        element.textContent = '';
+        element.className = 'form-message';
+    });
 }
 
 // Update submit button state

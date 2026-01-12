@@ -1,5 +1,13 @@
 // Contact Form Handler with proper API URL handling
-document.addEventListener('DOMContentLoaded', function() {
+// Defer initialization to avoid blocking requestIdleCallback
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeContactForm);
+} else {
+    // Already loaded
+    setTimeout(initializeContactForm, 0);
+}
+
+function initializeContactForm() {
     const contactForm = document.getElementById('contactForm');
     const formMessage = document.getElementById('formMessage');
 
@@ -90,21 +98,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
-// ============================================================
-// CONTACT FORM HANDLER
-// ============================================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    initializeContactForm();
-});
-
-// Initialize contact form with event listener
-function initializeContactForm() {
-    const contactForm = document.getElementById('contactForm');
-    if (!contactForm) return;
-    
-    contactForm.addEventListener('submit', handleContactFormSubmit);
 }
 
 // Handle contact form submission

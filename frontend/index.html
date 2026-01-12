@@ -304,22 +304,39 @@
 
  <!-- Deferred AdSense loading (loads after interactive) -->
  <script defer>
+    function loadAdSense(){
+        // Use requestIdleCallback with short timeout to avoid blocking
+        if ('requestIdleCallback' in window) {
+            // Only wait max 100ms in idle callback to avoid violation
+            requestIdleCallback(injectAdSenseScript, { timeout: 100 });
+        } else {
+            // Fallback: load after DOM interactive, with timeout
+            setTimeout(injectAdSenseScript, 2500);
+        }
+    }
+    
+    function injectAdSenseScript(){
+        // Don't block execution
+        try {
+            const s = document.createElement('script');
+            s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695';
+            s.async = true;
+            s.crossOrigin = 'anonymous';
+            s.setAttribute('fetchpriority', 'low');
+            // Non-blocking append
+            if (document.head) {
+                document.head.appendChild(s);
+            }
+        } catch(e) {
+            // Silently fail if ad loading errors
+            console.log('Ad load deferred');
+        }
+    }
+    
     if(document.readyState === 'loading'){
         document.addEventListener('DOMContentLoaded', loadAdSense);
     } else {
         loadAdSense();
-    }
-    function loadAdSense(){
-        // Load AdSense after a short delay using native setTimeout (faster than requestIdleCallback)
-        setTimeout(injectAdSenseScript, 2000);
-    }
-    function injectAdSenseScript(){
-        const s = document.createElement('script');
-        s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4861288278202695';
-        s.async = true;
-        s.crossOrigin = 'anonymous';
-        s.setAttribute('fetchpriority', 'low');
-        document.head.appendChild(s);
     }
  </script>
  

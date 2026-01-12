@@ -13,11 +13,21 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('CONFIG not loaded. Check that config script loaded first.');
         return;
     }
+    
+    // Critical setup (blocking - must run immediately)
     setupHamburgerMenu();
     loadPosts();
-    setupCategoryFilter();
-    setupSearch();
-    trackReadingProgress();
+    
+    // Non-critical setup (staggered to avoid blocking)
+    // Category filter - lower priority, can wait
+    setTimeout(setupCategoryFilter, 500);
+    
+    // Search - medium priority, defer slightly
+    setTimeout(setupSearch, 700);
+    
+    // Reading progress - only on post pages, defer more
+    setTimeout(trackReadingProgress, 1000);
+});
 });
 
 // ============================================================
@@ -197,9 +207,14 @@ function displayPosts(posts) {
         `;
         return;
     }
+
+    // Batch DOM writes using DocumentFragment (reduces reflows)
+    const fragment = document.createDocumentFragment();
     
-    container.innerHTML = posts.map(post => `
-        <article class="blog-card">
+    posts.forEach(post => {
+        const article = document.createElement('article');
+        article.className = 'blog-card';
+        article.innerHTML = `
             <div class="blog-card-content">
                 <span class="category-badge" role="note" aria-label="Category">${escapeHtml(post.category)}</span>
                 <h3><a href="post.html?slug=${post.slug}">${escapeHtml(post.title)}</a></h3>
@@ -211,8 +226,13 @@ function displayPosts(posts) {
                 </div>
                 <a href="post.html?slug=${post.slug}" class="read-more" aria-label="Read more about ${escapeHtml(post.title)}">Read More</a>
             </div>
-        </article>
-    `).join('');
+        `;
+        fragment.appendChild(article);
+    });
+    
+    // Single reflow: Clear and append all at once
+    container.innerHTML = '';
+    container.appendChild(fragment);
 
     // Ensure any images in rendered content are lazy-loaded and decoded async
     setLazyImages();
@@ -221,19 +241,28 @@ function displayPosts(posts) {
 // Make images non-blocking: lazy-load and async decoding for better LCP/TBT
 function setLazyImages() {
     try {
-        // Images in dynamically injected content
+        // Batch all DOM operations to reduce reflows
         const imgs = document.querySelectorAll('img');
+        const updates = []; // Store changes to batch them
+        
         imgs.forEach((img, idx) => {
-            // Skip images that explicitly declare loading attribute
+            // Skip images that already have loading attribute
             if (img.hasAttribute('loading')) return;
-            // Keep first image eager if inside an article; otherwise lazy
+            
+            // Determine loading strategy (batch read)
             const isInArticle = !!img.closest('.post-body') || !!img.closest('.blog-card');
-            if (isInArticle && idx === 0) {
-                img.setAttribute('loading', 'eager');
-            } else {
-                img.setAttribute('loading', 'lazy');
+            const loadingValue = (isInArticle && idx === 0) ? 'eager' : 'lazy';
+            
+            // Queue updates instead of writing immediately
+            updates.push({ img, loading: loadingValue });
+        });
+        
+        // Apply all updates in batch (single reflow)
+        updates.forEach(({ img, loading }) => {
+            if (!img.hasAttribute('loading')) {
+                img.setAttribute('loading', loading);
+                img.setAttribute('decoding', 'async');
             }
-            img.setAttribute('decoding', 'async');
         });
     } catch (e) {
         // Non-fatal
@@ -246,24 +275,28 @@ function setLazyImages() {
 // ============================================================
 
 function setupCategoryFilter() {
-    const categoryButtons = document.querySelectorAll(CONFIG.SELECTORS.CATEGORY_BTN);
+    const categoryGrid = document.querySelector('.category-grid');
+    if (!categoryGrid) return;
     
-    categoryButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Update visual active state
-            categoryButtons.forEach(b => {
-                b.classList.remove('active');
-                b.setAttribute('aria-selected', 'false');
-            });
-            btn.classList.add('active');
-            btn.setAttribute('aria-selected', 'true');
-            
-            // Load posts for selected category
-            const category = btn.dataset.category;
-            currentCategory = category;
-            currentPage = 1;
-            loadPosts(currentPage, category, currentSearch);
+    // Event delegation - single listener on parent instead of per-button
+    categoryGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('.category-btn');
+        if (!btn) return;
+        
+        // Update visual active state
+        const categoryButtons = categoryGrid.querySelectorAll('.category-btn');
+        categoryButtons.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
         });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+        
+        // Load posts for selected category
+        const category = btn.dataset.category;
+        currentCategory = category;
+        currentPage = 1;
+        loadPosts(currentPage, category, currentSearch);
     });
 }
 
@@ -426,23 +459,60 @@ function escapeHtml(text) {
 
 // Track user's reading progress on post detail pages
 function trackReadingProgress() {
-    // Only track on post detail pages
+    // Early exit for non-post pages (avoid unnecessary work)
     if (!window.location.pathname.includes('post.html')) return;
     
-    // Create progress bar element
+    // Only create progress bar on actual post pages
     const progressBar = createProgressBar();
+    if (!progressBar) return; // Safety check
     document.body.appendChild(progressBar);
     
-    // Throttled scroll listener to prevent excessive reflow
-    let isThrottled = false;
-    window.addEventListener('scroll', () => {
-        if (!isThrottled) {
-            updateProgressBar(progressBar);
-            isThrottled = true;
-            requestAnimationFrame(() => {
-                isThrottled = false;
-            });
+    // Use requestAnimationFrame for smooth updates, not scroll events
+    let lastScrollPercent = 0;
+    let rafId = null;
+    let isScrolling = false;
+    
+    function updateOnFrame() {
+        // Batch all DOM reads first (avoid interleaving with writes)
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const scrollableHeight = documentHeight - windowHeight;
+        
+        if (scrollableHeight > 0) {
+            const scrollPercent = Math.min((scrollTop / scrollableHeight) * 100, 100);
+            
+            // Only write to DOM if value actually changed (reduce reflows)
+            if (Math.abs(scrollPercent - lastScrollPercent) > 0.5) {
+                lastScrollPercent = scrollPercent;
+                // Single batch write to DOM
+                progressBar.style.width = `${scrollPercent}%`;
+            }
         }
+        
+        rafId = requestAnimationFrame(updateOnFrame);
+    }
+    
+    // Start animation loop only on scroll
+    window.addEventListener('scroll', () => {
+        if (!isScrolling) {
+            isScrolling = true;
+            if (!rafId) {
+                rafId = requestAnimationFrame(updateOnFrame);
+            }
+        }
+    }, { passive: true });
+    
+    // Stop animation loop when scrolling stops (save CPU)
+    window.addEventListener('scroll', () => {
+        clearTimeout(window.scrollTimeout);
+        window.scrollTimeout = setTimeout(() => {
+            isScrolling = false;
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+        }, 150);
     }, { passive: true });
 }
 
@@ -458,23 +528,11 @@ function createProgressBar() {
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         width: 0%;
         z-index: 9999;
-        transition: width 0.1s;
+        will-change: width;
+        transform: translateZ(0);
+        transition: width 0.05s ease-out;
     `;
     return bar;
-}
-
-// Helper: Update progress bar based on scroll position
-function updateProgressBar(progressBar) {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
-    const scrollableHeight = documentHeight - windowHeight;
-    
-    if (scrollableHeight <= 0) return;
-    
-    const scrollPercent = (scrollTop / scrollableHeight) * 100;
-    // Only update if percentage changed to avoid unnecessary DOM writes
-    progressBar.style.width = `${Math.min(scrollPercent, 100)}%`;
 }
 
 // ============================================================
