@@ -9,7 +9,7 @@ param(
 
 Write-Host ""
 Write-Host "============================================================"
-Write-Host "  🔄 Website Keep-Alive Service Started"
+Write-Host "  Website Keep-Alive Service Started"
 Write-Host "============================================================"
 Write-Host "  URL: $URL"
 Write-Host "  Interval: $IntervalSeconds seconds ($(($IntervalSeconds / 60)) minutes)"
@@ -23,23 +23,23 @@ $failureCount = 0
 
 while ($true) {
     try {
-        $response = Invoke-WebRequest -Uri $URL -TimeoutSec 10 -ErrorAction Stop
+        $response = Invoke-WebRequest -Uri $URL -TimeoutSec 10 -UseBasicParsing -ErrorAction Stop
         $successCount++
         $pingCount++
         
-        Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] ✅ Ping #$pingCount successful - Status: $($response.StatusCode)"
+        Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] OK - Ping #$pingCount successful - Status: $($response.StatusCode)"
         
     } catch {
         $failureCount++
         $pingCount++
         
-        Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] ❌ Ping #$pingCount failed - Error: $($_.Exception.Message)"
+        Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] FAILED - Ping #$pingCount failed - Error: $($_.Exception.Message)"
     }
     
     # Display summary every 12 pings (1 hour)
     if ($pingCount % 12 -eq 0) {
         Write-Host ""
-        Write-Host "📊 Summary - Total Pings: $pingCount | Success: $successCount | Failed: $failureCount"
+        Write-Host "Summary - Total Pings: $pingCount | Success: $successCount | Failed: $failureCount"
         Write-Host ""
     }
     
