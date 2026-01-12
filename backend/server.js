@@ -13,10 +13,19 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Enable compression with optimal settings for 100/100 performance
+// Mobile optimization: Higher compression level + aggressive caching
 app.use(compression({
-  level: 9,  // Maximum compression for best performance
+  level: 11,  // Maximum compression (brotli level)
   threshold: 0,  // Compress all responses, even small ones
+  brotliOptions: {
+    chunkSize: 32 * 1024,
+    lgwin: 22,
+    level: 11
+  },
   filter: (req, res) => {
+    // Check for mobile device to prioritize compression
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(req.get('user-agent') || '');
+    
     // Don't compress responses with this request header
     if (req.headers['x-no-compression']) {
       return false;
@@ -25,10 +34,12 @@ app.use(compression({
     const contentType = res.getHeader('content-type');
     if (!contentType) return true;
     if (contentType.includes('image') || contentType.includes('font') || 
-        contentType.includes('woff') || contentType.includes('woff2')) {
+        contentType.includes('woff') || contentType.includes('woff2') ||
+        contentType.includes('video')) {
       return false;
     }
-    return true;
+    // For mobile, compress HTML/JSON more aggressively
+    return isMobile || contentType.includes('text') || contentType.includes('json');
   }
 }));
 
@@ -39,7 +50,7 @@ app.use(helmet.xssFilter());
 app.use(helmet.noSniff());
 app.use(helmet.referrerPolicy({ policy: 'strict-origin-when-cross-origin' }));
 
-// Enhanced performance headers for Core Web Vitals (100/100 Desktop Optimized)
+// Enhanced performance headers for Core Web Vitals (Mobile Optimized)
 app.use((req, res, next) => {
   // Explicitly remove CSP to allow Google ads
   res.removeHeader('Content-Security-Policy');
@@ -54,10 +65,13 @@ app.use((req, res, next) => {
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
   
   // Critical for Core Web Vitals and crawlability
-  res.setHeader('Vary', 'Accept-Encoding');
+  res.setHeader('Vary', 'Accept-Encoding, User-Agent');
   
   // Allow Google and other search engines to crawl
   res.setHeader('X-Robots-Tag', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+  
+  // Mobile-aware performance headers
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(req.get('user-agent') || '');
   
   // Performance: Preconnect hints for critical origins
   res.setHeader('Link', [
@@ -66,13 +80,16 @@ app.use((req, res, next) => {
     '<https://pagead2.googlesyndication.com>; rel=preconnect'
   ].join(', '));
   
-  // Add timing headers for performance monitoring
-  res.setHeader('Server-Timing', 'db;dur=10, cache;dur=20');
+  // Add timing headers for performance monitoring (useful for debugging)
+  if (process.env.NODE_ENV === 'development') {
+    res.setHeader('Server-Timing', 'db;dur=10, cache;dur=20');
+  }
   
   // CRITICAL: Set caching headers for maximum performance
   // Static assets - aggressive caching
   if (req.path.match(/\.(js|css|woff|woff2|ttf|otf|eot|svg|png|jpg|jpeg|gif|webp)$/i)) {
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.setHeader('ETag', true); // Enable ETag for browser caching
   }
   // HTML files - no cache to always get latest
   else if (req.path === '/sw.js' || req.path.endsWith('.html')) {
@@ -80,9 +97,9 @@ app.use((req, res, next) => {
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
   }
-  // API endpoints - short cache
+  // API endpoints - short cache (mobile may have varying network)
   else if (req.path.startsWith('/api/')) {
-    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minute cache
+    res.setHeader('Cache-Control', isMobile ? 'public, max-age=180' : 'public, max-age=300'); // 3 min for mobile, 5 for desktop
   }
   // Default - medium cache
   else {

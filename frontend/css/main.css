@@ -23,6 +23,7 @@ body {
     line-height: 1.6;
     overflow: visible !important;
     transition: overflow 0.3s ease;
+    contain: layout style paint;
 }
 
 /* ========================================
@@ -1024,6 +1025,20 @@ header {
         animation-iteration-count: 1 !important;
         transition-duration: 0s !important;
         scroll-behavior: auto !important;
+    }
+}
+
+/* Mobile performance optimization: Reduce animations on low-end devices */
+@media (max-width: 768px) {
+    * {
+        transition-duration: 0.15s !important;
+    }
+    
+    .hamburger span,
+    .nav-menu,
+    .dropdown-menu,
+    .blog-card {
+        transition-duration: 0.2s !important;
     }
 }
 
